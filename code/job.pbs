@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -N cf
+#PBS -l walltime=40:00:00
+#PBS -l nodes=1:ppn=24
+#PBS -m ae
+#PBS -o output/$PBS_JOBNAME.out
+#PBS -j oe
+
+cd $PBS_O_WORKDIR
+PATH=$PBS_O_PATH
+echo $PBS_O_WORKDIR
+echo 'starting'
+echo -n 'Job is running on node '; cat $PBS_NODEFILE
+python cf.py
+echo 'done'
+
