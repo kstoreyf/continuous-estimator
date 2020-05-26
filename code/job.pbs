@@ -1,5 +1,8 @@
 #!/bin/bash
-#PBS -N cf
+#PBS -N cf_n1e-4_tophat10
+##PBS -N cf_n1e-4_ddcheck
+##PBS -N check_cf
+##PBS -N check_compute_cf
 #PBS -l walltime=40:00:00
 #PBS -l nodes=1:ppn=24
 #PBS -m ae
@@ -12,5 +15,8 @@ echo $PBS_O_WORKDIR
 echo 'starting'
 echo -n 'Job is running on node '; cat $PBS_NODEFILE
 python cf.py
+#python compute_cf.py
+#python check_cf.py
+#python check_compute_cf.py
 echo 'done'
 

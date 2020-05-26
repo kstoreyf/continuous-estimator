@@ -16,18 +16,13 @@ from astropy import units as u
 
 import plotter
 import corrfuncproj
-import spline
-import dcosmo
-import kernel
-import bao 
 
 from Corrfunc.utils import compute_amps
 from Corrfunc.utils import evaluate_xi
 
+import read_lognormal as reader
 
-plot_dir = '../plots/plots_2019-10-03'
-result_dir = '../results/results_2019-10-03'
-cat_dir = '../catalogs/catalogs_2019-09-30'
+
 nthreads = 24
 color_dict = {'True':'black', 'tophat':'blue', 'LS': 'orange', 'piecewise':'red', 'standard': 'orange'}
 
@@ -38,25 +33,26 @@ def main():
 
 
 def multi():
-    nrealizations = 1
+    nrealizations = 15
     #seeds = [10]
     seeds = np.arange(0,nrealizations)
     boxsize = 750
     #nbar_str = '3e-4'
-    nbar_str = '1e-3'
+    nbar_str = '1e-4'
     mock_tag = ''
 
     nbins = 22
     projs = ['tophat']
-    proj_tags = ['tophat']
+    proj_tags = ['tophat_hangcheck']
     #projs = ['bao']
     #proj_tags = ['bao_alpha1.01']
     # for bao only
     #kwargs = {'cosmo_base':nbodykit.cosmology.Planck15, 'redshift':0}
+    cosmo = nbodykit.cosmology.Planck15
     
     #py_str = '_py2'
     compute_standard = False # also compute the standard estimator
-    overwrite = False
+    overwrite = True
     overwrite_rr = False
     py_str = ''
     if 'py2' in py_str:
@@ -69,23 +65,26 @@ def multi():
     kwargs = {}
     #kwargs = {'params':['Omega_cdm', 'Omega_b', 'h'], 'cosmo_base':nbodykit.cosmology.Planck15, 'redshift':0}
 
-    cat_tag = '_L{}_nbar{}{}{}'.format(boxsize, nbar_str, mock_tag, py_str)
-   
+    #cat_tag = '_L{}_nbar{}{}{}'.format(boxsize, nbar_str, mock_tag, py_str)
+    cat_tag = '_L{}_n{}{}{}'.format(boxsize, nbar_str, mock_tag, py_str)
+
     tagstr = ','.join(proj_tags)
     print("Running box {} for projections {}".format(cat_tag[1:], tagstr))
     
-    cat_dir = '../catalogs/cats_lognormal{}'.format(cat_tag)
+    #cat_dir = '../catalogs/cats_lognormal{}'.format(cat_tag)
+    #cat_dir = '../../byebyebias/catalogs/cats_lognormal{}'.format(cat_tag) # WORKS
+    cat_dir = '../catalogs/lognormal'
     result_dir = '../results/results_lognormal{}'.format(cat_tag)
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
     log = False
     
     # randoms
-    rand_fn = '{}/rand{}_10x.dat'.format(cat_dir, cat_tag)
-    random = np.loadtxt(rand_fn)
-    nr = random.shape[0]
-    randsky_fn = '{}/randsky{}_10x.dat'.format(cat_dir, cat_tag)        
-    randomsky = np.loadtxt(randsky_fn)
+    #rand_fn = '{}/rand{}_10x.dat'.format(cat_dir, cat_tag)
+    #random = np.loadtxt(rand_fn)
+    #nr = random.shape[0]
+    #randsky_fn = '{}/randsky{}_10x.dat'.format(cat_dir, cat_tag)        
+    #randomsky = np.loadtxt(randsky_fn)
 
     print("Set up bins")
     if log:
@@ -98,9 +97,10 @@ def multi():
     # Load True CF (input to catalog) 
     rbins = np.linspace(rmin, rmax, nbins+1)
     rbins_avg = 0.5*(rbins[1:]+rbins[:-1])
-    r_lin, _, _ = np.load('{}/cf_lin_{}{}.npy'.format(cat_dir, 'true_cont1000', cat_tag), allow_pickle=allow_pickle)
+    #r_lin, _, _ = np.load('{}/cf_lin_{}{}.npy'.format(cat_dir, 'true_cont1000', cat_tag), allow_pickle=allow_pickle)
     # TODO: MAKE SIM MORE BINS, THIS IS HACKY
-    r_lin = np.linspace(min(r_lin), max(r_lin), 1000)
+    #r_lin = np.linspace(min(r_lin), max(r_lin), 1000)
+    r_lin = np.linspace(rmin, rmax, 1000)
     if log:
         rbins_log = np.logspace(np.log10(rmin), np.log10(rmax), nbins)
         rbins_avg_log = 10 ** (0.5 * (np.log10(rbins_log)[1:] + np.log10(rbins_log)[:-1]))
@@ -121,29 +121,40 @@ def multi():
 
     ### PROJECTION RANDOMS
     ### check if random counts already exist for tag, if not then count
-    rr_projs, qq_projs = [], []
-    for i in range(len(projs)):
-        save_rrproj_fn = '{}/rr_qq_proj_lin_{}{}.npy'.format(result_dir, proj_tags[i], cat_tag)
-        if not os.path.isfile(save_rrproj_fn) or overwrite_rr:
-            print("Computing randoms for projection {}".format(proj_tags[i]))
-            rr_proj, qq_proj = counts_cf_proj_auto(randomsky, rbins, r_lin, projs[i], qq=True, **kwargs)
-            np.save(save_rrproj_fn, [rr_proj, qq_proj])
-            print("Saved projection randoms to {}".format(save_rrproj_fn))
-        else:
-            print("Loading projection randoms from {}".format(save_rrproj_fn))
-            rr_proj, qq_proj = np.load(save_rrproj_fn, allow_pickle=allow_pickle)
-        rr_projs.append(rr_proj)
-        qq_projs.append(qq_proj)
+    #rr_projs, qq_projs = [], []
+    #for i in range(len(projs)):
+    #    save_rrproj_fn = '{}/rr_qq_proj_lin_{}{}.npy'.format(result_dir, proj_tags[i], cat_tag)
+    #    if not os.path.isfile(save_rrproj_fn) or overwrite_rr:
+    #        print("Computing randoms for projection {}".format(proj_tags[i]))
+    #        rr_proj, qq_proj = counts_cf_proj_auto(randomsky, rbins, r_lin, projs[i], qq=True, **kwargs)
+    #        np.save(save_rrproj_fn, [rr_proj, qq_proj])
+    #        print("Saved projection randoms to {}".format(save_rrproj_fn))
+    #    else:
+    #        print("Loading projection randoms from {}".format(save_rrproj_fn))
+    #        rr_proj, qq_proj = np.load(save_rrproj_fn, allow_pickle=allow_pickle)
+    #    rr_projs.append(rr_proj)
+    #    qq_projs.append(qq_proj)
 
     ### COMPUTE CFs
     ### for each seed for each projection
     for seed in seeds:
 
-        data_fn = '{}/cat_lognormal{}_seed{}.dat'.format(cat_dir, cat_tag, seed)
-        data = np.loadtxt(data_fn)
-        nd = data.shape[0]
-        datasky_fn = '{}/catsky_lognormal{}_seed{}.dat'.format(cat_dir, cat_tag, seed)
-        datasky = np.loadtxt(datasky_fn)
+        # data_fn = '{}/cat_lognormal{}_seed{}.dat'.format(cat_dir, cat_tag, seed)
+        # data = np.loadtxt(data_fn)
+        # nd = data.shape[0]
+        # datasky_fn = '{}/catsky_lognormal{}_seed{}.dat'.format(cat_dir, cat_tag, seed)
+        # datasky = np.loadtxt(datasky_fn)
+        fn = f'{cat_dir}/cat{cat_tag}_lognormal_rlz{seed}.bin'
+        Lx, Ly, Lz, N, data = reader.read(fn)
+        x, y, z, vx, vy, vz = data.T
+        pos = np.array([x, y, z]).T
+        ra, dec, cz = to_sky(pos, cosmo)
+        print("to skyed")
+        datasky = [ra, dec, cz]
+        print("um")
+        print(datasky)
+        datasky = np.array(datasky).T
+        print("donesky")
 
         if compute_standard:
             save_standard_fn = '{}/cf_lin_{}{}_seed{}.npy'.format(result_dir, 'standard', cat_tag, seed)
@@ -163,81 +174,17 @@ def multi():
                 start = time.time()
                 proj = projs[i]
                 dd_proj = counts_cf_proj_auto(datasky, rbins, r_lin, proj, qq=False, **kwargs)
-                dr_proj = counts_cf_proj_cross(datasky, randomsky, rbins, r_lin, proj, **kwargs)
-                r_proj, xi_proj, amps_proj = compute_cf_proj(dd_proj, dr_proj, rr_projs[i], qq_projs[i], nd, nr, rbins, r_lin, proj, **kwargs)
-                print("Amplitudes:", amps_proj)
-                np.save(save_fn, [r_proj, xi_proj, amps_proj, proj])
+                #dr_proj = counts_cf_proj_cross(datasky, randomsky, rbins, r_lin, proj, **kwargs)
+                #r_proj, xi_proj, amps_proj = compute_cf_proj(dd_proj, dr_proj, rr_projs[i], qq_projs[i], nd, nr, rbins, r_lin, proj, **kwargs)
+                print("dddddd proj done")
+                #print("Amplitudes:", amps_proj)
+                #np.save(save_fn, [r_proj, xi_proj, amps_proj, proj])
                 end = time.time()
                 print("Saved to {}".format(save_fn))
                 print("TIME FOR PROJCF: {} s".format(end-start))
             else:
                 print("{} already exists!".format(save_fn))
 
-
-def single():
-
-    boxsize = 750
-    nbar_str = '1e-4'
-    #projs = ['gaussian_kernel']
-    #projs = ['quadratic_spline']
-    #projs = ['tophat', 'piecewise']
-    #projs = []
-    cat_tag = '_L{}_nbar{}'.format(boxsize, nbar_str)
-
-    print("Get data")
-    cat_fn = '{}/cat_lognormal{}.dat'.format(cat_dir, cat_tag)
-    rand_fn = '{}/rand{}_10x.dat'.format(cat_dir, cat_tag)
-    catsky_fn = '{}/catsky_lognormal{}.dat'.format(cat_dir, cat_tag)
-    randsky_fn = '{}/randsky{}_10x.dat'.format(cat_dir, cat_tag)
-    
-    data = np.loadtxt(cat_fn)
-    random = np.loadtxt(rand_fn) 
-    datasky = np.loadtxt(catsky_fn)
-    randomsky = np.loadtxt(randsky_fn)
-    nd = data.shape[0]
-    nr = random.shape[0]
-
-    print("Set up bins")
-    if log:
-        rmin = 1
-    else:
-        rmin = 40
-    rmax = 200
-    nbins = 9
-    rbins = np.linspace(rmin, rmax, nbins)
-    rbins_avg = 0.5*(rbins[1:]+rbins[:-1])
-    r_lin, _, _ = np.load('{}/cf_lin_{}{}.npy'.format(cat_dir, 'true', cat_tag))
-    # TODO: MAKE SIM MORE BINS, THIS IS HACKY
-    r_lin = np.linspace(min(r_lin), max(r_lin), 1000)
-    
-    if log:
-        rbins_log = np.logspace(np.log10(rmin), np.log10(rmax), nbins)
-        rbins_avg_log = 10 ** (0.5 * (np.log10(rbins_log)[1:] + np.log10(rbins_log)[:-1]))
-        r_log, _, _ = np.load('{}/cf_log_{}{}.npy'.format(cat_dir, 'true', cat_tag))
-
-    print("Calc standard corrfunc CF")
-    print("LIN")
-    dd, dr, rr = counts_corrfunc_3d(data, random, rbins, boxsize)
-    xi_stan = compute_cf(dd, dr, rr, nd, nr, 'ls') 
-    np.save('{}/cf_lin_{}{}.npy'.format(result_dir, 'standard', tag), [rbins_avg, xi_stan, 'standard'])
-    if log:
-        print("LOG")
-        dd_log, dr_log, rr_log = counts_corrfunc_3d(data, random, rbins_log, boxsize)
-        xi_stan_log = compute_cf(dd_log, dr_log, rr_log, nd, nr, 'ls')
-        np.save('{}/cf_log_{}{}.npy'.format(result_dir, 'standard', tag), [rbins_avg_log, xi_stan_log, 'standard'])
-
-    print("Calc projected CF")
-    for proj in projs:
-        print("LIN PROJ")
-        dd, dr, rr, qq = counts_cf_proj(datasky, randomsky, rbins, r_lin, proj)
-        r_cont, xi_proj, amps = compute_cf_proj(dd, dr, rr, qq, nd, nr, rbins, r_cont, proj)
-        np.save('{}/cf_lin_{}{}.npy'.format(result_dir, proj, tag), [r_lin, xi_proj, amps, proj])
-        if log:
-            print("LOG PROJ")
-            dd, dr, rr, qq = counts_cf_proj(datasky, randomsky, rbins_log, r_log, proj)
-            r_cont_log, xi_proj_log, amps_log = compute_cf_proj(dd, dr, rr, qq, nd, nr, rbins_log, r_cont_log, proj)
-            np.save('{}/cf_log_{}{}.npy'.format(result_dir, proj, tag), [r_log, xi_proj_log, amps_log, proj])
-        
 
 def counts_corrfunc_auto(cat, rbins, boxsize):
     x, y, z = cat.T
@@ -465,7 +412,9 @@ def to_sky(pos, cosmo, velocity=None, rsd=False, comoving=True):
 
     if comoving:
         z = cosmo.comoving_distance(z)
-    return ra, dec, z
+    return np.array(ra), np.array(dec), np.array(z)
+    #return ra, dec, z
+    #return np.array([ra, dec, z])
 
 
 if __name__=='__main__':

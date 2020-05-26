@@ -14,7 +14,7 @@ def read(fn):
         Lx, Ly, Lz, N = header
         data = struct.unpack("f" * ((len(fileContent) -nleading) // 4), fileContent[nleading:])
          
-        data = np.array(data)
-        data = data.reshape((-1, 6)) 
+    data = np.array(data)
+    data = data.reshape((-1, 6)) 
         
-        return Lx, Ly, Lz, N, data
+    return Lx, Ly, Lz, N, data
