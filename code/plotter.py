@@ -42,6 +42,8 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
         xmax = max(np.array(rs).flatten())
     else:
         xmin, xmax = xlim
+
+    print(min(r_true), max(r_true))
     r_t = np.array([r_true[k] for k in range(len(r_true)) if xmin<=r_true[k]<xmax])
     cf_t = np.array([cf_true[k] for k in range(len(r_true)) if xmin<=r_true[k]<xmax])
    
@@ -75,9 +77,8 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
             #marker = 'o'
             #ls = 'None'
             label = labels[j]
-       
-        ax[0].plot(r, cf, color=colors[j], alpha=alphas[j], 
-                            label=label, marker=marker, ls=lss[j], lw=2.5)
+      
+        ax[0].plot(r, cf, color=colors[j], alpha=alphas[j], label=str(label), marker=marker, ls=lss[j], lw=2.5)
 
         if error_regions is not None:
             if cont:
@@ -89,6 +90,8 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
 
         if err and len(rs[j])==len(r_true):
             #ax[1].plot(r, (cf-cf_t)/cf_t, color=colors[j], alpha=alphas[j])
+            print(len(cf))
+            print(len(cf_t))
             ax[1].plot(r, cf-cf_t, color=colors[j], alpha=alphas[j], marker=marker, ls=lss[j], lw=2.5)
             if cont:
                 ax[1].fill_between(r, upper-cf_t, lower-cf_t, color=colors[j], alpha=0.2)
@@ -128,7 +131,6 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
 
     if show_legend:
         ax[0].legend()
-
     if saveto:
         plt.savefig(saveto)
     return ax
