@@ -28,10 +28,10 @@ def main():
 
 def realizations():
     boxsize = 750
-    nbar_str = '3e-4'
-    #nrealizations = 11
-    #seeds = np.arange(nrealizations)
-    seeds = [999]
+    nbar_str = '1e-4'
+    nrealizations = 1
+    seeds = np.arange(nrealizations)
+    #seeds = [999]
     tag = '_L{}_nbar{}'.format(boxsize, nbar_str)
     
     print("Making lognormal mocks for {}".format(tag))
@@ -45,8 +45,8 @@ def realizations():
     datasky_fn = '{}/catsky_lognormal{}.dat'.format(cat_dir, tag)
     randsky_fn = '{}/randsky{}_10x.dat'.format(cat_dir, tag)
     pk_fn = '{}/pk_cont1000{}.dat'.format(cat_dir, tag)
-    cf_lin_fn = '{}/cf_lin_{}{}.npy'.format(cat_dir, 'true_cont1000', tag)
-    cf_log_fn = '{}/cf_log_{}{}.npy'.format(cat_dir, 'true_cont1000', tag)
+    cf_lin_fn = '{}/cf_lin_{}{}.npy'.format(cat_dir, 'true', tag)
+    cf_log_fn = '{}/cf_log_{}{}.npy'.format(cat_dir, 'true', tag)
     nbar = float(nbar_str)
     boxsize = float(boxsize)
 
@@ -59,9 +59,9 @@ def realizations():
     cf(Plin, log=False, saveto=cf_lin_fn)
     cf(Plin, log=True, saveto=cf_log_fn)
 
-   # if not os.path.isfile(rand_fn):
-   #     random = generate_random(nbar, boxsize, savepos=rand_fn)
-   #     randomsky = to_sky(random['Position'], cosmo, savepos=randsky_fn)
+    if not os.path.isfile(rand_fn):
+        random = generate_random(nbar, boxsize, savepos=rand_fn)
+        #randomsky = to_sky(random['Position'], cosmo, savepos=randsky_fn)
 
    # for seed in seeds:
    #     data_fn = '{}/cat_lognormal{}_seed{}.dat'.format(cat_dir, tag, seed)

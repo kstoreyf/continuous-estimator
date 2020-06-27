@@ -3,12 +3,13 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 
+from scipy.interpolate import interp1d
 
 
 color_dict = {'True':'black', 'tophat':'blue', 'standard': 'orange', 'piecewise':'crimson', 'linear spline':'red', 'cosmo deriv':'purple', 'triangle':'crimson'}
 
 def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=None,
-            log=False, err=False, zoom=False, error_regions=None, xlim=None, cont=True, 
+            log=False, err=False, zoom=False, error_regions=None, xlim=None, errlim=None, cont=True, 
             label_rmse=True, show_legend=True):
 
     print(np.array(rs).shape)
@@ -49,6 +50,7 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
    
     #cf_t = 1 + cf_t
     #cf_t = r_t**2 * cf_t
+    ax[0].axhline(0, color='silver', ls='-')
     ax[0].plot(r_t, cf_t, color='k', label='True', ls=lss[0], marker=marker, lw=2.5)
     
     offset = 0
@@ -67,6 +69,7 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
         if len(rs[j])==len(r_true) and abs(max(rs[j])-max(r_true))<0.01:
             #marker = None
             #ls = '-'
+            rs_are_same = True
             rmserr = rmse(cf, cf_t)
             #print(labels[j], "RMSE: {:.2e}".format(rmserr))
             if label_rmse:
@@ -74,6 +77,7 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
             else:
                 label = labels[j]
         else:
+            rs_are_same = False
             #marker = 'o'
             #ls = 'None'
             label = labels[j]
@@ -88,10 +92,12 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
             else:
                 ax[0].errorbar(r+offset, cf, yerr=[cf-lower, upper-cf], color=colors[j], ls='None', alpha=0.5)
 
-        if err and len(rs[j])==len(r_true):
+        if err:
             #ax[1].plot(r, (cf-cf_t)/cf_t, color=colors[j], alpha=alphas[j])
-            print(len(cf))
-            print(len(cf_t))
+            if not rs_are_same:
+                cf_t_func = interp1d(r_true, cf_true)
+                cf_t = cf_t_func(r)
+
             ax[1].plot(r, cf-cf_t, color=colors[j], alpha=alphas[j], marker=marker, ls=lss[j], lw=2.5)
             if cont:
                 ax[1].fill_between(r, upper-cf_t, lower-cf_t, color=colors[j], alpha=0.2)
@@ -100,6 +106,7 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
             else:
                 ax[1].errorbar(r+offset, cf-cf_t, yerr=[cf-lower, upper-cf], color=colors[j], ls='None', alpha=0.5)
             #ax[1].plot(r, cf/cf_t, color=colors[j], alpha=alphas[j])
+
 
     #ax[0].set_xlabel('r')
     #ax[0].set_ylabel(r'$\xi(r)$')  
@@ -125,7 +132,8 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
         #ax[1].set_ylabel(r'($\xi-\xi_{true})/\xi_{true}$')
         #ax[1].set_ylabel('fractional error')
         ax[1].set_ylabel(r'$\xi(r)$ - $\xi_{true}(r)$')
-        #ax[1].set_ylim(-5, 5)
+        if errlim:
+            ax[1].set_ylim(errlim[0], errlim[1])
     else:
         ax[0].set_xlabel(r'r (h$^{-1}$ Mpc)')
 

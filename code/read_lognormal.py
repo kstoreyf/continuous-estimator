@@ -1,8 +1,6 @@
 import numpy as np
 import struct
 
-#tag = 'test'
-#fileName = 'data/catalog_{}/lognormal/{}_lognormal_rlz0.bin'.format(tag, tag)
 
 def read(fn):
 
