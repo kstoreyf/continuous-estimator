@@ -141,8 +141,7 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     rcont = np.linspace(rmin, rmax, 1000)
     numerator = dd_proj - rr_ana
     amps_periodic_ana = np.linalg.solve(qq_ana, numerator)
-    #amps_periodic_ana = np.linalg.solve(qq_ana, dd_proj) - 1
-    xi_periodic_ana = evaluate_xi(nrbins, amps_periodic_ana, len(rcont), rcont, len(r_edges)-1, r_edges, proj_type, projfn=projfn)
+    xi_periodic_ana = evaluate_xi(nrbins, amps_periodic_ana, len(rcont), rcont, nrbins, r_edges, proj_type, projfn=projfn)
 
     print("DD proj:", dd_proj)
     return rcont, xi_periodic_ana
