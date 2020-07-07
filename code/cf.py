@@ -18,38 +18,50 @@ from Corrfunc.mocks.DDsmu_mocks import DDsmu_mocks
 from nbodykit.lab import *
 import nbodykit
 
+
+
+
 def main():
+
+    print("Corrfunc version:", Corrfunc.__version__, Corrfunc.__file__)
+
     L = 750
-    cat_tag = f'_L{L}_n3e-5'
+    cat_tag = f'_L{L}_n1e-4'
     kwargs = {}
     
     #proj = 'theory'
-    #binwidth = 5
+    #binwidth = 3
     #cf_tag = f"_{proj}_bw{binwidth}"
 
-    proj = 'tophat'
-    binwidth = 3
-    cf_tag = f"_{proj}_bw{binwidth}"
+    #proj = 'tophat'
+    #binwidth = 3
+    #cf_tag = f"_{proj}_bw{binwidth}"
 
-    #proj = 'spline'
-    #kwargs = {'order': 3}
-    #binwidth = 12
-    #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}"
+    # proj = 'piecewise'
+    # binwidth = 10
+    # cf_tag = f"_{proj}_bw{binwidth}_hangstill"
 
+    proj = 'spline'
+    kwargs = {'order': 3}
+    binwidth = 10
+    cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}_xlim40-140"
+    
     nbins = None
     Nrealizations = 100
     overwrite = True
     qq_analytic = True
-    #qq_analytic = False
+    nthreads = 12
 
     result_dir = '../results/results_lognormal{}'.format(cat_tag)
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
     
     # define bins
-    rmin = 40.
-    rmax = 196. #!! 
-    #rmax = 200.
+    #rmin = 0.
+    #rmax = 240. #!! 
+    rmin = 40.0
+    rmax = 140.0
+    #rmax = 240.
     assert bool(nbins) ^ bool(binwidth), "Can't set both nbins and binwidth!"
     if nbins:   
         binwidth = (rmax-rmin)/float(nbins) 
@@ -86,7 +98,7 @@ def main():
         Lx, Ly, Lz, N, data = reader.read(fn)
         assert L==Lx and L==Ly and L==Lz, f"Box sizes don't align! L: {L}, Lx: {Lx}, Ly: {Ly}, Lz: {Lz}"
         x, y, z, vx, vy, vz = data.T
-        print(N)
+        print("N =",N)
         
         start = time.time()
         if "theory" in proj:
@@ -103,27 +115,24 @@ def main():
                  nprojbins, proj_type, projfn=projfn)
         end = time.time()
 
+        #print("Done but not saved", save_fn)
+        print(f"Saved result to {save_fn}")
         np.save(save_fn, [r, xi, proj])
         print("Time:", end-start, "s")
             
 
-def xi_theory_periodic(x, y, z, L, r_edges):
-    nthreads = 24
+def xi_theory_periodic(x, y, z, L, r_edges, nthreads=24):
     res = Corrfunc.theory.xi(L, nthreads, r_edges, x, y, z)
     res = np.array(res)
     xi = [rr[3] for rr in res]
-    print("THEORY")
-    print([rr[4] for rr in res])
-    print(xi)
     return xi
 
 
-def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=None):
+def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=None, nthreads=24):
     mumax = 1.0
     nmubins = 1
     verbose = False # MAKE SURE THIS IS FALSE otherwise breaks
     periodic = True
-    nthreads = 24
     _, dd_proj, _ = DDsmu(1, nthreads, r_edges, mumax, nmubins, x, y, z,
                 proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
                 boxsize=L, periodic=periodic)
@@ -136,7 +145,9 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
 
     # works up to 100 thru here
     # hangs up to 15 when through next line
+    print(rmin, rmax, nd, volume, nprojbins, nrbins, r_edges, proj_type, projfn)
     rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, nrbins, r_edges, proj_type, projfn=projfn)
+    print(rr_ana)
 
     rcont = np.linspace(rmin, rmax, 1000)
     numerator = dd_proj - rr_ana
@@ -147,12 +158,11 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     return rcont, xi_periodic_ana
 
 
-def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, nprojbins, proj_type, projfn=None):
+def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, nprojbins, proj_type, projfn=None, nthreads=24):
     mumax = 1.0
     nmubins = 1
     verbose = False # MAKE SURE THIS IS FALSE otherwise breaks
     periodic = True
-    nthreads = 24
 
     print("computing dd...")
     _, dd_proj, _ = DDsmu(1, nthreads, r_edges, mumax, nmubins, x, y, z,
@@ -179,7 +189,7 @@ def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, 
 
 
 
-def compute_rr_qq_numeric(rr_qq_fn, random, L, r_edges, nprojbins, proj, proj_type, projfn=None):
+def compute_rr_qq_numeric(rr_qq_fn, random, L, r_edges, nprojbins, proj, proj_type, projfn=None, nthreads=24):
     print("computing rr...")
 
     rx, ry, rz = random.T
@@ -188,7 +198,6 @@ def compute_rr_qq_numeric(rr_qq_fn, random, L, r_edges, nprojbins, proj, proj_ty
     nmubins = 1
     verbose = False # MAKE SURE THIS IS FALSE otherwise breaks
     periodic = True
-    nthreads = 24    
     _, rr_proj, qq_proj = DDsmu(1, nthreads, r_edges, mumax,             nmubins, rx, ry, rz,
             proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
             boxsize=L, periodic=periodic)
@@ -214,7 +223,6 @@ def get_proj_parameters(proj, r_edges=None, cf_tag=None, **kwargs):
     elif proj=='bao':
         proj_type = 'generalr'
         projfn = f'../tables/bases{cf_tag}.dat'
-        print(kwargs)
         nprojbins, _ = bao.write_bases(r_edges[0], r_edges[-1], projfn, **kwargs) 
     elif proj=='theory':
         proj_type = None

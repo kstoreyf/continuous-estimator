@@ -13,31 +13,33 @@ from Corrfunc.utils import qq_analytic
 from Corrfunc.bases import bao
 
 import read_lognormal as reader
-
+import bao_utils
 
 
 def main():
     nbar_str = '3e-5'
     proj = 'baoiter'
-    cf_tag = f"_{proj}_alpha1.1"
-    #realizations = [94]
-    realizations = range(100)
+    cf_tag = f"_{proj}_cosmob17"
+    realizations = [24]
+    #realizations = range(100)
 
     restart_unconverged = True # will restart any unconverged realizations - WARNING, IF FALSE WILL OVERWRITE ITERATIONS OF UNCONVERGED ONES
     convergence_threshold = 0.001 #when to stop (fractional change)
-    niter_max = 50 # stop after this many iterations if not converged 
+    niter_max = 90 # stop after this many iterations if not converged 
 
+    cosmo_name = 'b17'
     skip_converged = True
     qq_analytic = True
-    nthreads = 16
+    nthreads = 24
     dfrac = 0.01
-    eta = 0.25 # typically 1 but might need smaller for convergence issues
+    eta = 0.1 # typically 1 but might need smaller for convergence issues
 
+    cosmo = bao_utils.get_cosmo(cosmo_name)
     qq_tag = '' if qq_analytic else '_qqnum'
 
     for Nr in realizations:
-
-        biter = BAO_iterator(Nr=Nr, nbar_str=nbar_str, cf_tag=cf_tag, qq_analytic=qq_analytic, nthreads=nthreads)
+        print(f"Realization {Nr}")
+        biter = BAO_iterator(Nr=Nr, nbar_str=nbar_str, cf_tag=cf_tag, qq_analytic=qq_analytic, nthreads=nthreads, cosmo=cosmo)
 
         if skip_converged:
             converged_fn = f'{biter.result_dir}/cf{biter.cf_tag}{qq_tag}_converged_niter*{biter.cat_tag}_rlz{biter.Nr}.npy'
@@ -47,26 +49,25 @@ def main():
                 continue
 
         # initial parameters
+        niter_start = 0
+        alpha_model_start = 1.0
         if restart_unconverged:
-            #pattern = f"cf{biter.cf_tag}{qq_tag}_niter\d+{biter.cat_tag}_rlz{biter.Nr}.npy"
             pattern = f"cf{biter.cf_tag}{qq_tag}_niter([0-9]+){biter.cat_tag}_rlz{biter.Nr}.npy"
             niters_done = []
             for fn in os.listdir(biter.result_dir):
                 matches = re.search(pattern, fn)
                 if matches is not None:
                     niters_done.append(int(matches.group(1)))
-            niter_lastdone = max(niters_done) # load in last completed one
-
-            start_fn = f'{biter.result_dir}/cf{biter.cf_tag}{qq_tag}_niter{niter_lastdone}{biter.cat_tag}_rlz{biter.Nr}.npy'
-            res = np.load(start_fn, allow_pickle=True, encoding='latin1')
-            _, _, _, _, extra_dict = res
-            alpha_model_start = extra_dict['alpha_result']
-            niter_start = niter_lastdone + 1
-        else:
-            niter_start = 0
-            alpha_model_start = 1.1
+            
+            if niters_done: # if matches found (list not empty), start from latest iter; otherwise, will start from zero
+                niter_lastdone = max(niters_done) # load in last completed one
+                start_fn = f'{biter.result_dir}/cf{biter.cf_tag}{qq_tag}_niter{niter_lastdone}{biter.cat_tag}_rlz{biter.Nr}.npy'
+                res = np.load(start_fn, allow_pickle=True, encoding='latin1')
+                _, _, _, _, extra_dict = res
+                alpha_model_start = extra_dict['alpha_result']
+                niter_start = niter_lastdone + 1
         
-        print(f"Running realization {Nr}, starting from iteration {niter_start}")
+        print(f"Starting from iteration {niter_start}")
         # set up iterative procedure
         biter.load_catalogs()
         alpha_model = alpha_model_start
@@ -87,7 +88,7 @@ def main():
             extra_dict = {'alpha_start': alpha_model_start,
                           'alpha_model': alpha_model,
                           'dalpha': dalpha,
-                          'alpha_result': alpha_next,
+                          'alpha_result': alpha_next, #should this be alpha_result?
                           'niter': niter} 
             
 
@@ -97,6 +98,7 @@ def main():
             err = abs(alpha_model-alpha_result)/alpha_model
             if err < convergence_threshold:
                 converged = True
+            
             biter.save_cf(xi, amps, niter, extra_dict, converged=converged)
 
             alpha_model = alpha_next
@@ -116,12 +118,17 @@ def main():
 
 class BAO_iterator:
 
-    def __init__(self, boxsize=750, nbar_str='1e-5', Nr=0, rmin=40, rmax=200, nbins=15, cf_tag='_baoiter', qq_analytic=True, nthreads=24):
+    def __init__(self, boxsize=750, nbar_str='1e-5', Nr=0, rmin=40, rmax=200, nbins=15, cf_tag='_baoiter', qq_analytic=True, nthreads=24, cosmo=None):
 
         # input params
         self.boxsize = boxsize
         self.nbar_str = nbar_str
         self.Nr = Nr
+        if cosmo==None:
+            print("No cosmo input, defaulting to Planck")
+            self.cosmo = nbodykit.cosmology.Planck15
+        else:
+            self.cosmo = cosmo
 
         self.rmin = rmin
         self.rmax = rmax
@@ -196,7 +203,7 @@ class BAO_iterator:
 
         _, dd_proj, _ = DDsmu(1, self.nthreads, self.rbins, self.mumax, self.nmubins, self.x, self.y, self.z,
                         proj_type=self.proj_type, nprojbins=self.nprojbins, projfn=self.projfn,
-                        verbose=self.verbose, boxsize=self.boxsize, periodic=self.periodic)
+                        verbose=self.verbose, boxsize=self.boxsize, periodic=self.periodic, isa='fallback')
 
         volume = self.boxsize**3
         nrbins = len(self.rbins)-1
@@ -246,7 +253,7 @@ class BAO_iterator:
 
         self.projfn = '../tables/bases{}{}.dat'.format(self.cf_tag, self.cat_tag)
         # The spline routine writes to file, so remember to delete later
-        kwargs = {'cosmo_base':nbodykit.cosmology.Planck15, 'redshift':0, 'dalpha':dalpha, 'alpha_model':alpha_model, 'bias':1.5}
+        kwargs = {'cosmo_base':self.cosmo, 'redshift':0, 'dalpha':dalpha, 'alpha_model':alpha_model, 'bias':1.5}
         self.nprojbins, _ = bao.write_bases(self.rbins[0], self.rbins[-1], self.projfn, **kwargs)      
         xi, amps = self.run_estimator()
         

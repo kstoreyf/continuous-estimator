@@ -4,10 +4,14 @@
 ##PBS -N cf_n1e-4_ddcheck
 ##PBS -N check_cf
 ##PBS -N check_compute_cf
-##PBS -N compute_cf
-#PBS -N baoiter_n1e-4
+##PBS -N cf_bugsquash
+##PBS -N cf_hangjob_noisa
+##PBS -N baoiter_n3e-5
+#PBS -N cf_spline3_xlim
+##PBS -N cf_min
 #PBS -l walltime=40:00:00
 #PBS -l nodes=1:ppn=12
+##PBS -l mem=32GB
 #PBS -m ae
 #PBS -o output/$PBS_JOBNAME.out
 #PBS -j oe
@@ -18,8 +22,10 @@ echo $PBS_O_WORKDIR
 echo 'starting'
 echo -n 'Job is running on node '; cat $PBS_NODEFILE
 #python lognormal.py
-#python cf.py
-python bao_iterative.py
+python cf.py
+#python cf_bugsquash.py
+#python cf_minimal_theory.py
+#python bao_iterative.py
 #python compute_cf.py
 #python check_cf.py
 #python check_compute_cf.py

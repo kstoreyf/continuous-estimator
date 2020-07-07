@@ -10,7 +10,7 @@ color_dict = {'True':'black', 'tophat':'blue', 'standard': 'orange', 'piecewise'
 
 def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=None,
             log=False, err=False, zoom=False, error_regions=None, xlim=None, errlim=None, cont=True, 
-            label_rmse=True, show_legend=True):
+            label_rmse=True, show_legend=True, bases=None):
 
     print(np.array(rs).shape)
 
@@ -18,17 +18,19 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
     if not alphas:
         alphas = np.ones(len(colors))
     print('plotting')
-    if err:
+
+    if err and bases is None:
         fig, ax = plt.subplots(2, 1, figsize=(8,8), gridspec_kw={'height_ratios': [2, 1]}, sharex=True)
-        plt.subplots_adjust(wspace=0, hspace=0)
+        plt.subplots_adjust(wspace=0, hspace=0.1)
+    elif err and bases is not None:
+        fig, ax = plt.subplots(3, 1, figsize=(8,10), gridspec_kw={'height_ratios': [2, 1, 1]})
+        plt.subplots_adjust(wspace=0, hspace=0.2)
     else:
         plt.figure(figsize=(8,6))
         ax = plt.gca()
         ax = [ax]
     
     if cont:
-        #lss = ['-', '--', '-.', ':']
-        #lss = ['-','-.','-']
         lss = ['-']*len(rs)
         marker = 'None'
     else:
@@ -48,17 +50,16 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
     r_t = np.array([r_true[k] for k in range(len(r_true)) if xmin<=r_true[k]<xmax])
     cf_t = np.array([cf_true[k] for k in range(len(r_true)) if xmin<=r_true[k]<xmax])
    
-    #cf_t = 1 + cf_t
-    #cf_t = r_t**2 * cf_t
     ax[0].axhline(0, color='silver', ls='-')
-    ax[0].plot(r_t, cf_t, color='k', label='True', ls=lss[0], marker=marker, lw=2.5)
+    ax[0].plot(r_t, cf_t, color='k', label='True', ls='-', lw=1.5, zorder=1000)
     
     offset = 0
     for j in range(len(rs)):
-        offset += 0.5
+        #offset += 0.5
          
         r = np.array([rs[j][k] for k in range(len(rs[j])) if xmin<=rs[j][k]<xmax])
         cf = np.array([cfs[j][k] for k in range(len(rs[j])) if xmin<=rs[j][k]<xmax])
+
         if error_regions is not None:
             lower = error_regions[j][0]
             upper = error_regions[j][1]
@@ -95,21 +96,27 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
         if err:
             #ax[1].plot(r, (cf-cf_t)/cf_t, color=colors[j], alpha=alphas[j])
             if not rs_are_same:
-                cf_t_func = interp1d(r_true, cf_true)
+                cf_t_func = interp1d(r_true, cf_true, kind='cubic')
                 cf_t = cf_t_func(r)
 
             ax[1].plot(r, cf-cf_t, color=colors[j], alpha=alphas[j], marker=marker, ls=lss[j], lw=2.5)
-            if cont:
-                ax[1].fill_between(r, upper-cf_t, lower-cf_t, color=colors[j], alpha=0.2)
-                ax[1].plot(r, lower-cf_t, color=colors[j], ls=lss[j])
-                ax[1].plot(r, upper-cf_t, color=colors[j], ls=lss[j])
-            else:
-                ax[1].errorbar(r+offset, cf-cf_t, yerr=[cf-lower, upper-cf], color=colors[j], ls='None', alpha=0.5)
+            # for now let's not plot error in residual
+            #if cont:
+                #ax[1].fill_between(r, upper-cf_t, lower-cf_t, color=colors[j], alpha=0.2)
+                #ax[1].plot(r, lower-cf_t, color=colors[j], ls=lss[j])
+                #ax[1].plot(r, upper-cf_t, color=colors[j], ls=lss[j])
+            #else:
+            #    ax[1].errorbar(r+offset, cf-cf_t, yerr=[cf-lower, upper-cf], color=colors[j], ls='None', alpha=0.5)
             #ax[1].plot(r, cf/cf_t, color=colors[j], alpha=alphas[j])
 
+        if bases is not None:
+            base = bases[j]
+            rbase = base[:, 0]
+            base = np.array([base[k] for k in range(len(rbase)) if xmin<=rbase[k]<xmax])
+            rb = np.array([rbase[k] for k in range(len(rbase)) if xmin<=rbase[k]<xmax])
+            for bb in range(1, base.shape[1]):
+                ax[2].plot(rb, base[:, bb], color=colors[j], alpha=alphas[j], marker=marker, ls=lss[j], lw=2.5)
 
-    #ax[0].set_xlabel('r')
-    #ax[0].set_ylabel(r'$\xi(r)$')  
     ax[0].set_ylabel(r'$\xi(r)$')
     ax[0].set_xlim(xmin, xmax)
     
@@ -121,16 +128,19 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, alphas=None, saveto=N
         ax[0].set_yscale('log')
         if err:
             ax[1].set_xscale('log')
-    #else:
-    #    ax[0].set_xlim(40, max(r_true))
-    #    ax[1].set_xlim(40, max(r_true))
-        #ax[0].set_ylim(-0.05,0.05)
 
     if err:
-        ax[1].axhline(0, color='k', lw=2.5, zorder=0)
-        ax[1].set_xlabel(r'r (h$^{-1}$ Mpc)')
+        ax[1].axhline(0, color='k', lw=1.5, zorder=1000)
+        ax[1].set_xlim(xmin, xmax)
+
+        if bases is None:
+            ax[1].set_xlabel(r'r (h$^{-1}$ Mpc)')
+        else:
+            ax[2].set_xlabel(r'r (h$^{-1}$ Mpc)')
+            ax[2].set_xlim(xmin, xmax)
+            ax[2].set_ylabel(r'bases')
+
         #ax[1].set_ylabel(r'($\xi-\xi_{true})/\xi_{true}$')
-        #ax[1].set_ylabel('fractional error')
         ax[1].set_ylabel(r'$\xi(r)$ - $\xi_{true}(r)$')
         if errlim:
             ax[1].set_ylim(errlim[0], errlim[1])
