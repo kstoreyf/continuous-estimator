@@ -7,7 +7,7 @@
 ##PBS -N cf_bugsquash
 ##PBS -N cf_hangjob_noisa
 ##PBS -N baoiter_n3e-5
-#PBS -N cf_spline3_xlim
+#PBS -N cf_tophat_bw6_1e-4
 ##PBS -N cf_min
 #PBS -l walltime=40:00:00
 #PBS -l nodes=1:ppn=12

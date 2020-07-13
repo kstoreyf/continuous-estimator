@@ -33,18 +33,18 @@ def main():
     #binwidth = 3
     #cf_tag = f"_{proj}_bw{binwidth}"
 
-    #proj = 'tophat'
-    #binwidth = 3
-    #cf_tag = f"_{proj}_bw{binwidth}"
+    proj = 'tophat'
+    binwidth = 6
+    cf_tag = f"_{proj}_bw{binwidth}"
 
     # proj = 'piecewise'
     # binwidth = 10
     # cf_tag = f"_{proj}_bw{binwidth}_hangstill"
 
-    proj = 'spline'
-    kwargs = {'order': 3}
-    binwidth = 10
-    cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}_xlim40-140"
+    #proj = 'spline'
+    #kwargs = {'order': 3}
+    #binwidth = 10
+    #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}_xlim40-140"
     
     nbins = None
     Nrealizations = 100
@@ -59,8 +59,10 @@ def main():
     # define bins
     #rmin = 0.
     #rmax = 240. #!! 
-    rmin = 40.0
-    rmax = 140.0
+    rmin = 36.0
+    rmax = 156.0
+    #rmin = 40.0
+    #rmax = 140.0
     #rmax = 240.
     assert bool(nbins) ^ bool(binwidth), "Can't set both nbins and binwidth!"
     if nbins:   
