@@ -21,7 +21,10 @@ periodic = True
 nthreads = 1
 proj_type = 'tophat'
 nprojbins = nbins
+nmubins = 1
+mumax = 1.0
 dd_res, dd_proj, _ = DDsmu(1, nthreads, r_edges, mumax, nmubins, x, y, z, 
                            boxsize=boxsize, periodic=periodic, proj_type=proj_type, nprojbins=nprojbins)
 print("Corrfunc result:", dd_res)
 print("Smoothcorrfunc result:", dd_proj)
+print("Successfully ran smoothcorrfunc on lognormal mock!")
