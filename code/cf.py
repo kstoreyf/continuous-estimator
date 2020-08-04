@@ -34,8 +34,8 @@ def main():
     #cf_tag = f"_{proj}_bw{binwidth}"
 
     proj = 'tophat'
-    binwidth = 6
-    cf_tag = f"_{proj}_bw{binwidth}"
+    binwidth = 5
+    cf_tag = f"_{proj}_bw{binwidth}_anatest"
 
     # proj = 'piecewise'
     # binwidth = 10
@@ -47,7 +47,7 @@ def main():
     #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}_xlim40-140"
     
     nbins = None
-    Nrealizations = 100
+    Nrealizations = 1
     overwrite = True
     qq_analytic = True
     nthreads = 12
@@ -157,6 +157,8 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     xi_periodic_ana = evaluate_xi(nrbins, amps_periodic_ana, len(rcont), rcont, nrbins, r_edges, proj_type, projfn=projfn)
 
     print("DD proj:", dd_proj)
+    print(numerator)
+    print(amps_periodic_ana)
     return rcont, xi_periodic_ana
 
 
