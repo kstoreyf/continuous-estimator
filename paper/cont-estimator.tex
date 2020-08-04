@@ -131,11 +131,9 @@ The LSS also contains the signature of redshift-space distortions caused by the 
 Additionally, the LSS can be used to constrain galaxy formation in conjunction with models of galaxy bias (e.g. \citealt{Hamilton1988}). %?
 With current observations, the LSS is well-described by a cold dark matter model with a cosmological constant, the standard $\Lambda$CDM model.
 Upcoming galaxy surveys will observe larger volumes with improved measurements, allowing us to test $\Lambda$CDM to even higher precision.
-\KSF{Should I name-drop surveys, and their data volume / sky area?} \hogg{I don't think it is necessary; use your judgement.}
 
 We characterize the LSS by using luminous sources to trace the underlying matter density field.
-These tracers are often to taken to be galaxies, but can also be galaxy clusters, quasars and other sources.
-\KSF{should i say that hereafter we will take them to be galaxies?} \hogg{Yes.}
+These tracers are often to taken to be galaxies, but can also be galaxy clusters, quasars and other sources; in this paper we will consider our tracers to be galaxies.
 The clustering of these objects is measured with two-point statistics, namely the power spectrum $P(k)$ and the two-point correlation function (\cf).
 These characterize the clustering in Fourier space and real space, respectively, with the \cf defined as the Fourier Transform of the power spectrum: 
 \KSF{i'm not sure about my notation here with the vectors and d3k}
@@ -151,43 +149,41 @@ However, in practical applications the survey boundaries introduce nontrivial is
 The \cf requires more computational power and extra survey products, but it is an incredibly useful tool; for instance, it well-suited to the analysis of the BAO feature which manifests at a single scale in real space.
 
 The \cf measures the excess probability that any two galaxies are separated by a given distance, compared to a uniform distribution; effectively, it characterizes the strength of clustering at a given spatial scale. 
-% need to discuss statistical homogeneity & isotropy? (ergodicity?)
 In calculating the \cf, the boundaries of the surveys prevent us from directly summing pair counts due to nontrivial edge effects.
 To account for the survey boundaries as well as corrupted regions due to issues such as bright foreground stars, a set of random points are Poisson-distributed within the acceptable survey window. 
 The pairwise correlations of these unclustered points are used to normalize out the survey window when estimating the \cf of the clustered data.
 Typically, this requires random points on the order of 10-100 times the number of data points, making the random correlations the limiting factor in \cf computation.
 
-The \cf is computed in bins of radial separation, meaning that in practice it measures the volume average of the \cf over the bin. %is this accurate?
+The \cf is computed in bins of radial separation.
 This binning introduces inherent limitations.
 First, the choice of bins requires a trade-off between bias and variance: fewer bins may bias the result, while more bins increases the variance of measurement.
 Finite-width bins also result in a loss of information about the property in which one is binning.
-As we strive for extreme precision in large-scale structure analyses, we should be maximizing the information we extract from the data.
+As we work towards extreme precision in large-scale structure, maximizing the information we extract with our analyses will become increasingly important. 
 
 More generally, binning adds arbitrary boundaries between continuous data; results should not depend on bin choice, yet they sometimes do.
 \cite{Lanzuisi2017} noted that the choice of binning axis impacts the detected correlation between the luminosity of active galactic nuclei and their host galaxies; \cite{Grimmett2020} devised a method to investigate this correlation in a continuous manner using a hierarchical Bayesian model, eliminating the need for binning.
 \cite{Bailoni2016} explored the dependence of clustering analyses on the number of redshift bins, finding a non-negligible difference in cosmological parameter uncertainties.
-The implications for BAO analyses were explored by \citep{Percival2014}, who found that there is an optimal bin width given the analysis method.
+The implications for BAO analyses were explored by \cite{Percival2014}, who found that there is an optimal bin width given the analysis method.
 This balances the increasing statistical error with small bins and the offset in the derived BAO peak location with large bins; the effects are small but non-negligible.
-%Moreover, we note that standard estimators are fundamentally biased due to this finite binning; we will address this in a future work. %TODO: figure out this wording. need to explain more than this or leave out entirely?
 
-%some papers have equations (even this eqn) in intro - but should bump it to motivation and just explain?
+\KSF{should i bump this equation to Motivation and just explain it in words here? some papers do have equations (even this eqn) in intro}
 Estimators of the \cf have been studied extensively (\citealt{PeeblesHauser1974}; \citealt{DavisPeebles1983}; \citealt{Hamilton1993}).
 The current standard estimator was proposed by \cite{LandySzalay1993}, hereafter \LS. It is based on summing all data pairs $DD$ with a given separation and using data-random pairs $DR$ and random pairs $RR$ to correct for the survey boundary. The correlation function $\xi_k(r)$ for the $k^\mathrm{th}$ separation bin is
-%assume we should keep this notation even though it's clunky, as it's recognizable
-%should we use estimator notation with a hat on xi?
+\KSF{do we need to use mathematical estimator notation with a hat on xi?}
 \begin{equation}
 \xi_k(r) = \frac{DD_k(r) - 2DR_k(r) + RR_k(r)}{RR_k(r)},
 \end{equation}
-where we assume the pair counts are normalized. %should we write out normalization explicitly? here or somewhere else?
-Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}. %added simple because there was the recent paper which looked at all linear combos and optimized, think that one might have better bias/variance properties
-Estimators of the \cf must also take into account the imperfect nature of the survey area that is in the window, including the target completeness and fiber collisions; typically each galaxy pair is assigned a weight based on these. %is this necessary? not sure where it fits
-Then, pair counts are replaced by the sum of pair weights.
+where we take the pair counts to be normalized.
+Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}.
+Estimators of the \cf must also take into account the imperfect nature of the survey, including systematic effects, the target completeness, and fiber collisions.
+To account for these, each galaxy pair is assigned a weight, and pair counts are replaced by the sum of pair weights.
+\KSF{should this note about weighting stay here or be moved? if so to where?}
 
 Variations on the random catalog pair count method have been proposed in recent years.
 \cite{Demina2016} replaced the $DR$ and $RR$ terms with an integral over the probability map, reducing computation time and increasing precision.
 An estimator proposed by \cite{VargasMagana2013} iterates over sets of mock catalogs to find an optimal linear combination of data and random pair counts, reducing the bias and variance.
-The marked correlation function \citep{WhitePadmanabhan2009} sums weights based on properties of the galaxies one is interested in, such as the local density or galaxy luminosity, and avoids the use of a random catalog.
-The estimators described so far have all taken probabilistic approaches; others have taken a likelihood approach.
+An alternative estimator, the marked correlation function (e.g. \citealt{WhitePadmanabhan2009}), avoids the use of a random catalog altogether: it considers the ratio between the \cf and a weighted correlation function in which weights are assigned based on galaxy properties, such as the local density.
+These estimators have all taken probabilistic approaches; others have taken a likelihood approach.
 \cite{BaxterRozo2013} introduced a maximum likelihood estimator for the \cf, which achieves lower variance compared to the \LS estimator, enabling finer binning and requiring a smaller random catalog for the same precision.
 
 These estimators present improvements to \LS, but they are still limited to estimates in separation bins.
@@ -201,7 +197,6 @@ This estimator removes the need for binning and allows for the \cf to be represe
 It is particularly well-suited to the analysis of LSS features such as the BAO peak; we find that we can accurately locate the peak with fewer components.
 
 %will obviously keep changing this as paper develops
-%spell out acronyms again that were defined in the abstract?
 This paper is organized as follows. 
 In $\S$\ref{sec:motiv}, we motivate our estimator and explain its formulation.
 %In Section \ref{sec:est}, we prove its correctness and describe our implementation, and demonstrate its application on a simulated data set. 
@@ -222,37 +217,33 @@ DD_k &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} i(g_k < |x_n - x_{n'}| < h_k) \\
 DR_k &\equiv& \frac{1}{N_D N_R} \sum_{n m} i(g_k < |x_n - x_m| < h_k) \\
 RR_k &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} i(g_k < |x_m - x_{m'}| < h_k),
 \end{eqnarray}
-where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function \KSF{define?} \hogg{yes}, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
-\KSF{decide on these normalization terms - generalize to D1 D2? simpler, but then need RD term}
+where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
+\KSF{added this next line, thoughts?}
+The tracer position can be real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
+\KSF{Generalize to D1 D2 R1 R2? I think I'd prefer to keep as-is so it looks more familiar. But this requires the clunky normalization factor.} 
 
-The \LS estimator has been analyzed extensively; it is shown to have the lowest bias and variance compared to other pair-count-based estimators (e.g. \citealt{Kerscher2000}).
-In the limit of unclustered data, for a data volume much larger than the scales of interest, and an infinitely large random catalog, the \LS estimator is known to be optimal: it is unbiased and has minimum variance.
+The \LS estimator is known to be optimal (i.e. it is unbiased and has minimum variance) under a particular set of conditions: in the limit of unclustered data, for a data volume much larger than the scales of interest, and an infinitely large random catalog. 
 In practice the latter two limits are sufficiently satisfied, but the data we are interested in is clustered.
-\LS does show a bias on very large scales ($>$130 \hmpc), but the bias is significantly smaller than that of most other estimators (\citealt{Kerscher1999}, \citealt{VargasMagana2013}).
-\LS is also less sensitive to the number of random points than other estimators \citep{Kerscher2000}.
 \cite{VargasMagana2013} show that for clustered data, the \LS estimator has lower variance than other estimators, but does not reach the Poisson noise limit.
-
-\KSF{Figure demonstrating trade-off between bias and variance? or too simple} \hogg{Only if the point isn't clear without it.}
-
-\KSF{Should i explain / show some of the other estimators? --> now i do in the beyond LS section} \hogg{No; our job is not to work through all estimators. But we SHOULD note that our mod can be applied to almost any estimator that currently uses bins!}
-
-\KSF{Do i need to explain real space vs redshift space vs projected correlation function?} \hogg{No, but always be absolutely unambiguous about what space you are in. To the point that you might even want to use different symbols.}
+When applied to clustered data, \LS does show a bias on very large scales ($>$130 \hmpc), but the bias is significantly smaller than that of most other estimators (\citealt{Kerscher1999}, \citealt{VargasMagana2013}).
+\LS is also less sensitive to the number of random points than other estimators \citep{Kerscher2000}.
+While \LS has been sufficient for past analyses, it is clear that it is suboptimal for realistic large-scale structure measurements on modern datasets.
 
 \subsection{Least Squares Fitting}
 
 Estimating clustering is closely related to least-squares fitting.
-We are trying to find the best representation of spatial data in the space of two-point radial separation.
-Recall that the linear least-squares fit to a set of data 
+We are essentially trying to find the best representation of spatial data in the space of two-point radial separation.
+Recall that the linear least-squares fit to a set of data is
 \begin{equation}
 X = [A\T C\inv A]\inv [A\T C\inv Y]
 \end{equation}
 where $X$ is the vector of best-fit parameters, $A$ is a matrix with zeroth and first order terms of $x$ data, $C$ is the covariance matrix, and $Y$ is a column vector of $y$ data.
 The second bracketed term contains the observed data; the first bracketed term weights the data by the errors.
-Naively, in the case of the \cf, the observed data is the pair counts at a given separation, and the weights are provided by the pair counts of the random catalog.
+In the case of the \cf, the observed data is the pair counts at a given separation, and the weights are provided by the pair counts of the random catalog.
 Indeed, this is reminiscent of the so-called natural estimator of the \cf, $\xi_k = DD_k/RR_k - 1$ (e.g. \citealt{Kerscher2000}).
 
 From this connection, we can infer the form of the estimator.
-\KSF{expand this section}
+\KSF{What else to say in this section?? How to expand on what's here?}
 
 % TODO: fix this capitalization issue
 \subsection{\Est}
