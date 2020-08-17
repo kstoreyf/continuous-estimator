@@ -98,84 +98,87 @@
 \flatiron
 
 \begin{abstract}\noindent
-% Context
+% Context / Aims
 The two-point correlation function (\cf) is the most important statistic in structure formation, used to measure the clustering of density field tracers (e.g. galaxies).
-Current estimators of the 2pcf, including the standard Landy-Szalay (\LS) estimator, have significant limitations.
-%Aims
-In this work we address the issue that the \LS estimator evaluates the \cf in hard-edged bins of separation between objects, which results in a loss of information and a poor trade-off between bias and variance.
+Current estimators of the 2pcf, including the standard Landy-Szalay (\LS) estimator, evaluate the \cf in hard-edged bins of separation between objects, which is inappropriate for the science context and results in a loss of information and a poor trade-off between bias and variance.
 %Methods
-We present a new estimator for the \cf, \emph{\est}, which generalizes \LS to a continuous representation and obviates binning in separation or any other property. 
-Our estimator replaces the binned pair counts of \LS with a linear superposition of any set of basis functions, and outputs the best-fit linear combination of basis functions to describe the \cf. 
-It is closely related to the information-theory optimal estimator used in linear least-squares fitting. 
-The choice of basis can take into account the expected form of the \cf, as well as its dependence on other properties beyond separation.
+We present a new estimator for the \cf, \emph{\est}, which generalizes \LS to a continuous representation and obviates binning in separation or any other pair property. 
+Our estimator replaces the binned pair counts with a linear superposition of basis functions; it outputs the best-fit linear combination of basis functions to describe the \cf. 
+It is closely related to the estimator used in linear least-squares fitting. 
+The choice of basis can take into account the expected form of the \cf, as well as its dependence on properties other than separation.
 %Results
 We show that \est can estimate the clustering of artificial data in representations that provide more accuracy with fewer basis functions than \LS.
-Using a spline basis representation, we show that \est achieves lower bias and lower variance than \LS. 
-We also demonstrate how the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale.
-Critically, these representations reduce the number of mock catalogs required for covariance estimation, a limiting factor in \cf measurements.
-We discuss other applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and potentially unifying real-space and Fourier-space approaches to clustering measurements.
+\Est achieves lower bias and lower variance than \LS. 
+We also demonstrate that the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale.
+Critically, these will permit reductions in the number of mock catalogs required for covariance estimation, currently the limiting step in \cf measurements.
+We discuss applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and potentially unifying real-space and Fourier-space approaches to clustering measurements.
 
 \end{abstract}
 
-\keywords{cosmology: large-scale structure --- galaxies: statistics} %?
+%TODO: should have 6 keywords 
+%via Unified Astronomy Thesauras (UAT), http://astrothesaurus.org/concept-select/
+\keywords{Astrostatistics techniques (1886), Baryon acoustic oscillations (138), Galaxy counts (588), Two-point correlation function (1951), Large-scale structure of the universe (902)}
 
 \section{Introduction}
 
-The large-scale structure (LSS) of the universe is a critical probe of fundamental cosmology. 
-It encodes information about the physics of the early universe and the subsequent expansion history.
-In particular, the LSS provides a probe of the Baryon Acoustic Oscillations (BAO), density fluctuations resulting from baryon-photon coupling in the early universe.
-The distance traveled by these waves imprints a feature on the statistical description of the LSS, which can be used to determine the characteristic BAO length scale \citep{EisensteinHu1998}.
-The LSS also contains the signature of redshift-space distortions caused by the peculiar velocities of galaxies, which probe the growth rate of structure \citep{Kaiser1987}.
+The large-scale structure (LSS) of the Universe is critical to our understanding of fundamental cosmology. 
+It encodes information about the physics of the early Universe and the subsequent expansion history.
+In particular, LSS measures the Baryon Acoustic Oscillation (BAO) scale, which results from density fluctuations in the baryon-photon fluid.
+The distance traveled by these density waves before recombination imprints a feature on the statistical description of the LSS, which can be used to determine the characteristic BAO length scale \citep{EisensteinHu1998}.
+The LSS also contains the signature of redshift-space distortions caused by the peculiar velocities of galaxies, which are used to measure the growth rate of structure \citep{Kaiser1987}.
 Additionally, the LSS can be used to constrain galaxy formation in conjunction with models of galaxy bias (e.g. \citealt{Hamilton1988}). %?
 With current observations, the LSS is well-described by a cold dark matter model with a cosmological constant, the standard $\Lambda$CDM model.
 Upcoming galaxy surveys will observe larger volumes with improved measurements, allowing us to test $\Lambda$CDM to even higher precision.
 
-We characterize the LSS by using luminous sources to trace the underlying matter density field.
-These tracers are often to taken to be galaxies, but can also be galaxy clusters, quasars and other sources; in this paper we will consider our tracers to be galaxies.
-The clustering of these objects is measured with two-point statistics, namely the power spectrum $P(k)$ and the two-point correlation function (\cf).
-These characterize the clustering in Fourier space and real space, respectively, with the \cf defined as the Fourier Transform of the power spectrum: 
-\KSF{i'm not sure about my notation here with the vectors and d3k}
-\begin{equation}
-\xi(\mathbf{r}) = \frac{1}{(2\pi)^3} \int P(\mathbf{k}) e^{i\mathbf{k} \cdot \mathbf{r}} d^3\mathbf{k}.
-\end{equation}
-If we assume isotropy, we find that the spherically averaged correlation function is
-\begin{equation}
-\xi(r) = \frac{1}{2\pi^2} \int_0^{\infty} P(k) \frac{\mathrm{sin}(kr)}{kr} k^2 dk.
-\end{equation}
-In principle, the power spectrum and the two-point correlation function contain the same information.
-However, in practical applications the survey boundaries introduce nontrivial issues in computing these statistics, leading to diverging approaches to their computation with a significant difference in expense.
-The \cf requires more computational power and extra survey products, but it is an incredibly useful tool; for instance, it well-suited to the analysis of the BAO feature which manifests at a single scale in real space.
+% MOVE TO THESIS INTRO
+% We characterize the LSS by using luminous sources to trace the underlying matter density field.
+% These tracers are often to taken to be galaxies, but can also be galaxy clusters, quasars and other sources; in this paper we will consider our tracers to be galaxies.
+% The clustering of these objects is measured with two-point statistics, namely the power spectrum $P(k)$ and the two-point correlation function (\cf).
+% These characterize the clustering in Fourier space and real space, respectively, with the \cf defined as the Fourier Transform of the power spectrum: 
+% \KSF{i'm not sure about my notation here with the vectors and d3k}
+% \begin{equation}
+% \xi(\mathbf{r}) = \frac{1}{(2\pi)^3} \int P(\mathbf{k}) e^{i\mathbf{k} \cdot \mathbf{r}} d^3\mathbf{k}.
+% \end{equation}
+% If we assume isotropy, we find that the spherically averaged correlation function is
+% \begin{equation}
+% \xi(r) = \frac{1}{2\pi^2} \int_0^{\infty} P(k) \frac{\mathrm{sin}(kr)}{kr} k^2 dk.
+% \end{equation}
+% In principle, the power spectrum and the two-point correlation function contain the same information.
+% However, in practical applications the survey boundaries introduce nontrivial issues in computing these statistics, leading to diverging approaches to their computation with a significant difference in expense.
+% The \cf requires more computational power and extra survey products, but it is an incredibly useful tool; for instance, it well-suited to the analysis of the BAO feature which manifests at a single scale in real space.
 
-The \cf measures the excess probability that any two galaxies are separated by a given distance, compared to a uniform distribution; effectively, it characterizes the strength of clustering at a given spatial scale. 
-In calculating the \cf, the boundaries of the surveys prevent us from directly summing pair counts due to nontrivial edge effects.
-To account for the survey boundaries as well as corrupted regions due to issues such as bright foreground stars, a set of random points are Poisson-distributed within the acceptable survey window. 
+The most important statistic for characterizing the LSS is the two-point correlation function (\cf).
+The \cf measures the excess frequency at which any two galaxies are separated by a given distance, compared to a uniform distribution; effectively, it characterizes the strength of clustering at a given spatial scale. 
+In calculating the \cf, the nontrivial survey boundaries of the surveys prevent us from directly summing pair counts.
+% hogg: is the below important here? 
+To account for the survey boundaries as well as regions corrupted by issues such as bright foreground stars, a set of random points are Poisson-distributed within the acceptable survey window. 
 The pairwise correlations of these unclustered points are used to normalize out the survey window when estimating the \cf of the clustered data.
-Typically, this requires random points on the order of 10-100 times the number of data points, making the random correlations the limiting factor in \cf computation.
 
-The \cf is computed in bins of radial separation.
+The \cf is traditionally estimated in bins of radial separation.
 This binning introduces inherent limitations.
 First, the choice of bins requires a trade-off between bias and variance: fewer bins may bias the result, while more bins increases the variance of measurement.
 Finite-width bins also result in a loss of information about the property in which one is binning.
-As we work towards extreme precision in large-scale structure, maximizing the information we extract with our analyses will become increasingly important. 
+As we work towards extreme precision in large-scale structure, maximizing the information we extract with our analyses will become increasingly important.
+Finally, the error on the covariance matrix scales with the number of bins; a larger number of bins reduces bias, but means we must estimate a very large covariance matrix to achieve the required precision.
+This is currently the limiting step in LSS analyses, requiring many mock catalogs tailored to the survey, and covariance matrix computation will further limit cosmological constraints as survey size increases.
 
 More generally, binning adds arbitrary boundaries between continuous data; results should not depend on bin choice, yet they sometimes do.
 \cite{Lanzuisi2017} noted that the choice of binning axis impacts the detected correlation between the luminosity of active galactic nuclei and their host galaxies; \cite{Grimmett2020} devised a method to investigate this correlation in a continuous manner using a hierarchical Bayesian model, eliminating the need for binning.
 \cite{Bailoni2016} explored the dependence of clustering analyses on the number of redshift bins, finding a non-negligible difference in cosmological parameter uncertainties.
 The implications for BAO analyses were explored by \cite{Percival2014}, who found that there is an optimal bin width given the analysis method.
 This balances the increasing statistical error with small bins and the offset in the derived BAO peak location with large bins; the effects are small but non-negligible.
+It is clear that, when analyzing smooth quantities such as LSS statistics, binning is sinning.
 
-\KSF{should i bump this equation to Motivation and just explain it in words here? some papers do have equations (even this eqn) in intro}
 Estimators of the \cf have been studied extensively (\citealt{PeeblesHauser1974}; \citealt{DavisPeebles1983}; \citealt{Hamilton1993}).
-The current standard estimator was proposed by \cite{LandySzalay1993}, hereafter \LS. It is based on summing all data pairs $DD$ with a given separation and using data-random pairs $DR$ and random pairs $RR$ to correct for the survey boundary. The correlation function $\xi_k(r)$ for the $k^\mathrm{th}$ separation bin is
-\KSF{do we need to use mathematical estimator notation with a hat on xi?}
+The current standard estimator was proposed by \cite{LandySzalay1993}, hereafter \LS. It is based on summing all data pairs $DD$ with a given separation and using data-random pairs $DR$ and random pairs $RR$ to correct for the survey boundary. The \LS estimator of the correlation function $\hat{\xi}_k$ for the $k^\mathrm{th}$ bin in separation $r$ is
 \begin{equation}
-\xi_k(r) = \frac{DD_k(r) - 2DR_k(r) + RR_k(r)}{RR_k(r)},
+\hat{\xi}_k = \frac{DD_k - 2DR_k + RR_k}{RR_k},
 \end{equation}
+% Hogg on normalization: "HUH??" TODO: follow up
 where we take the pair counts to be normalized.
 Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}.
 Estimators of the \cf must also take into account the imperfect nature of the survey, including systematic effects, the target completeness, and fiber collisions.
-To account for these, each galaxy pair is assigned a weight, and pair counts are replaced by the sum of pair weights.
-\KSF{should this note about weighting stay here or be moved? if so to where?}
+To account for these, each galaxy pair is sometimes assigned a weight, and pair counts are replaced by the sum of pair weights.
 
 Variations on the random catalog pair count method have been proposed in recent years.
 \cite{Demina2016} replaced the $DR$ and $RR$ terms with an integral over the probability map, reducing computation time and increasing precision.
@@ -183,6 +186,7 @@ An estimator proposed by \cite{VargasMagana2013} iterates over sets of mock cata
 An alternative estimator, the marked correlation function (e.g. \citealt{WhitePadmanabhan2009}), avoids the use of a random catalog altogether: it considers the ratio between the \cf and a weighted correlation function in which weights are assigned based on galaxy properties, such as the local density.
 These estimators have all taken probabilistic approaches; others have taken a likelihood approach.
 \cite{BaxterRozo2013} introduced a maximum likelihood estimator for the \cf, which achieves lower variance compared to the \LS estimator, enabling finer binning and requiring a smaller random catalog for the same precision.
+% TODO: kernel methods to cite and destroy here?
 
 These estimators present improvements to \LS, but they are still limited to estimates in separation bins.
 Some require additional computational costs or layers of complexity, so the standard formulation of \LS continues to be the default estimator used in most analyses.
@@ -478,7 +482,7 @@ The estimator of \cite{VargasMagana2013} selects the optimal combination of pair
 
 \subsection{Computational Performance}
 
-The computational scaling is by definition the same compared to traditional estimators due to the limiting factor of pair-finding.
+The computational scaling is by definition the same as traditional estimators, because pair-finding remains the limiting factor.
 \Est has the additional need for evaluating the function $f$ for each pair of galaxies.
 For simple basis functions like splines, this will only marginally decrease performance.
 For more complicated functions such as evaluating a cosmological model, \est may incur extra computational expense.
@@ -515,7 +519,7 @@ Future surveys will have more costly requirements on mock catalogs, with larger 
 An alternative to increasing $N_{mocks}$ is decreasing $N_{bins}$ to achieve the same error on precision.
 In the standard method, this is shown to \emph{increase} the statistical error, albeit only slightly \cite{Percival2014}.
 A substantial increase in bin width would prevent capturing information in finer clustering features; even the relatively broad BAO peak requires a bin size on the order of its width of $\sim$10\hmpc.
-In fact, in the standard method more bins would be desireable, but the number is limited by the available number of mocks due to the error discussed above.
+In fact, in the standard method more bins would typically be desireable, but the number is limited by the available number of mocks for covariance matrix computation.
 
 With our estimator, we have shown that we can reduce the variance by using fewer components, without sacrificing accuracy.
 This means that we can safely reduce $N_{bins}$, or in our replacement of bins with continuous functions, the number of basis functions $K$.
@@ -539,13 +543,13 @@ The basis functions $f$ in this case would take the form
     f_k(T_n, T_m) = f_k(r_{nm}, z_n, z_m),
 \end{equation}
 where $z$ is the redshift of tracer $n$ or $m$.
-Another potential use case is the luminosity and color dependence of galaxy clustering, which can be used to probe galaxy formation \citep{Zehavi2011}.
+Another potential use case is the luminosity and color dependence of galaxy clustering, which can be used to understand the relationship between galaxy formation and the LSS \citep{Zehavi2011}.
 This could be extended to other galaxy properties.
 
 The estimator gives us the opportunity to investigate more subtle or exotic signals which are anomalous with respect to our conventional models.
 Anomalies could appear as inhomogeneities or anisotropies in the data.
 For example, cosmological parameters could vary across the sky, which has previously investigated in patches across the Cosmic Microwave Background \citep{MukherjeeWandelt2018}.
-Another possibility is anisotropy in the cosmic acceleration, which could appear in various probes including the BAO peak \citep{Faltenbacher2012} and Type Ia supernovae \citep{Colin2019}.
+Another possibility is anisotropy in the cosmic acceleration, which could leave signatures in measurements made using various phenomena including baryon acoustic oscillations \citep{Faltenbacher2012} and Type Ia supernovae \citep{Colin2019}.
 With our estimator, we could introduce a dependence on location or direction into our basis functions, and constrain the potential deviation from homogeneity or isotropy.
 While these effects would be highly degenerate with systematics, our estimator combined with robust systematics mitigation allows us to investigate the possibility of new physics.
 
