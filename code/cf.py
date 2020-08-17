@@ -26,16 +26,18 @@ def main():
     print("Corrfunc version:", Corrfunc.__version__, Corrfunc.__file__)
 
     L = 750
-    cat_tag = f'_L{L}_n1e-4'
+    #cat_tag = f'_L{L}_n2e-4_z057'
+    #cat_tag = f'_L{L}_n1e-4_z057'
+    cat_tag = f'_L{L}_n5e-5_z057'
     kwargs = {}
     
     #proj = 'theory'
-    #binwidth = 3
+    #binwidth = 6
     #cf_tag = f"_{proj}_bw{binwidth}"
 
     proj = 'tophat'
-    binwidth = 5
-    cf_tag = f"_{proj}_bw{binwidth}_anatest"
+    binwidth = 6
+    cf_tag = f"_{proj}_bw{binwidth}"
 
     # proj = 'piecewise'
     # binwidth = 10
@@ -43,28 +45,20 @@ def main():
 
     #proj = 'spline'
     #kwargs = {'order': 3}
-    #binwidth = 10
-    #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}_xlim40-140"
-    
-    nbins = None
-    Nrealizations = 1
-    overwrite = True
-    qq_analytic = True
-    nthreads = 12
+    #binwidth = 12
+    #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}"
+    compute_xis(L, cat_tag, proj, cf_tag, binwidth=binwidth, kwargs=kwargs)
 
+
+def compute_xis(L, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None, Nrealizations=1000, overwrite=False, qq_analytic=True, nthreads=12, rmin=36.0, rmax=156.0):
+ 
     result_dir = '../results/results_lognormal{}'.format(cat_tag)
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
-    
-    # define bins
-    #rmin = 0.
-    #rmax = 240. #!! 
-    rmin = 36.0
-    rmax = 156.0
-    #rmin = 40.0
-    #rmax = 140.0
-    #rmax = 240.
-    assert bool(nbins) ^ bool(binwidth), "Can't set both nbins and binwidth!"
+
+    rmin = rmin
+    rmax = rmax
+    assert bool(nbins) ^ bool(binwidth), "Set either nbins or binwidth (but not both)!"
     if nbins:   
         binwidth = (rmax-rmin)/float(nbins) 
     r_edges = np.arange(rmin, rmax+binwidth, binwidth)
@@ -102,24 +96,26 @@ def main():
         x, y, z, vx, vy, vz = data.T
         print("N =",N)
         
+        extra_dict = {'r_edges': r_edges, 'nprojbins': nprojbins, 'proj_type': proj_type, 'projfn': projfn, 'qq_analytic': qq_analytic}
         start = time.time()
         if "theory" in proj:
             xi = xi_theory_periodic(x, y, z, L, r_edges)
             r = r_avg
+            amps = None
         else:
             if qq_analytic:
-                r, xi = xi_proj_periodic_analytic(x, y, z, L, r_edges,
+                r, xi, amps = xi_proj_periodic_analytic(x, y, z, L, r_edges,
                  nprojbins, proj_type, projfn=projfn)
             else:
                 rx, ry, rz = random.T
-                r, xi = xi_proj_periodic_numeric(x, y, z, 
+                r, xi, amps = xi_proj_periodic_numeric(x, y, z, 
                 rx, ry, rz, rr_proj, qq_proj, L, r_edges,
                  nprojbins, proj_type, projfn=projfn)
         end = time.time()
 
         #print("Done but not saved", save_fn)
         print(f"Saved result to {save_fn}")
-        np.save(save_fn, [r, xi, proj])
+        np.save(save_fn, [r, xi, amps, proj, extra_dict])
         print("Time:", end-start, "s")
             
 
@@ -136,30 +132,35 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     verbose = False # MAKE SURE THIS IS FALSE otherwise breaks
     periodic = True
     _, dd_proj, _ = DDsmu(1, nthreads, r_edges, mumax, nmubins, x, y, z,
-                proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
-                boxsize=L, periodic=periodic)
-
+              proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
+              boxsize=L, periodic=periodic)
+    #dd_proj = np.random.rand(nprojbins)
     rmin = min(r_edges)
     rmax = max(r_edges)
-    volume = L**3
-    nrbins = len(r_edges)-1
+    if proj_type not in ['tophat', 'piecewise']:
+        r_edges = None
+    volume = float(L**3)
+    #nrbins = len(r_edges)-1
     nd = len(x)
 
     # works up to 100 thru here
     # hangs up to 15 when through next line
-    print(rmin, rmax, nd, volume, nprojbins, nrbins, r_edges, proj_type, projfn)
-    rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, nrbins, r_edges, proj_type, projfn=projfn)
+    print(rmin, rmax, nd, volume, nprojbins, r_edges, proj_type, projfn)
+    #rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, nrbins, r_edges, proj_type, projfn=projfn)
+    rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, proj_type, rbins=r_edges, projfn=projfn)
     print(rr_ana)
 
     rcont = np.linspace(rmin, rmax, 1000)
     numerator = dd_proj - rr_ana
     amps_periodic_ana = np.linalg.solve(qq_ana, numerator)
-    xi_periodic_ana = evaluate_xi(nrbins, amps_periodic_ana, len(rcont), rcont, nrbins, r_edges, proj_type, projfn=projfn)
+    #xi_periodic_ana = evaluate_xi(nrbins, amps_periodic_ana, len(rcont), rcont, nrbins, r_edges, proj_type, projfn=projfn)
+    xi_periodic_ana = evaluate_xi(amps_periodic_ana, rcont, proj_type, rbins=r_edges, projfn=projfn)
 
     print("DD proj:", dd_proj)
     print(numerator)
     print(amps_periodic_ana)
-    return rcont, xi_periodic_ana
+    print("First 10 xi vals:", xi_periodic_ana[:10])
+    return rcont, xi_periodic_ana, amps_periodic_ana
 
 
 def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, nprojbins, proj_type, projfn=None, nthreads=24):
@@ -222,12 +223,9 @@ def get_proj_parameters(proj, r_edges=None, cf_tag=None, **kwargs):
     elif proj=='spline':
         nprojbins = len(r_edges)-1
         proj_type = 'generalr'
-        projfn = f'../tables/bases{cf_tag}.dat'
-        spline.write_bases(r_edges[0], r_edges[-1], len(r_edges)-1, projfn, **kwargs)
-    elif proj=='bao':
-        proj_type = 'generalr'
-        projfn = f'../tables/bases{cf_tag}.dat'
-        nprojbins, _ = bao.write_bases(r_edges[0], r_edges[-1], projfn, **kwargs) 
+        # cf_tag includes binwidth and order
+        projfn = f"../tables/bases{cf_tag}_r{r_edges[0]}-{r_edges[-1]}_npb{nprojbins}.dat"
+        spline.write_bases(r_edges[0], r_edges[-1], nprojbins, projfn, **kwargs)
     elif proj=='theory':
         proj_type = None
         nprojbins = None

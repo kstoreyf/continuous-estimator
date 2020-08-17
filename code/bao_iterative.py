@@ -17,29 +17,31 @@ import bao_utils
 
 
 def main():
-    nbar_str = '3e-5'
+    boxsize = 750
+    cat_tag = f'_L{boxsize}_n5e-5_z057'
     proj = 'baoiter'
     cf_tag = f"_{proj}_cosmob17"
-    realizations = [24]
-    #realizations = range(100)
+    redshift = 0.57
+    realizations = range(1000)
 
     restart_unconverged = True # will restart any unconverged realizations - WARNING, IF FALSE WILL OVERWRITE ITERATIONS OF UNCONVERGED ONES
     convergence_threshold = 0.001 #when to stop (fractional change)
-    niter_max = 90 # stop after this many iterations if not converged 
+    niter_max = 20 # stop after this many iterations if not converged 
 
     cosmo_name = 'b17'
     skip_converged = True
     qq_analytic = True
     nthreads = 24
     dfrac = 0.01
-    eta = 0.1 # typically 1 but might need smaller for convergence issues
+    eta = 0.1 # theoretically 1 but need smaller for convergence issues; start w 0.1, then half
 
     cosmo = bao_utils.get_cosmo(cosmo_name)
     qq_tag = '' if qq_analytic else '_qqnum'
 
     for Nr in realizations:
         print(f"Realization {Nr}")
-        biter = BAO_iterator(Nr=Nr, nbar_str=nbar_str, cf_tag=cf_tag, qq_analytic=qq_analytic, nthreads=nthreads, cosmo=cosmo)
+        alpha_model_start = 1.0
+        biter = BAO_iterator(boxsize, cat_tag, Nr=Nr, cf_tag=cf_tag, qq_analytic=qq_analytic, nthreads=nthreads, cosmo=cosmo, redshift=redshift, alpha_model_start=alpha_model_start, dfrac=dfrac)
 
         if skip_converged:
             converged_fn = f'{biter.result_dir}/cf{biter.cf_tag}{qq_tag}_converged_niter*{biter.cat_tag}_rlz{biter.Nr}.npy'
@@ -50,7 +52,6 @@ def main():
 
         # initial parameters
         niter_start = 0
-        alpha_model_start = 1.0
         if restart_unconverged:
             pattern = f"cf{biter.cf_tag}{qq_tag}_niter([0-9]+){biter.cat_tag}_rlz{biter.Nr}.npy"
             niters_done = []
@@ -85,12 +86,11 @@ def main():
             alpha_result = alpha_model + dalpha*C
             alpha_next = alpha_model + eta*dalpha*C
 
-            extra_dict = {'alpha_start': alpha_model_start,
-                          'alpha_model': alpha_model,
-                          'dalpha': dalpha,
-                          'alpha_result': alpha_next, #should this be alpha_result?
-                          'niter': niter} 
-            
+            extra_dict = {'r_edges': biter.rbins, 'nprojbins': biter.nprojbins, 
+                          'proj_type': biter.proj_type, 'projfn': biter.projfn,
+                          'alpha_start': alpha_model_start, 'alpha_model': alpha_model,
+                          'dalpha': dalpha, 'alpha_result': alpha_next, #should this be alpha_result?
+                          'niter': niter}
 
             print(f'iter {niter}')
             print(f'alpha: {alpha_model}, dalpha: {dalpha}')
@@ -118,11 +118,10 @@ def main():
 
 class BAO_iterator:
 
-    def __init__(self, boxsize=750, nbar_str='1e-5', Nr=0, rmin=40, rmax=200, nbins=15, cf_tag='_baoiter', qq_analytic=True, nthreads=24, cosmo=None):
+    def __init__(self, boxsize, cat_tag, Nr=0, rmin=36.0, rmax=200.0, nbins=15, cf_tag='_baoiter', qq_analytic=True, nthreads=24, cosmo=None, redshift=0.0, bias=2.0, alpha_model_start=1.0, dfrac=0.01):
 
         # input params
         self.boxsize = boxsize
-        self.nbar_str = nbar_str
         self.Nr = Nr
         if cosmo==None:
             print("No cosmo input, defaulting to Planck")
@@ -133,12 +132,12 @@ class BAO_iterator:
         self.rmin = rmin
         self.rmax = rmax
         self.nbins = nbins
+        self.redshift = redshift
 
         # other params
         self.mumax = 1.0
-        #weight_type='pair_product'
+        self.bias = bias
         self.weight_type=None
-
         self.periodic = True
         self.nthreads = nthreads
         self.nmubins = 1
@@ -151,14 +150,22 @@ class BAO_iterator:
         self.rbins_avg = 0.5*(self.rbins[1:]+self.rbins[:-1])
         self.rcont = np.linspace(rmin, rmax, 1000)
 
-        self.cat_tag = '_L{}_n{}'.format(boxsize, nbar_str)
+        self.cat_tag = cat_tag
         self.cat_dir = '../catalogs/lognormal'
         self.cf_tag = cf_tag
+        self.projfn = f"../tables/bases{self.cf_tag}_r{self.rbins[0]}-{self.rbins[-1]}_z{self.redshift}_bias{self.bias}_rlz{self.Nr}.dat"
 
         # set up result dir
         self.result_dir = '../results/results_lognormal{}'.format(self.cat_tag)
         if not os.path.exists(self.result_dir):
             os.makedirs(self.result_dir)
+
+        # write initial bases
+        projfn_start = f"../tables/bases{self.cf_tag}_r{self.rbins[0]}-{self.rbins[-1]}_z{self.redshift}_bias{self.bias}.dat"
+        dalpha = dfrac*alpha_model_start
+        kwargs = {'cosmo_base':self.cosmo, 'redshift':self.redshift, 'dalpha':dalpha, 'alpha_model':alpha_model_start, 'bias':self.bias}
+        self.nprojbins, _ = bao.write_bases(self.rbins[0], self.rbins[-1], projfn_start, **kwargs)
+
 
 
     def save_cf(self, xi, amps, niter, extra_dict, converged=True):
@@ -176,10 +183,12 @@ class BAO_iterator:
         r_true = [r_true[i] for i in range(len(r_true)) if rmin<=r_true[i]<rmax]
         return r_true, xi_true
 
+
     def load_catalogs(self):
         self.load_data()
         if not self.qq_analytic:
             self.load_random()
+
 
     def load_data(self):
         data_fn = f'{self.cat_dir}/cat{self.cat_tag}_lognormal_rlz{self.Nr}.bin'
@@ -205,14 +214,13 @@ class BAO_iterator:
                         proj_type=self.proj_type, nprojbins=self.nprojbins, projfn=self.projfn,
                         verbose=self.verbose, boxsize=self.boxsize, periodic=self.periodic, isa='fallback')
 
-        volume = self.boxsize**3
-        nrbins = len(self.rbins)-1
-        rr_ana, qq_ana = qq_analytic(self.rmin, self.rmax, self.nd, volume, self.nprojbins, nrbins, self.rbins, self.proj_type, projfn=self.projfn)
+        volume = float(self.boxsize**3)
+        rr_ana, qq_ana = qq_analytic(self.rmin, self.rmax, self.nd, volume, self.nprojbins, self.proj_type, rbins=self.rbins, projfn=self.projfn)
     
         numerator = dd_proj - rr_ana
         amps_periodic_ana = np.linalg.solve(qq_ana, numerator)
         print("AMPS:", amps_periodic_ana)
-        xi_periodic_ana = evaluate_xi(self.nprojbins, amps_periodic_ana, len(self.rcont), self.rcont, nrbins, self.rbins, self.proj_type, projfn=self.projfn)
+        xi_periodic_ana = evaluate_xi(amps_periodic_ana, self.rcont, self.proj_type, rbins=self.rbins, projfn=self.projfn)
 
         return xi_periodic_ana, amps_periodic_ana
 
@@ -251,9 +259,7 @@ class BAO_iterator:
 
     def bao_iterative(self, dalpha, alpha_model):
 
-        self.projfn = '../tables/bases{}{}.dat'.format(self.cf_tag, self.cat_tag)
-        # The spline routine writes to file, so remember to delete later
-        kwargs = {'cosmo_base':self.cosmo, 'redshift':0, 'dalpha':dalpha, 'alpha_model':alpha_model, 'bias':1.5}
+        kwargs = {'cosmo_base':self.cosmo, 'redshift':self.redshift, 'dalpha':dalpha, 'alpha_model':alpha_model, 'bias':self.bias}
         self.nprojbins, _ = bao.write_bases(self.rbins[0], self.rbins[-1], self.projfn, **kwargs)      
         xi, amps = self.run_estimator()
         
