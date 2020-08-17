@@ -13,6 +13,8 @@ catalogs/
 *.blg
 *.log
 *.synctex.gz
+*.fdb_latexmk
+*.fls
 
 ############
 # Byte-compiled / optimized / DLL files

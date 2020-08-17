@@ -102,19 +102,17 @@
 The two-point correlation function (\cf) is the most important statistic in structure formation, used to measure the clustering of density field tracers (e.g. galaxies).
 Current estimators of the 2pcf, including the standard Landy-Szalay (\LS) estimator, have significant limitations.
 %Aims
-In this work we address the issue that the \LS estimator evaluates the \cf in bins of separation between objects, which results in a loss of information and a poor trade-off between bias and variance, given the inappropriateness of hard bin edges in most scientific contexts. \hogg{The issue is NOT the bias--variance trade-off; that exists everywhere. It is that this trade-off is bad when the model is inappropriate. It is the inappropriateness that we are addressing. I still don't like this wording, but I tried.}
+In this work we address the issue that the \LS estimator evaluates the \cf in hard-edged bins of separation between objects, which results in a loss of information and a poor trade-off between bias and variance.
 %Methods
 We present a new estimator for the \cf, \emph{\est}, which generalizes \LS to a continuous representation and obviates binning in separation or any other property. 
 Our estimator replaces the binned pair counts of \LS with a linear superposition of any set of basis functions, and outputs the best-fit linear combination of basis functions to describe the \cf. 
-It is closely related to the information-theory optimal estimator used in linear least-squares fitting. The choice of basis can take into account the expected form of the \cf, as well as its dependence on other properties beyond separation.
+It is closely related to the information-theory optimal estimator used in linear least-squares fitting. 
+The choice of basis can take into account the expected form of the \cf, as well as its dependence on other properties beyond separation.
 %Results
 We show that \est can estimate the clustering of artificial data in representations that provide more accuracy with fewer basis functions than \LS.
 Using a spline basis representation, we show that \est achieves lower bias and lower variance than \LS. 
 We also demonstrate how the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale.
 Critically, these representations reduce the number of mock catalogs required for covariance estimation, a limiting factor in \cf measurements.
-%As a demonstration, we apply the estimator to the Luminous Red Galaxy sample of the Sloan Digital Sky Survey (SDSS). 
-%We show that the continuous-function estimator, with basis functions chosen to be derivatives with respect to the cosmological parameters, provides a direct measurement of cosmological parameters from galaxy observations.
-%Similarly, we use the estimator to directly measure the location of the baryon acoustic feature in the SDSS data.
 We discuss other applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and potentially unifying real-space and Fourier-space approaches to clustering measurements.
 
 \end{abstract}
@@ -131,11 +129,9 @@ The LSS also contains the signature of redshift-space distortions caused by the 
 Additionally, the LSS can be used to constrain galaxy formation in conjunction with models of galaxy bias (e.g. \citealt{Hamilton1988}). %?
 With current observations, the LSS is well-described by a cold dark matter model with a cosmological constant, the standard $\Lambda$CDM model.
 Upcoming galaxy surveys will observe larger volumes with improved measurements, allowing us to test $\Lambda$CDM to even higher precision.
-\KSF{Should I name-drop surveys, and their data volume / sky area?} \hogg{I don't think it is necessary; use your judgement.}
 
 We characterize the LSS by using luminous sources to trace the underlying matter density field.
-These tracers are often to taken to be galaxies, but can also be galaxy clusters, quasars and other sources.
-\KSF{should i say that hereafter we will take them to be galaxies?} \hogg{Yes.}
+These tracers are often to taken to be galaxies, but can also be galaxy clusters, quasars and other sources; in this paper we will consider our tracers to be galaxies.
 The clustering of these objects is measured with two-point statistics, namely the power spectrum $P(k)$ and the two-point correlation function (\cf).
 These characterize the clustering in Fourier space and real space, respectively, with the \cf defined as the Fourier Transform of the power spectrum: 
 \KSF{i'm not sure about my notation here with the vectors and d3k}
@@ -151,43 +147,41 @@ However, in practical applications the survey boundaries introduce nontrivial is
 The \cf requires more computational power and extra survey products, but it is an incredibly useful tool; for instance, it well-suited to the analysis of the BAO feature which manifests at a single scale in real space.
 
 The \cf measures the excess probability that any two galaxies are separated by a given distance, compared to a uniform distribution; effectively, it characterizes the strength of clustering at a given spatial scale. 
-% need to discuss statistical homogeneity & isotropy? (ergodicity?)
 In calculating the \cf, the boundaries of the surveys prevent us from directly summing pair counts due to nontrivial edge effects.
 To account for the survey boundaries as well as corrupted regions due to issues such as bright foreground stars, a set of random points are Poisson-distributed within the acceptable survey window. 
 The pairwise correlations of these unclustered points are used to normalize out the survey window when estimating the \cf of the clustered data.
 Typically, this requires random points on the order of 10-100 times the number of data points, making the random correlations the limiting factor in \cf computation.
 
-The \cf is computed in bins of radial separation, meaning that in practice it measures the volume average of the \cf over the bin. %is this accurate?
+The \cf is computed in bins of radial separation.
 This binning introduces inherent limitations.
 First, the choice of bins requires a trade-off between bias and variance: fewer bins may bias the result, while more bins increases the variance of measurement.
 Finite-width bins also result in a loss of information about the property in which one is binning.
-As we strive for extreme precision in large-scale structure analyses, we should be maximizing the information we extract from the data.
+As we work towards extreme precision in large-scale structure, maximizing the information we extract with our analyses will become increasingly important. 
 
 More generally, binning adds arbitrary boundaries between continuous data; results should not depend on bin choice, yet they sometimes do.
 \cite{Lanzuisi2017} noted that the choice of binning axis impacts the detected correlation between the luminosity of active galactic nuclei and their host galaxies; \cite{Grimmett2020} devised a method to investigate this correlation in a continuous manner using a hierarchical Bayesian model, eliminating the need for binning.
 \cite{Bailoni2016} explored the dependence of clustering analyses on the number of redshift bins, finding a non-negligible difference in cosmological parameter uncertainties.
-The implications for BAO analyses were explored by \citep{Percival2014}, who found that there is an optimal bin width given the analysis method.
+The implications for BAO analyses were explored by \cite{Percival2014}, who found that there is an optimal bin width given the analysis method.
 This balances the increasing statistical error with small bins and the offset in the derived BAO peak location with large bins; the effects are small but non-negligible.
-%Moreover, we note that standard estimators are fundamentally biased due to this finite binning; we will address this in a future work. %TODO: figure out this wording. need to explain more than this or leave out entirely?
 
-%some papers have equations (even this eqn) in intro - but should bump it to motivation and just explain?
+\KSF{should i bump this equation to Motivation and just explain it in words here? some papers do have equations (even this eqn) in intro}
 Estimators of the \cf have been studied extensively (\citealt{PeeblesHauser1974}; \citealt{DavisPeebles1983}; \citealt{Hamilton1993}).
 The current standard estimator was proposed by \cite{LandySzalay1993}, hereafter \LS. It is based on summing all data pairs $DD$ with a given separation and using data-random pairs $DR$ and random pairs $RR$ to correct for the survey boundary. The correlation function $\xi_k(r)$ for the $k^\mathrm{th}$ separation bin is
-%assume we should keep this notation even though it's clunky, as it's recognizable
-%should we use estimator notation with a hat on xi?
+\KSF{do we need to use mathematical estimator notation with a hat on xi?}
 \begin{equation}
 \xi_k(r) = \frac{DD_k(r) - 2DR_k(r) + RR_k(r)}{RR_k(r)},
 \end{equation}
-where we assume the pair counts are normalized. %should we write out normalization explicitly? here or somewhere else?
-Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}. %added simple because there was the recent paper which looked at all linear combos and optimized, think that one might have better bias/variance properties
-Estimators of the \cf must also take into account the imperfect nature of the survey area that is in the window, including the target completeness and fiber collisions; typically each galaxy pair is assigned a weight based on these. %is this necessary? not sure where it fits
-Then, pair counts are replaced by the sum of pair weights.
+where we take the pair counts to be normalized.
+Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}.
+Estimators of the \cf must also take into account the imperfect nature of the survey, including systematic effects, the target completeness, and fiber collisions.
+To account for these, each galaxy pair is assigned a weight, and pair counts are replaced by the sum of pair weights.
+\KSF{should this note about weighting stay here or be moved? if so to where?}
 
 Variations on the random catalog pair count method have been proposed in recent years.
 \cite{Demina2016} replaced the $DR$ and $RR$ terms with an integral over the probability map, reducing computation time and increasing precision.
 An estimator proposed by \cite{VargasMagana2013} iterates over sets of mock catalogs to find an optimal linear combination of data and random pair counts, reducing the bias and variance.
-The marked correlation function \citep{WhitePadmanabhan2009} sums weights based on properties of the galaxies one is interested in, such as the local density or galaxy luminosity, and avoids the use of a random catalog.
-The estimators described so far have all taken probabilistic approaches; others have taken a likelihood approach.
+An alternative estimator, the marked correlation function (e.g. \citealt{WhitePadmanabhan2009}), avoids the use of a random catalog altogether: it considers the ratio between the \cf and a weighted correlation function in which weights are assigned based on galaxy properties, such as the local density.
+These estimators have all taken probabilistic approaches; others have taken a likelihood approach.
 \cite{BaxterRozo2013} introduced a maximum likelihood estimator for the \cf, which achieves lower variance compared to the \LS estimator, enabling finer binning and requiring a smaller random catalog for the same precision.
 
 These estimators present improvements to \LS, but they are still limited to estimates in separation bins.
@@ -201,7 +195,6 @@ This estimator removes the need for binning and allows for the \cf to be represe
 It is particularly well-suited to the analysis of LSS features such as the BAO peak; we find that we can accurately locate the peak with fewer components.
 
 %will obviously keep changing this as paper develops
-%spell out acronyms again that were defined in the abstract?
 This paper is organized as follows. 
 In $\S$\ref{sec:motiv}, we motivate our estimator and explain its formulation.
 %In Section \ref{sec:est}, we prove its correctness and describe our implementation, and demonstrate its application on a simulated data set. 
@@ -218,58 +211,59 @@ We assume we have a data catalog with $N_D$ objects and a random catalog with $N
 The pair counts for \LS and related estimators are then defined explicitly as
 %TODO: fix spacing on sides of equal sign
 \begin{eqnarray}\displaystyle
-DD_k &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} i(g_k < |x_n - x_{n'}| < h_k) \\
+\label{eq:ls1}
+DD_k &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} i(g_k < |x_n - x_{n'}| < h_k) \\ 
 DR_k &\equiv& \frac{1}{N_D N_R} \sum_{n m} i(g_k < |x_n - x_m| < h_k) \\
+\label{eq:ls3}
 RR_k &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} i(g_k < |x_m - x_{m'}| < h_k),
 \end{eqnarray}
-where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function \KSF{define?} \hogg{yes}, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
-\KSF{decide on these normalization terms - generalize to D1 D2? simpler, but then need RD term}
+where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
+\KSF{added this next line, thoughts?}
+The tracer position can be real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
+\KSF{Generalize to D1 D2 R1 R2? I think I'd prefer to keep as-is so it looks more familiar. But this requires the clunky normalization factor.} 
 
-The \LS estimator has been analyzed extensively; it is shown to have the lowest bias and variance compared to other pair-count-based estimators (e.g. \citealt{Kerscher2000}).
-In the limit of unclustered data, for a data volume much larger than the scales of interest, and an infinitely large random catalog, the \LS estimator is known to be optimal: it is unbiased and has minimum variance.
+The \LS estimator is known to be optimal (i.e. it is unbiased and has minimum variance) under a particular set of conditions: in the limit of unclustered data, for a data volume much larger than the scales of interest, and an infinitely large random catalog. 
 In practice the latter two limits are sufficiently satisfied, but the data we are interested in is clustered.
-\LS does show a bias on very large scales ($>$130 \hmpc), but the bias is significantly smaller than that of most other estimators (\citealt{Kerscher1999}, \citealt{VargasMagana2013}).
-\LS is also less sensitive to the number of random points than other estimators \citep{Kerscher2000}.
 \cite{VargasMagana2013} show that for clustered data, the \LS estimator has lower variance than other estimators, but does not reach the Poisson noise limit.
-
-\KSF{Figure demonstrating trade-off between bias and variance? or too simple} \hogg{Only if the point isn't clear without it.}
-
-\KSF{Should i explain / show some of the other estimators? --> now i do in the beyond LS section} \hogg{No; our job is not to work through all estimators. But we SHOULD note that our mod can be applied to almost any estimator that currently uses bins!}
-
-\KSF{Do i need to explain real space vs redshift space vs projected correlation function?} \hogg{No, but always be absolutely unambiguous about what space you are in. To the point that you might even want to use different symbols.}
+When applied to clustered data, \LS does show a bias on very large scales ($>$130 \hmpc), but the bias is significantly smaller than that of most other estimators (\citealt{Kerscher1999}, \citealt{VargasMagana2013}).
+\LS is also less sensitive to the number of random points than other estimators \citep{Kerscher2000}.
+While \LS has been sufficient for past analyses, it is clear that it is suboptimal for realistic large-scale structure measurements on modern datasets.
 
 \subsection{Least Squares Fitting}
 
 Estimating clustering is closely related to least-squares fitting.
-We are trying to find the best representation of spatial data in the space of two-point radial separation.
-Recall that the linear least-squares fit to a set of data 
+We are essentially trying to find the best representation of spatial data in the space of two-point radial separation.
+Recall that the linear least-squares fit to a set of data is
 \begin{equation}
 X = [A\T C\inv A]\inv [A\T C\inv Y]
 \end{equation}
 where $X$ is the vector of best-fit parameters, $A$ is a matrix with zeroth and first order terms of $x$ data, $C$ is the covariance matrix, and $Y$ is a column vector of $y$ data.
 The second bracketed term contains the observed data; the first bracketed term weights the data by the errors.
-Naively, in the case of the \cf, the observed data is the pair counts at a given separation, and the weights are provided by the pair counts of the random catalog.
+In the case of the \cf, the observed data is the pair counts at a given separation, and the weights are provided by the pair counts of the random catalog.
 Indeed, this is reminiscent of the so-called natural estimator of the \cf, $\xi_k = DD_k/RR_k - 1$ (e.g. \citealt{Kerscher2000}).
 
 From this connection, we can infer the form of the estimator.
-\KSF{expand this section}
+\KSF{What else to say in this section?? How to expand on what's here?}
 
 % TODO: fix this capitalization issue
 \subsection{\Est}
 \label{sec:est}
 
-% there's a reason im not using k here! because these need to be vectors / tensors to then compute the amplitude
-We generalize the \LS estimator defined above to any set of $K$ basis functions $f$ of the pair, so we now have
+\KSF{Q about notation; I switched from the sub-k notation to vector notation, because these need to be vectors / tensors to then compute the amplitude. But this might be adding additional confusion. I could write DD, RR etc in k-notation, and then switch to vector notation for the amplitude and evaluation equations? Thoughts?}
+Inspired by least-squares fitting, we generalize the \LS estimator defined above in Equations \ref{eq:ls1}-\ref{eq:ls3}.
+We generalize the indicator function $i$ to any function $f$.
+We further generalize the arguments of the function to any properties of the galaxies, rather than just their separation. 
+Writing these now in vector notation, with $f$ returning a vector of length $K$ where $K$ is the number of ``basis functions'', we have
+\KSF{I introduced this T notation to be the most general, as f can be a function of any galaxy properties, not just separation (which would be e.g. $r_{nm}$), but it's a bit clunky - especially when it comes to evaluating xi at the amplitudes. Thoughts?}
 \begin{eqnarray}\displaystyle
 DD &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} f(T_n, T_{n'}) \\
 DR &\equiv& \frac{1}{N_D N_R} \sum_{n m} f(T_n, T_{m}) \\
 RR &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} f(T_m, T_{m'}) \\
 QQ &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} f(T_m, T_{m'}) \cdot f\T(T_m, T_{m'}), \label{eq:qq_proj}
 \end{eqnarray}
-%introduced this T notation to be the most general but it's a bit clunky (see below)
-%what do we think about K-vector notation?
-%matrix->tensor?
 where $DD$, $DR$, and $RR$ are now $K$-vectors, $T$ refers to the data for the given tracer, and $QQ$ is a $K$-by-$K$ matrix defined as the outer product of basis function evaluations of the random--random pairs.
+\KSF{what do we think about K-vector notation? K is number of basis functions / components, as stated above}
+\KSF{should use "matrix" or "tensor"?}
 
 Then, we can compute the \cf as
 \begin{eqnarray}\displaystyle
@@ -278,52 +272,49 @@ a &\equiv& QQ\inv \cdot (DD + 2DR - RR) \\
 \xi(T_l, T_{l'}) &\equiv& a\T \cdot f(T_l, T_{l'}) \label{eq:xi_proj}
 \end{eqnarray}
 where $T_l$ and $T_{l'}$ contain the data values at which to evaluate $\xi$, and $a$ is a $K$-vector of the ``amplitudes'' of the basis functions.
-This generalized two-point estimator, or \est, removes the need for binning as the basis functions can be continuous.
-It is invariant under affine transformations; we show this in Appendix \ref{sec:affine}.
 
-%%% INDEX NOTATION VERSION %%%
-\iffalse % Messier and maybe inaccurate (with the inverse QQ)? but more consistent
-\begin{eqnarray}\displaystyle
-DD_k &\equiv& \sum_{n n'} f_k(T_n, T_{n'}) \\
-DR_k &\equiv& \sum_{n m} f_k(T_n, T_{m}) \\
-RR_k &\equiv& \sum_{m m'} f_k(T_m, T_{m'}) \\
-QQ_{kl} &\equiv& \sum_{m m'} f_k(T_m, T_{m'}) f_l(T_m, T_{m'}),
-\end{eqnarray}
-%should we change the letter of k to mean basis functions rather than bins now?
-%better notation for T?
-Then, we can compute the \cf as
-\begin{eqnarray}\displaystyle
-\xi_k(T_j, T_{j'}) &\equiv& a_k f_k(T_j, T_{j'}) \\
-a_k &\equiv& [QQ\inv]_{kl} (DD_l + 2DR_l - RR_l) 
-\end{eqnarray}
-where $k$ now indexes the basis functions, $T$ refers to all of the data for the given tracer, and $QQ_{kl}$ is the product of basis function indexed by $k$ and $l$ for the random--random pairs.
-\fi %%%%%%%%%%%%%%%%%%
+We call this generalized \cf estimator \est.
+It replaces the binned pair counts of \LS with any set of basis functions. 
+The linear superposition of these basis functions is the \cf.
+\Est outputs the best-fit linear combination of basis functions to describe the \cf.
+In this sense, it is related to the linear least-squares fitting described above.
+With this formulation, we no longer need to first bin our data and then fit a function; rather, the estimator directly projects the data (the pair counts) onto the desired function.
+This function can be nearly anything; the only limitation is it must be able to be written as a linear combination of basis functions.
 
-In the case where the basis functions only depend on the pair separation, we have $f = f(|x_n - x_{n'}|)$ and $\xi = \xi(r)$, where $r$ is the separation at which to evaluate the correlation function.
-Specifically, we can choose to define a set of basis functions $f^T$ as,
+\KSF{What do you think of the ordering of these paragraphs?}
+We can recover the Landy-Szalay estimator with the proper choice of $f$ and $T$.
+From our full galaxy pair data $T_n$ and $T_{n'}$, we can use only their separation,  $|x_n - x_n'|$.
+We can then define a set of basis functions $f\T$ as,
 \begin{equation}
-f^T_k(|x_n - x_n'|) =  i(g_k < |x_n - x_{n'}| < h_k)
+f\T_k(T_n, T_{n'}) =  i(g_k < |x_n - x_{n'}| < h_k)
 \end{equation}
 where $k$ denotes a particular bin in separation.
-In this case the $DD$, $DR$ and $RR$ vectors become binned pair counts and the $QQ$ matrix becomes diagonal, with diagonal elements equal to the $RR$ vector elements. %TODO CONTINUE HERE
-Then for this set of functions $f^T$, which is the definition of a top-hat (rectangular) function, the estimator is equivalent to that of Landy-Szalay.
+This is the top-hat or rectangular function.
+In this case the $DD$, $DR$ and $RR$ vectors simply become binned pair counts, with diagonal elementsm with $g_k$ and $h_k$ the bin edges as before.
+The $QQ$ matrix becomes diagonal, with its diagonal elements equal to the $RR$ vector elements.
+Then the evalution of the amplitudes and $\xi$ results in the equivalent of the \LS estimator--just displayed in a continuous form.
 
-\KSF{Worth giving analytic formulation of RR term? Or at least mentioning that there is one and we have derived it?} \hogg{Huh? We have one?}
+With this generalized two-point estimator, the basis functions $f$ need not have hard edges like the top-hat function.
+They can instead be smooth functions of the pair separation, chosen to suit the science use case.
+Further, the bases can make use of other information about the tracers, such as galaxy luminosity.
+\KSF{should I note here that we don't explore this further in this paper?}
+The estimator has the property that it is invariant under affine transformations; we show this in Appendix \ref{sec:affine}. \KSF{What more should I say about this? Why is it important? ``it is invariant under affine transformations, as it should be so that the result does not depend on e.g. the magnitude of the bases''?}
 
-\KSF{Discuss the limit of infinitesimal bins? Do we know what this is?} \hogg{Yes, we should discuss this, and show how we are related to that.}
+We can also write down the form of the estimator when we don't need to worry about the survey window; i.e. when we are working with a periodic box.
+In this case, we can analytically compute the $RR$ term, as well as the $QQ$ term, and use the natural form of the \cf estimator.
+The derivation and formulation of these terms are shown in Appendix \ref{sec:analytic}.
+
+\KSF{Discuss the limit of infinitesimal bins? Do we know what this is?} \hogg{Yes, we should discuss this, and show how we are related to that.} \KSF{I'm not sure what to say about this.}
 
 We implement this estimator based on the correlation function package \texttt{Corrfunc} by \cite{Sinha2019}.
-The code is open-source and available at \texttt{github.com/kstoreyf/Corrfunc}.
-\KSF{Should give any detail about implementation?} \hogg{Yes, we should summarize why this is a good package to build on.}
+\texttt{Corrfunc} is the state-of-the-art package for computing correlation functions and other clustering statistics; it is extremely fast and user-friendly, and is used in many published analyses.
+It is also modular and open-source, making it a natural choice as a base for our implementation.
+Our implementation of \est is also open-source and available at \texttt{github.com/kstoreyf/Corrfunc}.
 
-\KSF{where to put this link? In a footnote? And is it ok to keep it as a fork?} \hogg{Put link here and in a note at the end of the acks at the end which says ``all of the code is available open-source at...}
 
-\section{Applications}
+\section{Experiments and Results}
 \label{sec:app}
 
-\KSF{Does this count as Applications if its on fake data? Better name?} \hogg{I say ``Experiments and results'' these days.}
-
-\KSF{Clearly describe real-space vs redshift-space! where tho?}
 We demonstrate the application of \est on artifical data.
 We generate lognormal mock catalogs \citep{ColesJones1991} using the \texttt{nbodykit} package \citep{Hand2018}.
 We use an input power spectrum with the Planck cosmology \KSF{CITE}.
@@ -449,13 +440,17 @@ This means that data at all scales could contribute to all basis functions.
 It is then critical to ensure that the final parameter estimate does not rely on the range of scales chosen.
 We have confirmed that in this application, the result is robust to the chosen range as long as the scales cover the range $40<r<200$ \hmpc, the typical range used in BAO analyses. \KSF{Actually have to check this and update numbers!}
 
-% \section{Application to survey data} \label{sec:app}
-
-% We apply the estimator to the SDSS DR3 sample from \cite{Eisenstein2005}.
-
-% The reconstructed dataset we use is described in \cite{Kazin2010}.
 
 \section{Discussion} \label{sec:discuss}
+
+\subsection{Relationship to Other Existing Estimators}
+
+The \est has properties similar to existing estimators, including kernel density estimators and the marked correlation function.
+With the proper choice of basis functions, \est can indeed produce both of these estimators; it is more general than either of them.
+
+\KSF{Paragraph on KDEs}
+
+\KSF{Paragraph on marked cf}
 
 \subsection{Beyond the Landy-Szalay Estimator}
 
@@ -562,12 +557,11 @@ This represents a step towards unifying the correlation function and the power s
 
 \section{Summary}
 
-We did cool science!
-
-\KSF{Do we want a summary? Think it might be useful for this particular paper, but def repetitive}
+\KSF{TODO: write short summary}
 
 \acknowledgements
 It is a pleasure to thank\ldots
+All of the code used in this paper is available open-source at \texttt{github.com/kstoreyf/Corrfunc} and \texttt{github.com/kstoreyf/continuous-estimator}. 
 
 \appendix
 \section{Affine Invariance}\label{sec:affine}
