@@ -1,4 +1,6 @@
+import numpy as np
 import math
+import glob
 
 import nbodykit
 from nbodykit.lab import *
@@ -83,3 +85,33 @@ def radius_sound_horizon(om, ob, h0):
     s = 2.0 / (3.0 * k_eq) * math.sqrt(6.0 / R_eq) * math.log((math.sqrt(1.0 + R_d) + math.sqrt(R_d + R_eq)) / (1.0 + math.sqrt(R_eq)))
 
     return s
+
+
+def calc_alpha(cat_tag, cf_tag, realizations=range(100)):
+    cat_dir = '../catalogs'
+    result_dir = '../results/results_lognormal{}'.format(cat_tag)
+    
+    xis = []
+    n_converged = 0
+    alphas = []
+    for Nr in realizations:
+
+        if 'baoiter' in cf_tag:
+            fn_pattern = f"cf{cf_tag}_converged_*{cat_tag}_rlz{Nr}.npy"
+            for cf_fn in glob.glob(f'{result_dir}/{fn_pattern}'):
+                #print(cf_fn)
+                r_avg, xi, amps, _, extra_dict = np.load(cf_fn, allow_pickle=True)
+                #print("C:", amps[4])
+                alphas.append(extra_dict ['alpha_result'])
+                n_converged +=1
+                break #should only be 1 match; but probs better way to do this
+        else:
+            cf_fn = '{}/cf{}{}_rlz{}.npy'.format(result_dir, cf_tags[i], cat_tag, Nr)
+            r_avg, xi, amps = np.load(cf_fn, allow_pickle=True)
+
+    print(cf_tag)
+    print(f"Found {n_converged} converged BAO cfs ({len(realizations)-n_converged} not converged)")    
+    print("alpha_mean:", np.mean(alphas))
+    print("alpha_std:", np.std(alphas))
+    return alphas
+
