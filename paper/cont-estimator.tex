@@ -117,7 +117,7 @@ We discuss applications and limitations of \est for present and future studies o
 
 %TODO: should have 6 keywords 
 %via Unified Astronomy Thesauras (UAT), http://astrothesaurus.org/concept-select/
-\keywords{Astrostatistics techniques (1886), Baryon acoustic oscillations (138), Galaxy counts (588), Two-point correlation function (1951), Large-scale structure of the universe (902)}
+\keywords{Astrostatistics techniques (1886), Baryon acoustic oscillations (138), Cosmology (343), Two-point correlation function (1951), Large-scale structure of the universe (902), Redshift surveys (1378)}
 
 \section{Introduction}
 
@@ -151,9 +151,11 @@ The most important statistic for characterizing the LSS is the two-point correla
 The \cf measures the excess frequency at which any two galaxies are separated by a given distance, compared to a uniform distribution; effectively, it characterizes the strength of clustering at a given spatial scale. 
 In calculating the \cf, the nontrivial survey boundaries of the surveys prevent us from directly summing pair counts.
 % hogg: is the below important here? 
+% TODO: move to sec 2!! 
 To account for the survey boundaries as well as regions corrupted by issues such as bright foreground stars, a set of random points are Poisson-distributed within the acceptable survey window. 
 The pairwise correlations of these unclustered points are used to normalize out the survey window when estimating the \cf of the clustered data.
 
+%TODO: discuss choice here
 The \cf is traditionally estimated in bins of radial separation.
 This binning introduces inherent limitations.
 First, the choice of bins requires a trade-off between bias and variance: fewer bins may bias the result, while more bins increases the variance of measurement.
@@ -168,14 +170,14 @@ More generally, binning adds arbitrary boundaries between continuous data; resul
 The implications for BAO analyses were explored by \cite{Percival2014}, who found that there is an optimal bin width given the analysis method.
 This balances the increasing statistical error with small bins and the offset in the derived BAO peak location with large bins; the effects are small but non-negligible.
 It is clear that, when analyzing smooth quantities such as LSS statistics, binning is sinning.
+% at end of this paragraph, situate ourselves within that literature 
+% think about if this paragraph were included in a future paper or review; what would it say about mine?
 
 Estimators of the \cf have been studied extensively (\citealt{PeeblesHauser1974}; \citealt{DavisPeebles1983}; \citealt{Hamilton1993}).
 The current standard estimator was proposed by \cite{LandySzalay1993}, hereafter \LS. It is based on summing all data pairs $DD$ with a given separation and using data-random pairs $DR$ and random pairs $RR$ to correct for the survey boundary. The \LS estimator of the correlation function $\hat{\xi}_k$ for the $k^\mathrm{th}$ bin in separation $r$ is
 \begin{equation}
-\hat{\xi}_k = \frac{DD_k - 2DR_k + RR_k}{RR_k},
+\hat{\xi}_k = \frac{DD_k - 2DR_k + RR_k}{RR_k}.
 \end{equation}
-% Hogg on normalization: "HUH??" TODO: follow up
-where we take the pair counts to be normalized.
 Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}.
 Estimators of the \cf must also take into account the imperfect nature of the survey, including systematic effects, the target completeness, and fiber collisions.
 To account for these, each galaxy pair is sometimes assigned a weight, and pair counts are replaced by the sum of pair weights.
@@ -187,6 +189,7 @@ An alternative estimator, the marked correlation function (e.g. \citealt{WhitePa
 These estimators have all taken probabilistic approaches; others have taken a likelihood approach.
 \cite{BaxterRozo2013} introduced a maximum likelihood estimator for the \cf, which achieves lower variance compared to the \LS estimator, enabling finer binning and requiring a smaller random catalog for the same precision.
 % TODO: kernel methods to cite and destroy here?
+% minimal in intro: after lit review ("variations" paragraph) - in some ways what we're doing bears some resemblance to mcf, because we're weighting the pairs by functions, and kernel estimates bc we're projecting the pairs onto basis functions; we will discuss below that our method is distinct from both of these approaches. think of this careful address as talking to referree or referree-like reader
 
 These estimators present improvements to \LS, but they are still limited to estimates in separation bins.
 Some require additional computational costs or layers of complexity, so the standard formulation of \LS continues to be the default estimator used in most analyses.
@@ -222,16 +225,14 @@ DR_k &\equiv& \frac{1}{N_D N_R} \sum_{n m} i(g_k < |x_n - x_m| < h_k) \\
 RR_k &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} i(g_k < |x_m - x_{m'}| < h_k),
 \end{eqnarray}
 where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
-\KSF{added this next line, thoughts?}
-The tracer position can be real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
-\KSF{Generalize to D1 D2 R1 R2? I think I'd prefer to keep as-is so it looks more familiar. But this requires the clunky normalization factor.} 
+The tracer position can be in real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
 
 The \LS estimator is known to be optimal (i.e. it is unbiased and has minimum variance) under a particular set of conditions: in the limit of unclustered data, for a data volume much larger than the scales of interest, and an infinitely large random catalog. 
-In practice the latter two limits are sufficiently satisfied, but the data we are interested in is clustered.
+In practice the latter two limits are sufficiently satisfied, but the data we are interested in are clustered.
 \cite{VargasMagana2013} show that for clustered data, the \LS estimator has lower variance than other estimators, but does not reach the Poisson noise limit.
 When applied to clustered data, \LS does show a bias on very large scales ($>$130 \hmpc), but the bias is significantly smaller than that of most other estimators (\citealt{Kerscher1999}, \citealt{VargasMagana2013}).
 \LS is also less sensitive to the number of random points than other estimators \citep{Kerscher2000}.
-While \LS has been sufficient for past analyses, it is clear that it is suboptimal for realistic large-scale structure measurements on modern datasets.
+While \LS has been sufficient for past analyses, its persisting bias and suboptimal variance under imperfect conditions mean that improvement is possible, and will be necessary for realistic large-scale structure measurements on modern datasets.
 
 \subsection{Least Squares Fitting}
 
@@ -241,8 +242,8 @@ Recall that the linear least-squares fit to a set of data is
 \begin{equation}
 X = [A\T C\inv A]\inv [A\T C\inv Y]
 \end{equation}
-where $X$ is the vector of best-fit parameters, $A$ is a matrix with zeroth and first order terms of $x$ data, $C$ is the covariance matrix, and $Y$ is a column vector of $y$ data.
-The second bracketed term contains the observed data; the first bracketed term weights the data by the errors.
+where $X$ is the vector of best-fit parameters, $A$ is a design matrix with zeroth and first order terms (and possibly higher order) functions of fitting features, $C$ is the covariance matrix, and $Y$ is a column vector of $y$ data to be fit.
+The second bracketed term projects the data onto the features; the first bracketed term renormalizes this quantity. \KSF{renormalizes what??}
 In the case of the \cf, the observed data is the pair counts at a given separation, and the weights are provided by the pair counts of the random catalog.
 Indeed, this is reminiscent of the so-called natural estimator of the \cf, $\xi_k = DD_k/RR_k - 1$ (e.g. \citealt{Kerscher2000}).
 
@@ -479,6 +480,21 @@ The estimator of \cite{VargasMagana2013} selects the optimal combination of pair
 \KSF{some of the terms in V-M include DD in the denom - need to mention this?}
 
 \KSF{Mention other work with Barnett about LS estimator?}
+
+\KSF{not sure where this next paragraph belongs}
+We also note that the \est can be easily generalized to cross-correlations between two datasets.
+In this case, we consider datasets $D_1$ and $D_2$, and associated random catalogs $R_1$ and $R_2$. 
+We then have two different data-random terms, crossing each dataset with the opposite random catalog, resulting in a \LS estimator of the form
+\KSF{notation is now clunky with double subscripts; could make 1 and 2 superscript? or maybe it's fine with the parens}
+\begin{equation}
+    \hat{\xi}_k = \frac{(D_1 D_2)_k - (D_1 R_2)_k - (D_2 R_1)_k + (R_1 R_2)_k}{(R_1 R_2)_k}.
+\end{equation}
+Here, each term is normalized simply by the number of pairs, as
+\begin{equation}
+    D_1 D_2 \equiv \frac{1}{N_{D1} N_{D2}} \sum_{n n'} f(T_n, T_{n'})
+\end{equation}
+and similarly for the other terms.
+This cross-correlation formulation can be extended to other estimators beyond \LS in a straightforward way.
 
 \subsection{Computational Performance}
 
