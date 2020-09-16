@@ -226,6 +226,7 @@ RR_k &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} i(g_k < |x_m - x_{m'}| < h_k),
 \end{eqnarray}
 where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
 The tracer position can be in real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
+Our results here also apply in a straightforward way to the cross-correlation; for details see \S\ref{ref:beyondls}. 
 
 The \LS estimator is known to be optimal (i.e. it is unbiased and has minimum variance) under a particular set of conditions: in the limit of unclustered data, for a data volume much larger than the scales of interest, and an infinitely large random catalog. 
 In practice the latter two limits are sufficiently satisfied, but the data we are interested in are clustered.
@@ -260,15 +261,16 @@ We generalize the indicator function $i$ to any function $f$.
 We further generalize the arguments of the function to any properties of the galaxies, rather than just their separation. 
 Writing these now in vector notation, with $f$ returning a vector of length $K$ where $K$ is the number of ``basis functions'', we have
 \KSF{I introduced this T notation to be the most general, as f can be a function of any galaxy properties, not just separation (which would be e.g. $r_{nm}$), but it's a bit clunky - especially when it comes to evaluating xi at the amplitudes. Thoughts?}
+\KSF{we should double count so that we could be sure to be symmetric; change 2->1 and say that we explicitly double count here. tho in an implementation we might not, and then prefactor changes. also say that the notation, sum over n n', does not self add. if want to be explicit, use double sum. think i should do this... then need to do double sum for LS def. for my version, write it as parallel as possible as LS, and call out changes. RR and DR now vectors, QQ is tensor}
+\KSF{vectors should be bolded; DD DR RR, f, ...}
 \begin{eqnarray}\displaystyle
 DD &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} f(T_n, T_{n'}) \\
 DR &\equiv& \frac{1}{N_D N_R} \sum_{n m} f(T_n, T_{m}) \\
 RR &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} f(T_m, T_{m'}) \\
 QQ &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} f(T_m, T_{m'}) \cdot f\T(T_m, T_{m'}), \label{eq:qq_proj}
 \end{eqnarray}
-where $DD$, $DR$, and $RR$ are now $K$-vectors, $T$ refers to the data for the given tracer, and $QQ$ is a $K$-by-$K$ matrix defined as the outer product of basis function evaluations of the random--random pairs.
+where $DD$, $DR$, and $RR$ are now $K$-vectors, $T$ refers to the data for the given tracer, and $QQ$ is a $K$-by-$K$ tensor defined as the outer product of basis function evaluations of the random--random pairs.
 \KSF{what do we think about K-vector notation? K is number of basis functions / components, as stated above}
-\KSF{should use "matrix" or "tensor"?}
 
 Then, we can compute the \cf as
 \begin{eqnarray}\displaystyle
@@ -296,7 +298,7 @@ f\T_k(T_n, T_{n'}) =  i(g_k < |x_n - x_{n'}| < h_k)
 where $k$ denotes a particular bin in separation.
 This is the top-hat or rectangular function.
 In this case the $DD$, $DR$ and $RR$ vectors simply become binned pair counts, with diagonal elementsm with $g_k$ and $h_k$ the bin edges as before.
-The $QQ$ matrix becomes diagonal, with its diagonal elements equal to the $RR$ vector elements.
+The $QQ$ tensor becomes diagonal, with its diagonal elements equal to the $RR$ vector elements.
 Then the evalution of the amplitudes and $\xi$ results in the equivalent of the \LS estimator--just displayed in a continuous form.
 
 With this generalized two-point estimator, the basis functions $f$ need not have hard edges like the top-hat function.
@@ -450,13 +452,28 @@ We have confirmed that in this application, the result is robust to the chosen r
 
 \subsection{Relationship to Other Existing Estimators}
 
-The \est has properties similar to existing estimators, including kernel density estimators and the marked correlation function.
+\Est has properties similar to existing estimators, including kernel density estimators and the marked correlation function.
 With the proper choice of basis functions, \est can indeed produce both of these estimators; it is more general than either of them.
 
-\KSF{Paragraph on KDEs}
+Kernel density estimation (KDE) is a class of methods for estimating a probability density function from a set of data.
+KDE methods essentially smooth the data with a given kernel, often a Gaussian.
+\KSF{should i cite the original KDE papers from the 50s and 60s? or not necessary bc not the focus?}
+This is useful when we want to reconstruct a distribution without making many assumptions about the data, as is required in parametric methods.
+KDEs have found use in many areas of astrophyics, for example to measure the 21cm power spectrum with reduced foreground contamination \citep{Trott2019}, and to estimate luminosity functions with superior performance compared to binned methods \citep{Yuan2020}.
+\KSF{there are others, should i list more citations? without describing?}
+\cite{Hatfield2016} uses a KDE approach to estimate the angular correlation function, in order to address the issues of information loss and arbitrary bin choice inherent to binning; they optimize for the kernel choice, and find a correlation function consistant with that of the binned method.
+\KSF{I couldnt find any other papers that use KDEs on correlation functions, but i found this one by chance. more to say here? the paper doesn't draw strong conclusions from this.}
+
+Specifically, kernel density estimators take the contribution of each data point to be a kernel function centered on that value, and sum these to determine the full distribution.
+In contrast, \est projects each data point onto fixed basis functions, which are distinct from the typical understanding of kernels.
+As such, our estimator is not smearing out the data, as KDEs do; it is using the data to directly infer the contribution of each basis function.
+That said, the formulation of \est is general enough that it can perform a kernel density estimate of the correlation function, by choosing $f(r)$ to be a kernel centered on $r$.
+However, our uses here of the estimator are fundamentally different from KDE methods, as they use use fixed basis functions that can take advantage of the science use case and preserve maximal information from the data.
+\KSF{this last sentence is a bit repetitive / are there more differences im missing?}
 
 \KSF{Paragraph on marked cf}
 
+\label{ref:beyondls}
 \subsection{Beyond the Landy-Szalay Estimator}
 
 While we have formulated our estimator as a generalization of \LS, as it is the standard used in \cf analyses and has optimal properties under certain conditions, we can also reformulate it for other estimators.
@@ -580,13 +597,16 @@ This represents a step towards unifying the correlation function and the power s
 \KSF{TODO: write short summary}
 
 \acknowledgements
-It is a pleasure to thank\ldots
+KSF was supported by the NASA FINESST grant [grant number] during the completion of this work.
+The authors thank Jeremy Tinker and Michael Blanton for helpful discussions, Roman Scoccimarro for insightful conversation, and the members of the Flatiron Astronomical Data Group for useful feedback.
+KSF would like to acknowledge significant code feedback and support from Manodeep Sinha, as well as Lehman Garrison.
+KSF thanks Drew Jamieson, Chris Lovell for helpful discussion...
 All of the code used in this paper is available open-source at \texttt{github.com/kstoreyf/Corrfunc} and \texttt{github.com/kstoreyf/continuous-estimator}. 
 
 \appendix
 \section{Affine Invariance}\label{sec:affine}
 
-The estimator is invariant under an affine transformation. We represent this by a matrix M, such that 
+The estimator is invariant under an affine transformation. We represent this by a transformation matrix M, such that 
 \begin{equation}
 f' \leftarrow Mf
 \end{equation}
@@ -599,7 +619,7 @@ DR' &=& \sum_{n m} M f_{n m} = M\,DR
 RR' &=& \sum_{m m'} M f_{m m'} = M\,RR
 \end{eqnarray}
 where $f_{n n'} = f_k(T_n, T_{n'})$.
-We have factored $M$ out of the summation. For the $QQ$ matrix we have
+We have factored $M$ out of the summation. For the $QQ$ tensor we have
 \begin{eqnarray}\displaystyle
 QQ' &=& \sum_{m m'} (Mf_{m m'}) \cdot (Mf_{m m'})\T \\
 &=& M\Bigg[ \sum_{m m'} f_{m m'} \cdot f_{m m'}\T \Bigg]M\T \\
