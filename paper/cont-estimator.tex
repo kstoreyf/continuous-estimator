@@ -403,7 +403,7 @@ Typically, density-field reconstruction is performed before applying the estimat
 The form of the standard fitting function is well-suited to our estimator, as it is a few-parameter model with a linear combination of terms.
 To use our estimator to estimate $\alpha$, we take the numerical partial derivative of the model with respect to $\alpha$, using a change in $\alpha$ of size $d\alpha$.
 Our fitting function is then
-\begin{equation}
+\begin{equation} \label{eq:baoiter_fit}
 \xi^{fit}(s) = B^2 \xi^{mod}(s) + C d\alpha\frac{d\xi_{mod}(\alpha s)}{d\alpha} + \frac{a_1}{s^2} + \frac{a_2}{s} + a_3,
 \end{equation}
 where $C$ describes the contribution of $\alpha$.
@@ -685,6 +685,44 @@ a_{\mathrm{ana}} = QQ_\mathrm{ana} \inv \cdot DD.
 \end{equation}
 Looking back, it might have seemed strange that we use $N_D$ in calculating the analytical $RR$ term, but we now see that this normalization prefactor cancels out with that of the $DD$ term.
 Finally, we can compute the correlation function as before in Equation \ref{eq:xi_proj}.
+
+\section{Iterative Procedure for Estimating the BAO Basis Functions}\label{sec:baoiter}
+
+The \est can be used to measure the baryon acoustic oscillation (BAO) scale by choosing the basis functions to be BAO fitting functions, as described in \ref{sec:app}. \KSF{check/update reference}
+For this application, we need to choose a fiducial cosmology for our bases, which will be offset from the true cosmology.
+This offset can be encoded by a scale dilation parameter $\alpha$, which contains the information about the BAO scale. \KSF{reference proper eqn}
+As our fitting function requires a numerical derivative to estimate $\alpha$, we require an iterative procedure to converge to the best-fit value. \KSF{this doesn't quite capture why iterative; clarify}
+
+We start with assuming that we have chosen our fiducial model to match our true cosmology (we in all likelihood have not, but it's not a bad initial guess).
+This gives us an initial $\alpha_\mathrm{model} = 1$. 
+We also choose a value for $d\alpha$, how much we will change our model by to compute the numerical derivative; we take it to be $d\alpha=0.01\alpha_\mathrm{model}$. 
+
+We then apply \est to perform the measurement, and obtain the amplitude for the derivative term in our model, $C$, as in Equation \ref{eq:baoiter_fit}. 
+This gives us the naive best-fit $\alpha$ from this initial model,
+\begin{equation}
+    \alpha_\mathrm{result} = \alpha_\mathrm{model} + \eta C d\alpha
+\end{equation}
+where $\eta$ is a damping parameter between $0$ and $1$.
+If $\eta$ is too large, this can result in ``jumps'' to the next $\alpha$ value that are too large, and leap over the best value; this can lead to a back-and-forth cycle in which the result hops between two values and never converges.
+In our application, we choose $\eta=0.2$ for the first 50 iterations, and then reduce it for subsequent iterations \KSF{describe exactly how!}.
+
+We choose a convergence criterion to be when the fractional change in $\alpha_\mathrm{result}$ between subsequent iterations falls below a threshold, $c_\mathrm{thresh}$ \KSF{name for this variable?}.
+As we are using the previous iteration's $\alpha_\mathrm{result}$ as the $\alpha_\mathrm{model}$ for the current iteration, we have
+\begin{equation}
+    c_\mathrm{thresh} = \frac{\alpha_\mathrm{model} - \alpha_\mathrm{result}}{\alpha_\mathrm{model}}.
+\end{equation}
+We choose a threshold of $c_\mathrm{thresh} = 0.0001$.
+
+\KSF{does this next bit make sense?}
+However, with this definition, the convergence will have a dependence on the choice of $\eta$.
+To avoid this, we could choose the $\alpha_\mathrm{result}$ for the convergence criterion to be the result if $\eta=1$, $\alpha_{\mathrm{result},\eta=1}$.
+Then the criterion is
+\begin{equation}
+    c_\mathrm{thresh} = \frac{\alpha_\mathrm{model} - \alpha_{\mathrm{result},\eta=1}}{\alpha_\mathrm{model}}.
+\end{equation}
+If the criterion is not met, we use the damped $\alpha_\mathrm{result}$ as the $\alpha_\mathrm{model}$ for the next iteration.
+If the criterion is met, we take $\alpha_{\mathrm{result},\eta=1}$ as our final result. 
+\KSF{or should this be just $\alpha_\mathrm{result}$, not $\eta=1$??}
 
 %need style file error
 %\bibliographystyle{apj} 
