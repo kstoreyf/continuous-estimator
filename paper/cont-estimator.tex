@@ -17,7 +17,8 @@
 \graphicspath{ {./images/} }
 \usepackage{xspace}
 \usepackage{xcolor}
-
+\usepackage{bm}
+\parindent=27pt
 
 % aastex parameters
 %%\hypersetup{linkcolor=red,citecolor=green,filecolor=cyan,urlcolor=magenta}
@@ -40,6 +41,12 @@
 \newcommand{\inv}{^{-1}}
 \newcommand{\T}{^{\mathsf{T}}}
 \newcommand{\hmpc}{$h^{-1}$Mpc}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\bld}[1]{\bm{#1}} %\mathbf gives very different look!
+\newcommand{\vv}[1]{\bld{v}_\mathrm{#1}}
+\newcommand{\TT}[1]{\bld{T}_\mathrm{#1}}
+\newcommand{\ff}{\bld{f}}
+\newcommand{\GG}[1]{\mathsf{G}_{#1}}
 % comments
 \newcommand{\KSF}[1]{\textcolor{teal}{KSF says: #1}}
 \newcommand{\hogg}[1]{\textcolor{red}{Hogg says: #1}}
@@ -175,7 +182,7 @@ It is clear that, when analyzing smooth quantities such as LSS statistics, binni
 
 Estimators of the \cf have been studied extensively (\citealt{PeeblesHauser1974}; \citealt{DavisPeebles1983}; \citealt{Hamilton1993}).
 The current standard estimator was proposed by \cite{LandySzalay1993}, hereafter \LS. It is based on summing all data pairs $DD$ with a given separation and using data-random pairs $DR$ and random pairs $RR$ to correct for the survey boundary. The \LS estimator of the correlation function $\hat{\xi}_k$ for the $k^\mathrm{th}$ bin in separation $r$ is
-\begin{equation}
+\begin{equation} \label{eq:lsintro}
 \hat{\xi}_k = \frac{DD_k - 2DR_k + RR_k}{RR_k}.
 \end{equation}
 Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}.
@@ -212,17 +219,28 @@ We discuss the implications and other possible applications in $\S$\ref{sec:disc
 \section{Motivation and Formulation} 
 \label{sec:motiv}
 
+In this paper, we use the following notation.
+We write vectors in bold and lowercase, e.g. $\vv{}$; tensors in bold and uppercase, e.g. $\TT{}$; and unstructured data blobs in sans serif, e.g. $\GG{}$.
+A hat above a symbol, e.g. $\bld{\hat{\xi}}$, indicates an estimate of the value.
+\KSF{where should this go?}
+
 \subsection{Standard Clustering Estimation}
 
 We assume we have a data catalog with $N_D$ objects and a random catalog with $N_R$ objects.
-The pair counts for \LS and related estimators are then defined explicitly as
-%TODO: fix spacing on sides of equal sign
+In standard notation, catalog pair counts are written as $DD$, $DR$, and $RR$, as in Equation \ref{eq:lsintro}.
+To clarify that these are vectors, with length $K$ where $K$ is the number of bins, we use the symbol $\vv{}$; then, for example, the data-data pair counts $DD$ become $\vv{DD}$.
+We can then write the \LS estimator as 
+\begin{equation} \label{eq:lsintro}
+    \bld{\hat{\xi}} = \frac{\vv{DD} - 2\,\vv{DR} + \vv{RR}}{\vv{RR}}.
+\end{equation}
+The pair counts are defined explicitly as
+\KSF{need to figure out how to deal with vector + k indexing notations}
 \begin{eqnarray}\displaystyle
 \label{eq:ls1}
-DD_k &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} i(g_k < |x_n - x_{n'}| < h_k) \\ 
-DR_k &\equiv& \frac{1}{N_D N_R} \sum_{n m} i(g_k < |x_n - x_m| < h_k) \\
+\vv{DD,k} &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} i(g_k < |x_n - x_{n'}| < h_k) \\ 
+\vv{DR,k} &\equiv& \frac{1}{N_D N_R} \sum_{n m} i(g_k < |x_n - x_m| < h_k) \\
 \label{eq:ls3}
-RR_k &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} i(g_k < |x_m - x_{m'}| < h_k),
+\vv{RR,k} &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} i(g_k < |x_m - x_{m'}| < h_k),
 \end{eqnarray}
 where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
 The tracer position can be in real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
@@ -241,12 +259,12 @@ Estimating clustering is closely related to least-squares fitting.
 We are essentially trying to find the best representation of spatial data in the space of two-point radial separation.
 Recall that the linear least-squares fit to a set of data is
 \begin{equation}
-X = [A\T C\inv A]\inv [A\T C\inv Y]
+\bld{x} = [\bld{A}\T \bld{C}\inv \bld{A}]\inv [\bld{A}\T \bld{C}\inv \bld{y}]
 \end{equation}
-where $X$ is the vector of best-fit parameters, $A$ is a design matrix with zeroth and first order terms (and possibly higher order) functions of fitting features, $C$ is the covariance matrix, and $Y$ is a column vector of $y$ data to be fit.
+where $\bld{x}$ is the vector of best-fit parameters, $\bld{A}$ is a design matrix with zeroth and first order terms (and possibly higher order) functions of fitting features, $\bld{C}$ is the covariance matrix, and $\bld{y}$ is a column vector of $\bld{y}$ data to be fit.
 The second bracketed term projects the data onto the features; the first bracketed term renormalizes this quantity. \KSF{renormalizes what??}
 In the case of the \cf, the observed data is the pair counts at a given separation, and the weights are provided by the pair counts of the random catalog.
-Indeed, this is reminiscent of the so-called natural estimator of the \cf, $\xi_k = DD_k/RR_k - 1$ (e.g. \citealt{Kerscher2000}).
+Indeed, this is reminiscent of the so-called natural estimator of the \cf, $\bld{\xi} = \vv{DD}/\vv{RR} - 1$ (e.g. \citealt{Kerscher2000}).
 
 From this connection, we can infer the form of the estimator.
 \KSF{What else to say in this section?? How to expand on what's here?}
@@ -255,28 +273,24 @@ From this connection, we can infer the form of the estimator.
 \subsection{\Est}
 \label{sec:est}
 
-\KSF{Q about notation; I switched from the sub-k notation to vector notation, because these need to be vectors / tensors to then compute the amplitude. But this might be adding additional confusion. I could write DD, RR etc in k-notation, and then switch to vector notation for the amplitude and evaluation equations? Thoughts?}
 Inspired by least-squares fitting, we generalize the \LS estimator defined above in Equations \ref{eq:ls1}-\ref{eq:ls3}.
-We generalize the indicator function $i$ to any function $f$.
-We further generalize the arguments of the function to any properties of the galaxies, rather than just their separation. 
-Writing these now in vector notation, with $f$ returning a vector of length $K$ where $K$ is the number of ``basis functions'', we have
-\KSF{I introduced this T notation to be the most general, as f can be a function of any galaxy properties, not just separation (which would be e.g. $r_{nm}$), but it's a bit clunky - especially when it comes to evaluating xi at the amplitudes. Thoughts?}
+We generalize the indicator function $i$ to any function $\ff$, which returns a vector of length $K$ where $K$ is the number of basis functions.
+We further generalize the arguments of the function to any properties of the galaxies, rather than just the separation between pairs; we call $\GG{}$ the data payload for a single galaxy.
+This gives us, instead of pair counts, a vector of amplitudes of the basis functions, $\vv{}$.
 \KSF{we should double count so that we could be sure to be symmetric; change 2->1 and say that we explicitly double count here. tho in an implementation we might not, and then prefactor changes. also say that the notation, sum over n n', does not self add. if want to be explicit, use double sum. think i should do this... then need to do double sum for LS def. for my version, write it as parallel as possible as LS, and call out changes. RR and DR now vectors, QQ is tensor}
-\KSF{vectors should be bolded; DD DR RR, f, ...}
 \begin{eqnarray}\displaystyle
-DD &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} f(T_n, T_{n'}) \\
-DR &\equiv& \frac{1}{N_D N_R} \sum_{n m} f(T_n, T_{m}) \\
-RR &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} f(T_m, T_{m'}) \\
-QQ &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} f(T_m, T_{m'}) \cdot f\T(T_m, T_{m'}), \label{eq:qq_proj}
+\vv{DD} &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} \ff(\GG{n}, \GG{n'}) \\
+\vv{DR} &\equiv& \frac{1}{N_D N_R} \sum_{n m} \ff(\GG{n}, \GG{m}) \\
+\vv{RR} &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} \ff(\GG{m}, \GG{m'}) \\
+\TT{RR} &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} \ff(\GG{m}, \GG{m'}) \cdot \ff\T(\GG{m}, \GG{m'}), \label{eq:qq_proj}
 \end{eqnarray}
 where $DD$, $DR$, and $RR$ are now $K$-vectors, $T$ refers to the data for the given tracer, and $QQ$ is a $K$-by-$K$ tensor defined as the outer product of basis function evaluations of the random--random pairs.
-\KSF{what do we think about K-vector notation? K is number of basis functions / components, as stated above}
 
 Then, we can compute the \cf as
 \begin{eqnarray}\displaystyle
 % here is where the T notation is weird - when you look at evaluation
-a &\equiv& QQ\inv \cdot (DD + 2DR - RR) \\
-\xi(T_l, T_{l'}) &\equiv& a\T \cdot f(T_l, T_{l'}) \label{eq:xi_proj}
+\bld{a} &\equiv& \TT{RR}\inv \cdot (\vv{DD} - 2\,\vv{DR} + \vv{RR}) \\
+\bld{\hat{\xi}}(\GG{l}, \GG{l'})  &\equiv& \bld{a}\T \cdot \ff(\GG{l}, \GG{l'}) \label{eq:xi_proj}
 \end{eqnarray}
 where $T_l$ and $T_{l'}$ contain the data values at which to evaluate $\xi$, and $a$ is a $K$-vector of the ``amplitudes'' of the basis functions.
 
@@ -366,6 +380,7 @@ This preserves the information in the data to the degree given by the chosen set
 \KSF{please add/correct here}
 
 \subsection{BAO Scale Estimation Test}
+\label{sec:bao}
 
 Measurement of the BAO scale provides a good use case for our estimator.
 The BAO feature is a peak in clustering on large scales, $\sim$150 Mpc, making it less sensitive to small-scale astrophysical effects.
@@ -378,18 +393,11 @@ We measure the spherically averaged correlation function, $\xi(s)$, where $s$ is
 In order to extract information about the baryon acoustic feature from galaxy clustering, we must choose a fiducial cosmological model to convert redshifts to distances.
 If we choose an incorrect model, the scales in the power spectrum will be dilated, so the oscillation wavelength---and thus the BAO peak position---will be shifted.
 We can model this shift as a scale dilation parameter, $\alpha$, which is a function of the relevant distance scales in the true and fiducial cosmologies:
-\begin{equation}
+\begin{equation} \label{eq:alpha}
 \alpha = \Bigg( \frac{D_A(z)}{D_A^{\text{mod}}(z)} \Bigg)^{2/3} \Bigg( \frac{H^{\text{mod}}(z)}{H(z)} \Bigg)^{1/3} \Bigg( \frac{r_s^{\text{mod}}}{r_s} \Bigg),
 \end{equation}
 where $D_A$ is the angular diameter distance, $H$ is the Hubble constant, $r_s$ is the sound horizon scale at the drag epoch, and the superscript ``$\text{mod}$'' denotes the value for the fiducial model.
 Qualitatively, if the fit prefers $\alpha>1$, this suggests the true position of the BAO peak is at a smaller scale than in the fiducial model, whereas if $\alpha<1$, the peak is at a larger scale.
-
-% Using spherically averaged so don't need this!!
-% The multipoles of the correlation function are given by
-% \begin{equation}
-% \xi_l(s) = \frac{1}{2} \int^{1}_{-1} \xi_l(s, \mu) L_l(\mu) d\mu
-% \end{equation}
-% where $L_l$ is the Legendre multipole of order $l$,  $s$ is the redshift-space separation between pairs, and $\mu = cos(\theta)$, $\theta$ is the angle between the separation vector $s$ and the line-of-sight direction (i.e. $\mu=1$ indicates a galaxy pair along the line of sight, $\mu$=0 indicates a pair with only transverse separation).
 
 In standard practice, the fitting function used to determine the value of $\alpha$ is
 \begin{equation}
@@ -401,16 +409,20 @@ The resulting value for $\alpha$ is used to derive the actual values of the dist
 Typically, density-field reconstruction is performed before applying the estimator to correct for nonlinear growth around the BAO scale \citep{Eisenstein2007}; for our toy example, we will omit this step.
 
 The form of the standard fitting function is well-suited to our estimator, as it is a few-parameter model with a linear combination of terms.
-To use our estimator to estimate $\alpha$, we take the numerical partial derivative of the model with respect to $\alpha$, using a change in $\alpha$ of size $d\alpha$.
+To use our estimator to estimate $\alpha$, we add a term that includes the partial derivative of the model with respect to $\alpha$.
+This allows us to have fixed basis functions, and for an initial choice of $\alpha_\mathrm{guess}$, determine the change in this value needed to improve the fit. 
 Our fitting function is then
 \begin{equation} \label{eq:baoiter_fit}
-\xi^{fit}(s) = B^2 \xi^{mod}(s) + C d\alpha\frac{d\xi_{mod}(\alpha s)}{d\alpha} + \frac{a_1}{s^2} + \frac{a_2}{s} + a_3,
+\xi^{fit}(s) = B^2 \xi^{mod}(\alpha_\mathrm{guess} s) + C k_0 \frac{\dd \xi^{mod}(\alpha_\mathrm{guess} s)}{\dd \alpha} + a_1\frac{k_1}{s^2} + a_2\frac{k_2}{s} + k_3 a_3,
 \end{equation}
-where $C$ describes the contribution of $\alpha$.
-We input these five terms (with arbitrary scaling) as the basis functions of our estimator.
-The estimator outputs an amplitude vector $a$ as described in $\S$\ref{sec:est}, which give the contribution of each term---precisely the values of $B$, $C$, $a_1$, $a_2$, and $a_3$.
-From the value of $C$, we can directly compute $\alpha$, as $\alpha_{\text{recovered}} =  \alpha + Cd\alpha$ (where $\alpha$ is our initial guess, typically starting with  $\alpha$=1). 
-That is, a value of $C=0$ indicates that the model is the best fit to the data and no scale dilation is needed, while nonzero values give the magnitude and direction of the scale dilation parameter.
+where $C$ is an additional coefficient that describes the contribution of the derivative term, and $k_0$, $k_1$, $k_2$, and $k_3$ are constants that determine the initial amplitude of the basis functions.
+Note that in theory the choice of $k_i$ values shouldn't matter as the estimator is affine invariant (see Appendix \ref{sec:affine}), but in practice reasonable choices are important for stability.
+
+To use the estimator for a BAO measurement, we input these five terms as the five basis functions of our estimator.
+The estimator outputs an amplitude vector $a$ as described in $\S$\ref{sec:est}, which give the contribution of each term---the values of $B$, $C$, $a_1$, $a_2$, and $a_3$.
+From the value of $C$, we can determine our estimate of the scale dilation parameter, $\hat{\alpha}$, as $\hat{\alpha} = \alpha_\mathrm{guess} + Ck_0$. 
+With this formulation, a value of $C=0$ indicates that the current $\alpha_\mathrm{guess}$ gives best fit to the data (given the chosen cosmological model), while nonzero values give the magnitude and direction of the necessary change in the scale dilation parameter.
+In practice, we apply an iterative procedure to converge at our best estimate $\hat{\alpha}$; this procedure and other implementation details are described in Appendix \ref{sec:baoiter}.
 
 \label{fig:bao_bases}
 \begin{figure}[ht]
@@ -425,12 +437,7 @@ We assume the fiducial cosmological model used in \cite{Beutler2017}: $\Omega_{\
 As we know the cosmology used for our mock catalogs, we can compute the true value of the scale dilation parameter, $\alpha_{\text{true}}=0.9574$ (a fairly extreme value but useful for testing purposes).
 With this fiducial model, we can construct the basis functions for our estimator; these are shown (with $\alpha=1$ and the free parameters set to arbitrary values) in Figure~\ref{fig:bao_bases}.
 
-We perform an iterative procedure to estimate $\alpha$.
-After the first estimation with the $\alpha=1$, model, we use the value of $C$ to compute the recovered $\alpha$, as described above.
-We then take that value as the new $\alpha$, and re-run the estimator.
-(In practice, this often jumps over the true value, so we tune the choice of the next $\alpha$ with a parameter $\eta$, as $\alpha_{\text{recovered}} = \alpha + \eta C d\alpha$, where $\eta$ is typically 0.1-0.5.)
-We stop when the percent change between $\alpha$ and $\alpha_{\text{recovered}}$ is less than 0.1\%; it typically takes fewer than 10 iterations to converge. \KSF{update this with true values}
-We apply this procedure to each of the 100 mocks; the resulting estimate for the correlation function is shown in Figure~\ref{fig:bao}.
+We apply our iterative estimation procedure to each of the 1000 mocks; the resulting estimate for the correlation function is shown in Figure~\ref{fig:bao}.
 The mean BAO estimate is shown in orange, and the mean tophat estimate is in blue; the truth is in black.
 Our estimator clearly better represents the shape of the known \cf.
 The mean value of the final recovered scale dilation parameter is $\alpha=0.9572 \pm 0.0315$, very close to the true value $\alpha_{\text{true}}=0.9574$.
@@ -686,43 +693,50 @@ a_{\mathrm{ana}} = QQ_\mathrm{ana} \inv \cdot DD.
 Looking back, it might have seemed strange that we use $N_D$ in calculating the analytical $RR$ term, but we now see that this normalization prefactor cancels out with that of the $DD$ term.
 Finally, we can compute the correlation function as before in Equation \ref{eq:xi_proj}.
 
-\section{Iterative Procedure for Estimating the BAO Basis Functions}\label{sec:baoiter}
+\section{Implementation of Estimation with BAO Basis Functions}\label{sec:baoiter}
 
-The \est can be used to measure the baryon acoustic oscillation (BAO) scale by choosing the basis functions to be BAO fitting functions, as described in \ref{sec:app}. \KSF{check/update reference}
+\subsection{Iterative Procedure}
+\Est can be used to measure the baryon acoustic oscillation (BAO) scale by choosing the basis functions to terms of a BAO fitting function, as described in \ref{sec:bao}.
 For this application, we need to choose a fiducial cosmology for our bases, which will be offset from the true cosmology.
-This offset can be encoded by a scale dilation parameter $\alpha$, which contains the information about the BAO scale. \KSF{reference proper eqn}
-As our fitting function requires a numerical derivative to estimate $\alpha$, we require an iterative procedure to converge to the best-fit value. \KSF{this doesn't quite capture why iterative; clarify}
+This offset can be encoded by a scale dilation parameter $\alpha$, which contains the information about the BAO scale; see Equation \ref{eq:alpha}. \KSF{reference proper eqn}
+As our fitting function requires a fiducial model and an initial guess of this parameter, $\alpha_\mathrm{guess}$, and then determines the change needed, an iterative procedure is needed to converge to the best-fit value.
 
-We start with assuming that we have chosen our fiducial model to match our true cosmology (we in all likelihood have not, but it's not a bad initial guess).
-This gives us an initial $\alpha_\mathrm{model} = 1$. 
-We also choose a value for $d\alpha$, how much we will change our model by to compute the numerical derivative; we take it to be $d\alpha=0.01\alpha_\mathrm{model}$. 
-
+We start with assuming that we have chosen our fiducial model to match our true cosmology (we in all likelihood have not, but it's not a bad initial guess), giving us an initial $\alpha_\mathrm{guess} = 1.0$. 
 We then apply \est to perform the measurement, and obtain the amplitude for the derivative term in our model, $C$, as in Equation \ref{eq:baoiter_fit}. 
-This gives us the naive best-fit $\alpha$ from this initial model,
+This gives us our estimate of the scale dilation parameter, $\hat{\alpha}$, from this initial model; for the $i$th iteration, we have
 \begin{equation}
-    \alpha_\mathrm{result} = \alpha_\mathrm{model} + \eta C d\alpha
+    \hat{\alpha}_{i} = \alpha_{\mathrm{guess},i} + C_i \, k_0
 \end{equation}
-where $\eta$ is a damping parameter between $0$ and $1$.
-If $\eta$ is too large, this can result in ``jumps'' to the next $\alpha$ value that are too large, and leap over the best value; this can lead to a back-and-forth cycle in which the result hops between two values and never converges.
-In our application, we choose $\eta=0.2$ for the first 50 iterations, and then reduce it for subsequent iterations \KSF{describe exactly how!}.
+where $k_0$ is the chosen scaling parameter for the derivative basis function as in Equation \ref{eq:baoiter_fit}.
 
-We choose a convergence criterion to be when the fractional change in $\alpha_\mathrm{result}$ between subsequent iterations falls below a threshold, $c_\mathrm{thresh}$ \KSF{name for this variable?}.
-As we are using the previous iteration's $\alpha_\mathrm{result}$ as the $\alpha_\mathrm{model}$ for the current iteration, we have
+We choose the convergence criterion to be when the fractional change in $\hat{\alpha}$ between subsequent iterations falls below a threshold, $c_\mathrm{thresh}$ \KSF{name for this variable?},
 \begin{equation}
-    c_\mathrm{thresh} = \frac{\alpha_\mathrm{model} - \alpha_\mathrm{result}}{\alpha_\mathrm{model}}.
+    \left| \frac{\hat{\alpha}_i - \hat{\alpha}_{i-1}}{\hat{\alpha}_i} \right| < c_\mathrm{thresh}.
 \end{equation}
-We choose a threshold of $c_\mathrm{thresh} = 0.0001$.
+For our application we choose $c_\mathrm{thresh} = 0.00001$.
 
-\KSF{does this next bit make sense?}
-However, with this definition, the convergence will have a dependence on the choice of $\eta$.
-To avoid this, we could choose the $\alpha_\mathrm{result}$ for the convergence criterion to be the result if $\eta=1$, $\alpha_{\mathrm{result},\eta=1}$.
-Then the criterion is
+To achieve convergence, we need to be careful in choosing our next $\alpha_{\mathrm{guess},i}$.
+If it is far from the best estimate, $C_i$ will be large, and our resulting estimate $\hat{\alpha}_{i}$ will be inaccurate.
+We thus include a damping parameter $\eta$ between 0 and 1 to improve our convergence.
+Our next guess is then
 \begin{equation}
-    c_\mathrm{thresh} = \frac{\alpha_\mathrm{model} - \alpha_{\mathrm{result},\eta=1}}{\alpha_\mathrm{model}}.
+    \alpha_{\mathrm{guess},i+1} = \alpha_{\mathrm{guess},i} + \eta \, C_i \, k_0.
 \end{equation}
-If the criterion is not met, we use the damped $\alpha_\mathrm{result}$ as the $\alpha_\mathrm{model}$ for the next iteration.
-If the criterion is met, we take $\alpha_{\mathrm{result},\eta=1}$ as our final result. 
-\KSF{or should this be just $\alpha_\mathrm{result}$, not $\eta=1$??}
+The choice of $\eta$ is important for stability and speed of convergence; too large a value can lead to a back-and-forth cycle in which the result hops between two values and never converges, and too small a value would make convergence take a very long time.
+In our application, we start with $\eta=0.5$.
+We check if our estimate is jumping over the true value by checking if the error changes sign; if it does, we reduce $\eta$ by a factor of $0.75$.
+
+\subsection{Implementation Details}
+
+We implement the partial derivative in the fitting function as a finite difference between model with the our chosen value of $\alpha_\mathrm{guess}$, and the model with a value shifted by a small $\Delta \alpha$,
+\KSF{what should the = sign be here?}
+\begin{equation}
+    \frac{\dd \xi^\mathrm{mod}(\alpha s)}{\dd \alpha} \Rightarrow \frac{\xi^\mathrm{mod}(\alpha_\mathrm{guess} s) - \xi^\mathrm{mod}((\alpha_\mathrm{guess} + \Delta \alpha)s)}{\Delta \alpha}.
+\end{equation}
+In our implemenation we take $\Delta \alpha = 0.001$; we check that our results are insensitive to this choice.
+
+We choose the amplitudes of the basis functions $k$ to set them at similar scales.
+We use $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$.
 
 %need style file error
 %\bibliographystyle{apj} 
