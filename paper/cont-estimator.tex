@@ -46,6 +46,7 @@
 \newcommand{\vv}[1]{\bld{v}_\mathrm{#1}}
 \newcommand{\TT}[1]{\bld{T}_\mathrm{#1}}
 \newcommand{\ff}{\bld{f}}
+\newcommand{\NN}[1]{N_\mathrm{#1}}
 \newcommand{\GG}[1]{\mathsf{G}_{#1}}
 % comments
 \newcommand{\KSF}[1]{\textcolor{teal}{KSF says: #1}}
@@ -234,18 +235,17 @@ We can then write the \LS estimator as
     \bld{\hat{\xi}} = \frac{\vv{DD} - 2\,\vv{DR} + \vv{RR}}{\vv{RR}}.
 \end{equation}
 The pair counts are defined explicitly as
-\KSF{need to figure out how to deal with vector + k indexing notations}
 \begin{eqnarray}\displaystyle
 \label{eq:ls1}
-\vv{DD,k} &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} i(g_k < |x_n - x_{n'}| < h_k) \\ 
-\vv{DR,k} &\equiv& \frac{1}{N_D N_R} \sum_{n m} i(g_k < |x_n - x_m| < h_k) \\
+\left[ \vv{DD} \right]_k &\equiv& \frac{2}{\NN{D}(\NN{D}-1)} \sum_{n n'} i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) \\ 
+\left[ \vv{DR} \right]_k &\equiv& \frac{1}{\NN{D} \NN{R}} \sum_{n m} i(g_k < |\bld{r}_n - \bld{r}_m| < h_k) \\
 \label{eq:ls3}
-\vv{RR,k} &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} i(g_k < |x_m - x_{m'}| < h_k),
+\left[ \vv{RR} \right]_k &\equiv& \frac{2}{\NN{R}(\NN{R}-1)} \sum_{m m'} i(g_k < |\bld{r}_m - \bld{r}_{m'}| < h_k),
 \end{eqnarray}
-where $DD_k$ is the count of data--data tracer pairs in bin $k$ (which has bin edges $g_k$ and $h_k$), $i()$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $x$ is the tracer position, the $n$ and $n'$ indices index data positions, the $m$ and $m'$ indices index random catalog positions, $DR_k$ is the count of data--random pairs, and $RR_k$ is the count of random--random pairs.
+where $\left[ \vv{} \right]_k$ is the pair counts in bin $k$ (which has bin edges $g_k$ and $h_k$), $i$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $\bld{r}$ is the tracer position, the $n$ and $n'$ indices index data positions, and the $m$ and $m'$ indices index random catalog positions.
 The tracer position can be in real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
 Our results here also apply in a straightforward way to the cross-correlation; for details see \S\ref{ref:beyondls}. 
-
+ 
 The \LS estimator is known to be optimal (i.e. it is unbiased and has minimum variance) under a particular set of conditions: in the limit of unclustered data, for a data volume much larger than the scales of interest, and an infinitely large random catalog. 
 In practice the latter two limits are sufficiently satisfied, but the data we are interested in are clustered.
 \cite{VargasMagana2013} show that for clustered data, the \LS estimator has lower variance than other estimators, but does not reach the Poisson noise limit.
@@ -277,22 +277,36 @@ Inspired by least-squares fitting, we generalize the \LS estimator defined above
 We generalize the indicator function $i$ to any function $\ff$, which returns a vector of length $K$ where $K$ is the number of basis functions.
 We further generalize the arguments of the function to any properties of the galaxies, rather than just the separation between pairs; we call $\GG{}$ the data payload for a single galaxy.
 This gives us, instead of pair counts, a vector of amplitudes of the basis functions, $\vv{}$.
-\KSF{we should double count so that we could be sure to be symmetric; change 2->1 and say that we explicitly double count here. tho in an implementation we might not, and then prefactor changes. also say that the notation, sum over n n', does not self add. if want to be explicit, use double sum. think i should do this... then need to do double sum for LS def. for my version, write it as parallel as possible as LS, and call out changes. RR and DR now vectors, QQ is tensor}
+We then define \est as
+\KSF{STILL FIGURING OUT we should double count so that we could be sure to be symmetric; change 2->1 and say that we explicitly double count here. tho in an implementation we might not, and then prefactor changes. also say that the notation, sum over n n', does not self add. if want to be explicit, use double sum. think i should do this... then need to do double sum for LS def. for my version, write it as parallel as possible as LS, and call out changes}
 \begin{eqnarray}\displaystyle
-\vv{DD} &\equiv& \frac{2}{N_D(N_D-1)} \sum_{n n'} \ff(\GG{n}, \GG{n'}) \\
-\vv{DR} &\equiv& \frac{1}{N_D N_R} \sum_{n m} \ff(\GG{n}, \GG{m}) \\
-\vv{RR} &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} \ff(\GG{m}, \GG{m'}) \\
-\TT{RR} &\equiv& \frac{2}{N_R(N_R-1)} \sum_{m m'} \ff(\GG{m}, \GG{m'}) \cdot \ff\T(\GG{m}, \GG{m'}), \label{eq:qq_proj}
+\vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \sum_{n} \sum_{n'} \ff(\GG{n}, \GG{n'}) \\
+\vv{DR} &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n}, \GG{m}) \\
+\vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \sum_{m} \sum_{m'} \ff(\GG{m}, \GG{m'}) \\
+\TT{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \sum_{m} \sum_{m'} \ff(\GG{m}, \GG{m'}) \cdot \ff\T(\GG{m}, \GG{m'}). \label{eq:qq_proj}
 \end{eqnarray}
-where $DD$, $DR$, and $RR$ are now $K$-vectors, $T$ refers to the data for the given tracer, and $QQ$ is a $K$-by-$K$ tensor defined as the outer product of basis function evaluations of the random--random pairs.
-
 Then, we can compute the \cf as
 \begin{eqnarray}\displaystyle
 % here is where the T notation is weird - when you look at evaluation
 \bld{a} &\equiv& \TT{RR}\inv \cdot (\vv{DD} - 2\,\vv{DR} + \vv{RR}) \\
 \bld{\hat{\xi}}(\GG{l}, \GG{l'})  &\equiv& \bld{a}\T \cdot \ff(\GG{l}, \GG{l'}) \label{eq:xi_proj}
 \end{eqnarray}
-where $T_l$ and $T_{l'}$ contain the data values at which to evaluate $\xi$, and $a$ is a $K$-vector of the ``amplitudes'' of the basis functions.
+where a $K$-vector of the computed \emph{amplitudes} of the basis functions, and $\GG{l}$ and $\GG{l'}$ contain the data values at which to evaluate $\xi$.
+We emphasize that these are not real datapoints, but instead allow us to evaluate the \cf at any set of parameters.
+In the standard case, $\GG{l}$ and $\GG{l'}$ would effectively be an imaginary pair of galaxies that has a separate $r$ at which we want to evaluate $\xi$, and we would compute $\bld{\hat{\xi}}$ for such a pair at every separation we are interested in.
+With our general formulation, we could choose basis functions that depend on other galaxy properties, to investigate the effect of these on the \cf; then, we would also choose each $\GG{l}$ and $\GG{l'}$ pair to have values of properties at which we want to evlauate $\xi$. 
+In the rest of this paper, however, we will only take into account the separation between pairs, and we will write $\xi(r)$.
+
+If we consider only the pair separation, and make a proper choice of $\ff$, \est reduces to the Landy-Szalay estimator.
+Explicitly, from our full galaxy pair data $\GG{n}$ and $\GG{n'}$, we can use only their separation,  $|\bld{r}_n - \bld{r}_n'|$.
+We can then define a set of $K$ basis functions $\ff$ as
+\begin{equation}
+\ff_k(\GG{n}, \GG{n'}) =  i(g_k < |\bld{r}_n - \bld{r}_n'| < h_k).
+\end{equation}
+This is the common top-hat (or rectangular) function; the index $k$ denotes a particular bin in separation, and here also indexes the basis functions, as each top-hat is a separate basis function.
+In this case the $\vv{DD}$, $\vv{DR}$ and $\vv{RR}$ vectors simply become binned pair counts, with bin edges $g_k$ and $h_k$ as before.
+The $\TT{RR}$ tensor becomes diagonal, with its diagonal elements equal to the $\vv{RR}$ vector elements.
+Then the evaluation of the amplitudes $\bld{a}$ and the correlation function estimate $\bld{\hat{\xi}}$ results in the equivalent of the \LS estimator--just displayed in a continuous form.
 
 We call this generalized \cf estimator \est.
 It replaces the binned pair counts of \LS with any set of basis functions. 
@@ -301,19 +315,6 @@ The linear superposition of these basis functions is the \cf.
 In this sense, it is related to the linear least-squares fitting described above.
 With this formulation, we no longer need to first bin our data and then fit a function; rather, the estimator directly projects the data (the pair counts) onto the desired function.
 This function can be nearly anything; the only limitation is it must be able to be written as a linear combination of basis functions.
-
-\KSF{What do you think of the ordering of these paragraphs?}
-We can recover the Landy-Szalay estimator with the proper choice of $f$ and $T$.
-From our full galaxy pair data $T_n$ and $T_{n'}$, we can use only their separation,  $|x_n - x_n'|$.
-We can then define a set of basis functions $f\T$ as,
-\begin{equation}
-f\T_k(T_n, T_{n'}) =  i(g_k < |x_n - x_{n'}| < h_k)
-\end{equation}
-where $k$ denotes a particular bin in separation.
-This is the top-hat or rectangular function.
-In this case the $DD$, $DR$ and $RR$ vectors simply become binned pair counts, with diagonal elementsm with $g_k$ and $h_k$ the bin edges as before.
-The $QQ$ tensor becomes diagonal, with its diagonal elements equal to the $RR$ vector elements.
-Then the evalution of the amplitudes and $\xi$ results in the equivalent of the \LS estimator--just displayed in a continuous form.
 
 With this generalized two-point estimator, the basis functions $f$ need not have hard edges like the top-hat function.
 They can instead be smooth functions of the pair separation, chosen to suit the science use case.
@@ -337,12 +338,14 @@ Our implementation of \est is also open-source and available at \texttt{github.c
 \label{sec:app}
 
 We demonstrate the application of \est on artifical data.
-We generate lognormal mock catalogs \citep{ColesJones1991} using the \texttt{nbodykit} package \citep{Hand2018}.
-We use an input power spectrum with the Planck cosmology \KSF{CITE}.
-The true correlation function is then known: it is the Fourier transform of the input power spectrum, computed numerically.
-Our test catalogs have size (750 \hmpc)$^3$ and a galaxy number density of $3 \times 10^{-4}$, to match that of the Brightest Cluster Galaxies \KSF{CITE}.
-We construct 100 realizations of this box. 
-We also generate a uniformly sampled random catalog with 10 times the number of galaxies as in the data catalogs.
+We generate lognormal mock catalogs \citep{ColesJones1991} using the \texttt{lognormal\_galaxies} code by \citep{Agrawal2017}.
+We use an input power spectrum with the Planck cosmology \KSF{CITE}, the same parameters used for the MultiDark-PATCHY simulations \citep{Kitaura2016} made for the Baryon Oscillation Spectroscopic Survey (Boss, \citealt{Dawson2013}).
+Our fiducial test catalogs have size (750 \hmpc)$^3$ and a galaxy number density of $2 \times 10^{-4}$.
+We construct 1000 realizations of this box.
+
+\subsection{Comparison of Standard Tophat Basis Functions}
+
+
 
 \subsection{Demonstration using Spline Basis Functions}
 \label{sec:spline}
@@ -350,12 +353,10 @@ We also generate a uniformly sampled random catalog with 10 times the number of 
 \label{fig:spline}
 \begin{figure}[ht]
 \centering
-    \includegraphics[width=0.8\textwidth]{tophat_cubic}
-    \caption{A comparison between \est with a cubic spline basis function (red dotted) and the standard tophat estimator (blue solid). The shaded region is the 1$\sigma$ variation in the 100 mock catalogs. The cubic spline estimator has lower bias and lower variance with fewer bins. \KSF{quote rmse in caption? otherwise not clear from figure its less biased.} \hogg{yes} \KSF{does tophat need to be a different linestyle?}} \KSF{fix to dotted linestyle}
+    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat3_spline}
+    \caption{A comparison between \est with a cubic spline basis function (red) and the standard tophat estimator (blue). The shaded region is the standard deviation of the \cf estimate of the 1000 mock catalogs. The cubic spline estimator has lower bias and lower variance with fewer bins. \KSF{quote rmse in caption? otherwise not clear from figure its less biased.} \hogg{yes} \KSF{does tophat need to be a different linestyle?}} \KSF{make tophat thin, spline thick, choose thin for black truth} \KSF{change ylim to 0.03} \KSF{restrict error ylim, symmetric +/-}
 
 \end{figure}
-
-\KSF{Should i have a figure showing the basis functions?} \hogg{yes}
 
 A natural extension of tophat basis functions is the B-spline.
 B-splines of order $n$ are piecewise polynomials of order $n-1$; they constitute the basis functions for spline interpolation \KSF{CITE}.
@@ -363,21 +364,17 @@ They have the nice property that the functions and their derivatives can be cont
 Further, B-splines are well-localized, which provides a more direct comparison to the typical tophat basis (which is entirely localized).
 For this demonstration we use fourth-order B-splines, which constitute the set of basis functions for a cubic spline, as they are the lowest-order spline to have a continuous first derivative.
 We compare this standard estimator, reformulated as continuous functions using a tophat basis.
-For the tophat basis we use 44 basis functions in the range $40 < r < 150$ \hmpc, each with a width of 2.5 \hmpc. 
-For the cubic spline basis, we use the same $r$ range, but with only 11 basis functions, and knots chosen on a grid of 10 \hmpc.
-\KSF{need to specify more about knots? is this accurate (not quite, the knots repeat values at the edge i think...) and should i mention control points?}
+For the tophat basis we use 18 basis functions in the range $36 < r < 144$ \hmpc, each with a width of 6 \hmpc.
+This is a standard bin width for two-point analyses. \KSF{cite optimal bin width paper}
+For the cubic spline basis, we use the same $r$ range, but with only 9 basis functions, and knots chosen to evenly span this $r$ range with this number of basis functions.
 
-The results are shown in Figure~\ref{fig:spline}, compared to the true input \cf.
-The spline basis results in a \cf estimate that has a root mean square error (RMSE) with respect to the truth of $4.38 \times 10^{-4}$, compared to $5.31 \times 10^{-4}$ for the tophat basis.
-This holds true when we average over the bin \KSF{need to do weighted average based on which r-values contribute? supposed to hear from tinker}, as in standard practice, and then compute the RMSE.
-The spline basis also results in lower variance across the 100 mocks, compared to the tophat basis.
+The results are shown in Figure~\ref{fig:spline}.
+We can compare our estimation to the known true input \cf, which is the Fourier transform of the input power spectrum.
+The spline basis clearly produces a better fit to the true correlation function in its smoothness and accuracy across the scale range.
+Even when we compare the error of the estimates at the effective redshift of each bin, as is done in standard practice, our spline basis achieves lower bias and variance \KSF{need plot showing}.
 Thus, \est allows for a more accurate and precise estimate of the \cf with fewer components.
+\KSF{TODO: elaborate more here}
 
-We note that this is fundamentally different than a kernel-based estimator.
-In a kernel formulation, each data point is smoothed by a particular kernel, smoothing out features in the resulting function.
-With our estimator, the basis functions are fixed and the data is projected onto them.
-This preserves the information in the data to the degree given by the chosen set of basis functions, which can in fact enhance features rather than smooth them.
-\KSF{please add/correct here}
 
 \subsection{BAO Scale Estimation Test}
 \label{sec:bao}
@@ -412,13 +409,17 @@ The form of the standard fitting function is well-suited to our estimator, as it
 To use our estimator to estimate $\alpha$, we add a term that includes the partial derivative of the model with respect to $\alpha$.
 This allows us to have fixed basis functions, and for an initial choice of $\alpha_\mathrm{guess}$, determine the change in this value needed to improve the fit. 
 Our fitting function is then
+\KSF{add multiplication (comma) operators}
+\KSF{fix mathrms}
 \begin{equation} \label{eq:baoiter_fit}
-\xi^{fit}(s) = B^2 \xi^{mod}(\alpha_\mathrm{guess} s) + C k_0 \frac{\dd \xi^{mod}(\alpha_\mathrm{guess} s)}{\dd \alpha} + a_1\frac{k_1}{s^2} + a_2\frac{k_2}{s} + k_3 a_3,
+\xi^{fit}(s) = B^2\,\xi^{mod}(\alpha_\mathrm{guess}\,s) + C\,k_0\,\frac{\dd \xi^{mod}(\alpha_\mathrm{guess}\,s)}{\dd \alpha} + a_1\,\frac{k_1}{s^2} + a_2\,\frac{k_2}{s} + a_3\,k_3 ,
 \end{equation}
 where $C$ is an additional coefficient that describes the contribution of the derivative term, and $k_0$, $k_1$, $k_2$, and $k_3$ are constants that determine the initial amplitude of the basis functions.
+In this case, the free parameters are $B^2$, $C$, $a_1$, $a_2$, and $a_3$.
 Note that in theory the choice of $k_i$ values shouldn't matter as the estimator is affine invariant (see Appendix \ref{sec:affine}), but in practice reasonable choices are important for stability.
 
 To use the estimator for a BAO measurement, we input these five terms as the five basis functions of our estimator.
+\KSF{update this given the above list of free params}
 The estimator outputs an amplitude vector $a$ as described in $\S$\ref{sec:est}, which give the contribution of each term---the values of $B$, $C$, $a_1$, $a_2$, and $a_3$.
 From the value of $C$, we can determine our estimate of the scale dilation parameter, $\hat{\alpha}$, as $\hat{\alpha} = \alpha_\mathrm{guess} + Ck_0$. 
 With this formulation, a value of $C=0$ indicates that the current $\alpha_\mathrm{guess}$ gives best fit to the data (given the chosen cosmological model), while nonzero values give the magnitude and direction of the necessary change in the scale dilation parameter.
@@ -428,7 +429,7 @@ In practice, we apply an iterative procedure to converge at our best estimate $\
 \begin{figure}[ht]
 \centering
     \includegraphics[width=0.8\textwidth]{bao_bases}
-    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $B^2$ term (green) is the fiducial model used to determine the scale dilation parameter $\alpha$. The $C$ term is the derivative of this model with respect to $\alpha$, allowing for the estimation of this parameter. The $a_1$, $a_2$, and $a_3$ terms are nuisance parameters to fit the broadband shape. \KSF{Make colorblind friendly! and diff linewidths maybe}}
+    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $B^2$ term (green) is the fiducial model used to determine the scale dilation parameter $\alpha$. The $C$ term is the derivative of this model with respect to $\alpha$, allowing for the estimation of this parameter. The $a_1$, $a_2$, and $a_3$ terms are nuisance parameters to fit the broadband shape. \KSF{Make colorblind friendly! try diff greens (change alpha?)}} \KSF{fix latex; displaystyle}
 \end{figure}
 
 We demonstrate this method using the same set of lognormal mocks as in $\S$\ref{sec:spline}.
@@ -445,7 +446,7 @@ The mean value of the final recovered scale dilation parameter is $\alpha=0.9572
 \label{fig:bao}
 \begin{figure}[th]
 \centering
-    \includegraphics[width=0.8\textwidth]{bao}
+    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat3_baoiter}
     \caption{Estimation of the correlation function using our estimator with basis functions based on the BAO fitting function (orange dot-dashed). The line is the mean of the final estimate from the iteration procedure for 100 mocks, and the shaded region is the $1\sigma$ variation. We also show the standard Landy-Szalay estimator, displayed as a tophat function (blue), as well as the true input correlation function (black). \KSF{This is for the 1e-4 box, need to run bigger box.} \KSF{Should this and the basis set figure be a single figure with two panels?} \KSF{Should i have a figure showing the sum of the basis functions and how that gets you the final cf?}}
 \end{figure}
 
@@ -458,6 +459,7 @@ We have confirmed that in this application, the result is robust to the chosen r
 \section{Discussion} \label{sec:discuss}
 
 \subsection{Relationship to Other Existing Estimators}
+\label{sec:otherest}
 
 \Est has properties similar to existing estimators, including kernel density estimators and the marked correlation function.
 With the proper choice of basis functions, \est can indeed produce both of these estimators; it is more general than either of them.
@@ -474,6 +476,7 @@ KDEs have found use in many areas of astrophyics, for example to measure the 21c
 Specifically, kernel density estimators take the contribution of each data point to be a kernel function centered on that value, and sum these to determine the full distribution.
 In contrast, \est projects each data point onto fixed basis functions, which are distinct from the typical understanding of kernels.
 As such, our estimator is not smearing out the data, as KDEs do; it is using the data to directly infer the contribution of each basis function.
+This preserves the information in the data to the degree given by the chosen set of basis functions, which can in fact enhance features rather than smooth them.
 That said, the formulation of \est is general enough that it can perform a kernel density estimate of the correlation function, by choosing $f(r)$ to be a kernel centered on $r$.
 However, our uses here of the estimator are fundamentally different from KDE methods, as they use use fixed basis functions that can take advantage of the science use case and preserve maximal information from the data.
 \KSF{this last sentence is a bit repetitive / are there more differences im missing?}
@@ -702,8 +705,8 @@ This offset can be encoded by a scale dilation parameter $\alpha$, which contain
 As our fitting function requires a fiducial model and an initial guess of this parameter, $\alpha_\mathrm{guess}$, and then determines the change needed, an iterative procedure is needed to converge to the best-fit value.
 
 We start with assuming that we have chosen our fiducial model to match our true cosmology (we in all likelihood have not, but it's not a bad initial guess), giving us an initial $\alpha_\mathrm{guess} = 1.0$. 
-We then apply \est to perform the measurement, and obtain the amplitude for the derivative term in our model, $C$, as in Equation \ref{eq:baoiter_fit}. 
-This gives us our estimate of the scale dilation parameter, $\hat{\alpha}$, from this initial model; for the $i$th iteration, we have
+We then apply \est to perform the measurement, and obtain the amplitude $C$ for the derivative term in our model as in Equation \ref{eq:baoiter_fit}. 
+This gives us our estimate $\hat{\alpha}$ of the scale dilation parameter from this initial model; for the $i$th iteration, we have
 \begin{equation}
     \hat{\alpha}_{i} = \alpha_{\mathrm{guess},i} + C_i \, k_0
 \end{equation}
@@ -719,8 +722,9 @@ To achieve convergence, we need to be careful in choosing our next $\alpha_{\mat
 If it is far from the best estimate, $C_i$ will be large, and our resulting estimate $\hat{\alpha}_{i}$ will be inaccurate.
 We thus include a damping parameter $\eta$ between 0 and 1 to improve our convergence.
 Our next guess is then
+\KSF{what should the assignment symbol be here?}
 \begin{equation}
-    \alpha_{\mathrm{guess},i+1} = \alpha_{\mathrm{guess},i} + \eta \, C_i \, k_0.
+    \alpha_{\mathrm{guess},i+1} \leftarrow \alpha_{\mathrm{guess},i} + \eta\,C_i\,k_0.
 \end{equation}
 The choice of $\eta$ is important for stability and speed of convergence; too large a value can lead to a back-and-forth cycle in which the result hops between two values and never converges, and too small a value would make convergence take a very long time.
 In our application, we start with $\eta=0.5$.
@@ -729,9 +733,9 @@ We check if our estimate is jumping over the true value by checking if the error
 \subsection{Implementation Details}
 
 We implement the partial derivative in the fitting function as a finite difference between model with the our chosen value of $\alpha_\mathrm{guess}$, and the model with a value shifted by a small $\Delta \alpha$,
-\KSF{what should the = sign be here?}
+\KSF{what should the assignment symbol be here?}
 \begin{equation}
-    \frac{\dd \xi^\mathrm{mod}(\alpha s)}{\dd \alpha} \Rightarrow \frac{\xi^\mathrm{mod}(\alpha_\mathrm{guess} s) - \xi^\mathrm{mod}((\alpha_\mathrm{guess} + \Delta \alpha)s)}{\Delta \alpha}.
+    \frac{\dd \xi^\mathrm{mod}(\alpha s)}{\dd \alpha} \leftarrow \frac{\xi^\mathrm{mod}(\alpha_\mathrm{guess} s) - \xi^\mathrm{mod}((\alpha_\mathrm{guess} + \Delta \alpha)s)}{\Delta \alpha}.
 \end{equation}
 In our implemenation we take $\Delta \alpha = 0.001$; we check that our results are insensitive to this choice.
 
