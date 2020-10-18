@@ -18,7 +18,7 @@
 \usepackage{xspace}
 \usepackage{xcolor}
 \usepackage{bm}
-\parindent=27pt
+\parindent=19pt
 
 % aastex parameters
 %%\hypersetup{linkcolor=red,citecolor=green,filecolor=cyan,urlcolor=magenta}
@@ -26,8 +26,8 @@
 %\revised{not yet}
 \accepted{YYY}
 %\submitjournal{ApJ}
-\shorttitle{A Continuous Correlation Function Estimator}
-\shortauthors{Storey-Fisher and Hogg}
+\shorttitle{a continuous correlation function estimator}
+\shortauthors{storey-fisher and hogg}
 
 % language
 \newcommand{\cf}{2pcf\xspace} %2pF? 2PCF? %TODO: fix spacing after
@@ -42,7 +42,7 @@
 \newcommand{\invp}{^{'-1}}
 \newcommand{\T}{^{\mathsf{T}}}
 \newcommand{\Tp}{^{'\mathsf{T}}}
-\newcommand{\hmpc}{$h^{-1}$Mpc}
+\newcommand{\hmpc}{$h^{-1}\,$Mpc}
 \newcommand{\dd}{\mathrm{d}}
 \newcommand{\bld}[1]{\bm{#1}} %\mathbf gives very different look!
 \newcommand{\vv}[1]{\bld{v}_\mathrm{#1}}
@@ -122,7 +122,7 @@ We show that \est can estimate the clustering of artificial data in representati
 We also demonstrate that the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale.
 Critically, these will permit reductions in the number of mock catalogs required for covariance estimation, currently the limiting step in \cf measurements.
 We discuss applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and potentially unifying real-space and Fourier-space approaches to clustering measurements.
-
+\KSF{say in abstract that we'll need far fewer mocks; ok to be repetitive}
 \end{abstract}
 
 %TODO: should have 6 keywords 
@@ -211,12 +211,9 @@ For top-hat basis functions, \est exactly reduces to the \LS estimator.
 This estimator removes the need for binning and allows for the \cf to be represented by fewer basis functions, requiring fewer mock catalogs to compute the covariance matrix.
 It is particularly well-suited to the analysis of LSS features such as the BAO peak; we find that we can accurately locate the peak with fewer components.
 
-%will obviously keep changing this as paper develops
 This paper is organized as follows. 
 In $\S$\ref{sec:motiv}, we motivate our estimator and explain its formulation.
-%In Section \ref{sec:est}, we prove its correctness and describe our implementation, and demonstrate its application on a simulated data set. 
-%Our results on the SDSS LRG sample are shown in Section \ref{sec:app}. 
-We demonstrate its application on a simulated data set, including a toy BAO analysis, in $\S$\ref{sec:app}.
+We demonstrate its application on a simulated data set, including a toy BAO analysis, in $\S$\ref{sec:experiments}.
 We discuss the implications and other possible applications in $\S$\ref{sec:discuss}. 
 
 \section{Motivation and Formulation} 
@@ -294,15 +291,31 @@ We then define \est as
 \end{eqnarray}
 Then, we can compute the \cf as
 \begin{eqnarray}\displaystyle
-% here is where the T notation is weird - when you look at evaluation
 \bld{a} &\equiv& \TT{RR}\inv \cdot (\vv{DD} - 2\,\vv{DR} + \vv{RR}) \\
 \bld{\hat{\xi}}(\GG{l}, \GG{l'})  &\equiv& \bld{a}\T \cdot \ff(\GG{l}, \GG{l'}) \label{eq:xi_proj}
 \end{eqnarray}
 where a $K$-vector of the computed \emph{amplitudes} of the basis functions, and $\GG{l}$ and $\GG{l'}$ contain the data values at which to evaluate $\xi$.
+\KSF{TOWRITE: discuss index / sum notation, sums over number of points in dataset}
+\KSF{say that cross-correlation is easy to see from this, point to section in discussion. could also put this right below the definition.}
 We emphasize that these are not real datapoints, but instead allow us to evaluate the \cf at any set of parameters.
 In the standard case, $\GG{l}$ and $\GG{l'}$ would effectively be an imaginary pair of galaxies that has a separate $r$ at which we want to evaluate $\xi$, and we would compute $\bld{\hat{\xi}}$ for such a pair at every separation we are interested in.
 With our general formulation, we could choose basis functions that depend on other galaxy properties, to investigate the effect of these on the \cf; then, we would also choose each $\GG{l}$ and $\GG{l'}$ pair to have values of properties at which we want to evlauate $\bld{\hat{\xi}}$. 
 In the rest of this paper, however, we will only take into account the separation between pairs, and we will write $\bld{\hat{\xi}}(r)$.
+
+\Est can be straightforwardly generalized to cross-correlations between two datasets.
+In this case, we consider datasets $D_1$ and $D_2$, and associated random catalogs $R_1$ and $R_2$. 
+We then have cross-correlations rather than auto-correlations for the data-data and random-random terms, and two different data-random terms, crossing each dataset with the opposite random catalog. 
+The data-data term becomes 
+\begin{equation}
+    \vv{D_1 D_2} \equiv \frac{1}{\NN{D_1}\,\NN{D_2}} \sum_{n_1} \sum_{n_2} \ff(\GG{n_1}, \GG{n_2})
+\end{equation}
+where $n_1$ and $n_2$ index the data points in each catalog, and the normalization factor is now simply the product of catalog sizes as we are no longer concerned with double-counting.
+The other terms ($\vv{D_1 R_2}$, $\vv{D_2 R_1}$, $\vv{R_1 R_2}$, $\TT{R_1 R_2}$) generalize as one would expect.
+The amplitudes then becomes
+\begin{equation}\displaystyle
+    \bld{a} \equiv \TT{R_1 R_2}\inv \cdot (\vv{D_1 D_2} - \vv{D_1 R_2} - \vv{D_2 R_1} + \vv{R_1 R_2})
+ \end{equation}
+and we use this to compute the estimator as in \ref{eq:xi_proj}.
 
 If we consider only the pair separation, and make a proper choice of $\ff$, \est reduces to the Landy-Szalay estimator.
 Explicitly, from our full galaxy pair data $\GG{n}$ and $\GG{n'}$, we can use only their separation,  $|\bld{r}_n - \bld{r}_{n'}|$.
@@ -340,45 +353,77 @@ Our implementation of \est is also open-source and available at \texttt{github.c
 
 
 \section{Experiments and Results}
-\label{sec:app}
+\label{sec:experiments}
 
-We demonstrate the application of \est on artifical data.
+\subsection{Lognormal Mock Catalogs}
+
+We demonstrate the application of \est on a set of artifical data.
 We generate lognormal mock catalogs \citep{ColesJones1991} using the \texttt{lognormal\_galaxies} code by \citep{Agrawal2017}.
-We use an input power spectrum with the Planck cosmology \KSF{CITE}, the same parameters used for the MultiDark-PATCHY simulations \citep{Kitaura2016} made for the Baryon Oscillation Spectroscopic Survey (Boss, \citealt{Dawson2013}).
-Our fiducial test catalogs have size (750 \hmpc)$^3$ and a galaxy number density of $2 \times 10^{-4}$.
-We construct 1000 realizations of this box.
+We use an input power spectrum with the Planck cosmology, the same parameters used for the MultiDark-PATCHY simulations \citep{Kitaura2016} made for the Baryon Oscillation Spectroscopic Survey (Boss, \citealt{Dawson2013}.
+This assumes a cold dark matter model with $\Omega_m = 0.307115$, $\Omega_b = 0.048206$, $\sigma_8 = 0.8288$, $n_s = 0.9611$, and $h = 0.6777$.
+Our fiducial test set is 1000 realizations of periodic cubes with size (750 \hmpc)$^3$ and a galaxy number density of $2 \times 10^{-4}$.
+We choose to perform these tests on periodic boxes so that we may compute the random-random term analytically (see Appendix \ref{sec:analytic}), significantly cutting down on computation time.
+We note, though, that we expect our results to hold for catalogs with realistic survey windows and random-random terms computed directly with \est.
+\KSF{I am realizing that it's a bit funny that our estimator hinges on the tensor random term, yet we are computing that analytically in all these tests. I think it's very fair, bc the formulation of the analytic $\vv{RR}$ \& $\TT{RR}$ terms is based on our formulation. I don't think this is a reason to change everything now; but maybe i should include the analytic formulations above, and refer to the appendix for the full derivation?}
 
 \subsection{Comparison of Standard Tophat Basis Functions}
 
+We first estimate the correlation function of our mocks using the the standard estimator.
+We choose 15 separation ($r$) bins in the range $36 < r < 156$ \hmpc, each with a width of 8 \hmpc; this was found to be the optimal bin width by \cite{Percival2014}, and is standard for two-point analyses.
+We apply the estimator to each of our 1000 mock catalogs.
+The mean of these estimated correlation functions is shown in Figure \ref{fig:tophat} (grey squares); the error bars show the standard deviation of the 1000 mocks in each bin.
+\KSF{do i note the legend info here, or just in figure caption?}
+We also show the true input correlation function (thin black line), and the bottom panel shows the absolute error between the estimated and true correlation functions.
 
+There remains an ambiguity in the $r$-value at which to plot the result of the standard estimator. 
+The volume-weighted average is often used, or a weighted average depending on the pairs in the bin; this choice propagates to differences in comparing the estimate to models (though at the precision of current surveys these differences are not significant).
+Here we plot the standard estimator with the volume-weighted average.
+
+We demonstrate \est with a tophat basis function as a check.
+We choose tophat functions with the same locations and widths as the bins used for the standard estimator; these are shown in the top panel of Figure \ref{fig:tophat}. 
+As this estimator computes the \cf in a continuous form, we plot the result as a continuous function at every $r$ value (thin blue line).
+This results in a step function form for the correlation function, which is in fact what the typical estimator is computing.
+The values of the correlation function at each step exactly align with the result of the standard estimator.
+In fact, we emphasize that this step function is exactly what the standard estimator is estimating; we have just made explicit the fact that the each estimate is for the entire bin.
+When we look at the error with respect to the truth (bottom panel), the error blows up at the edges of each bin, where the continuous estimate deviates most significantly from the truth.
+This demonstrates that the standard tophat estimator is not a good representation of the true \cf.
+
+\begin{figure}[t]
+\centering
+    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_theory8}
+    \caption{A comparison between \est with a tophat basis (thin blue lines) and the standard estimator (grey squares). The top panel shows the basis functions used for the tophat estimator. The middle panel shows the mean of the estimated correlation functions for 1000 mock catalogs, compared to the true input \cf (thin black line); the shaded region and errorbars are the standard deviation of the \cf estimate. The lower panel shows the absolute error between the estimate and true \cf. \Est with a tophat basis is exactly equivalent to the standard estimator, but in a continuous form, emphasizing the fact that binning results in a poor representation of the true \cf.}
+    \label{fig:tophat}
+\end{figure}
 
 \subsection{Demonstration using Spline Basis Functions}
 \label{sec:spline}
 
-\label{fig:spline}
 \begin{figure}[ht]
-\centering
-    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat3_spline}
-    \caption{A comparison between \est with a cubic spline basis function (red) and the standard tophat estimator (blue). The shaded region is the standard deviation of the \cf estimate of the 1000 mock catalogs. The cubic spline estimator has lower bias and lower variance with fewer bins. \KSF{quote rmse in caption? otherwise not clear from figure its less biased.} \hogg{yes} \KSF{does tophat need to be a different linestyle?}} \KSF{make tophat thin, spline thick, choose thin for black truth} \KSF{change ylim to 0.03} \KSF{restrict error ylim, symmetric +/-}
 
+\centering
+    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_spline}
+    \caption{A comparison between \est with a cubic spline basis function (thick red) and a standard tophat basis (thin blue). The top panel shows the basis functions used for each measurement. The middle panel shows the mean of the estimated correlation functions for each of the 1000 mock catalogs compared to the true input \cf (thin black); the shaded region is the standard deviation. The lower panel shows the absolute error between the estimate and true \cf. It is clear that the spline basis function results in a correlation function that is a better representation of the true \cf in its shape and smoothness.}
+    \label{fig:spline}
 \end{figure}
 
 A natural extension of tophat basis functions is the B-spline.
-B-splines of order $n$ are piecewise polynomials of order $n-1$; they constitute the basis functions for spline interpolation \KSF{CITE}.
+B-splines of order $n$ are piecewise polynomials of order $n-1$; they constitute the basis functions for spline interpolation. \KSF{do i need a citation here? would be a textbook probs...}
 They have the nice property that the functions and their derivatives can be continuous, depending on the order.
 Further, B-splines are well-localized, which provides a more direct comparison to the typical tophat basis (which is entirely localized).
 For this demonstration we use fourth-order B-splines, which constitute the set of basis functions for a cubic spline, as they are the lowest-order spline to have a continuous first derivative.
-We compare this standard estimator, reformulated as continuous functions using a tophat basis.
-For the tophat basis we use 18 basis functions in the range $36 < r < 144$ \hmpc, each with a width of 6 \hmpc.
-This is a standard bin width for two-point analyses. \KSF{cite optimal bin width paper}
-For the cubic spline basis, we use the same $r$ range, but with only 9 basis functions, and knots chosen to evenly span this $r$ range with this number of basis functions.
 
-The results are shown in Figure~\ref{fig:spline}.
-We can compare our estimation to the known true input \cf, which is the Fourier transform of the input power spectrum.
-The spline basis clearly produces a better fit to the true correlation function in its smoothness and accuracy across the scale range.
-Even when we compare the error of the estimates at the effective redshift of each bin, as is done in standard practice, our spline basis achieves lower bias and variance \KSF{need plot showing}.
-Thus, \est allows for a more accurate and precise estimate of the \cf with fewer components.
-\KSF{TODO: elaborate more here}
+We compare the estimator with a cubic spline basis to the standard estimator, reformulated as continuous functions using a tophat basis; the results are shown in Figure \ref{fig:spline}.
+The basis functions are shown in the top panel of the figure.
+We use the same tophat basis as above (thin blue).
+For the cubic spline basis, we use the same $r$-range and number of basis functions, and knots chosen to evenly span the range (thick red). 
+The cubic spline bases on the edge have different shapes such that they remain normalized; we note that generally, one should choose the basis functions such that the range of the \cf that is of interest does not depend on the range of the basis functions.
+
+The estimator using the cubic spline basis clearly produces a better fit to the true correlation function (thin black) in its shape and smoothness at every point across the scale range, compared to the estimator using the tophat basis.
+The bottom panel shows the error with respect to the truth; the cubic spline estimator is more generally more accurate, and straightforward to compare to the truth (or model) at every scale.
+On the other hand, in order to compare the binned correlation to a model, one must integrate the model over the bin range, though in practice the model is often just evaluated at the effective $r$ of each bin.
+This comparison demonstrates that there exist other sets of basis functions that produce better representations of the data compared to the standard tophat/binned estimator.
+The choice of a high-order spline may be useful for cases in which one wants a simple representative estimate of the \cf, or wants smooth derivatives.
+Generally, the choice of basis functions should be tailored to the scientific use case; in the next section we explore the case of a BAO analysis.
 
 
 \subsection{BAO Scale Estimation Test}
@@ -434,7 +479,7 @@ In practice, we apply an iterative procedure to converge at our best estimate $\
 \begin{figure}[ht]
 \centering
     \includegraphics[width=0.8\textwidth]{bao_bases}
-    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $B^2$ term (green) is the fiducial model used to determine the scale dilation parameter $\alpha$. The $C$ term is the derivative of this model with respect to $\alpha$, allowing for the estimation of this parameter. The $a_1$, $a_2$, and $a_3$ terms are nuisance parameters to fit the broadband shape. \KSF{Make colorblind friendly! try diff greens (change alpha?)}} \KSF{fix latex; displaystyle}
+    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $B^2$ term (green) is the fiducial model used to determine the scale dilation parameter $\alpha$. The $C$ term is the derivative of this model with respect to $\alpha$, allowing for the estimation of this parameter. The $a_1$, $a_2$, and $a_3$ terms are nuisance parameters to fit the broadband shape. \KSF{Make colorblind friendly! try diff greens (change alpha?)}} \KSF{fix latex; displaystyle} \KSF{call to basis function legend in fig 4 caption}
 \end{figure}
 
 We demonstrate this method using the same set of lognormal mocks as in $\S$\ref{sec:spline}.
@@ -452,8 +497,8 @@ The mean value of the final recovered scale dilation parameter is $\alpha=XXX \p
 \label{fig:bao}
 \begin{figure}[th]
 \centering
-    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat3_baoiter}
-    \caption{Estimation of the correlation function using our estimator with basis functions based on the BAO fitting function (orange dot-dashed). The line is the mean of the final estimate from the iteration procedure for 100 mocks, and the shaded region is the $1\sigma$ variation. We also show the standard Landy-Szalay estimator, displayed as a tophat function (blue), as well as the true input correlation function (black). \KSF{This is for the 1e-4 box, need to run bigger box.} \KSF{Should this and the basis set figure be a single figure with two panels?} \KSF{Should i have a figure showing the sum of the basis functions and how that gets you the final cf?}}
+    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_baoiter}
+    \caption{Estimation of the correlation function using our estimator with basis functions based on the BAO fitting function (orange dot-dashed). The line is the mean of the final estimate from the iteration procedure for 1000 mocks, and the shaded region is the $1\sigma$ variation. We also show the standard Landy-Szalay estimator, displayed as a tophat function (blue), as well as the true input correlation function (black). \KSF{This is for the 1e-4 box, need to run bigger box.} \KSF{Should this and the basis set figure be a single figure with two panels?} \KSF{Should i have a figure showing the sum of the basis functions and how that gets you the final cf?}}
 \end{figure}
 
 We note that these basis functions are significantly different than the tophat or B-spline bases previously explored, mainly because they are not localized.
@@ -507,25 +552,12 @@ by defining
 \begin{equation}
     \TT{DR} = \frac{2}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n}, \GG{m}) \cdot \ff\T(\GG{n}, \GG{m}).
 \end{equation}
-This could be extended to nearly any linear combination of pair counts.
+This formulation could be extended to nearly any linear combination of pair counts.
 The estimator of \cite{VargasMagana2013} selects the optimal combination of pair counts; our estimators could be combined to create an even more generalized estimator.
 \KSF{some of the terms in V-M include DD in the denom - need to mention this?}
 \KSF{what about estimator with DRsquared in the denom (hamilton estimator?) as trivial as naive guess?}
+It can also be extended to cross-correlations in a straightforward way as expected.
 
-\KSF{havent updated; think i will be able to delete this paragraph once i nail down the prefactors for the estimator}
-We also note that the \est can be easily generalized to cross-correlations between two datasets.
-In this case, we consider datasets $D_1$ and $D_2$, and associated random catalogs $R_1$ and $R_2$. 
-We then have two different data-random terms, crossing each dataset with the opposite random catalog, resulting in a \LS estimator of the form
-\KSF{notation is now clunky with double subscripts; could make 1 and 2 superscript? or maybe it's fine with the parens}
-\begin{equation}
-    \hat{\xi}_k = \frac{(D_1 D_2)_k - (D_1 R_2)_k - (D_2 R_1)_k + (R_1 R_2)_k}{(R_1 R_2)_k}.
-\end{equation}
-Here, each term is normalized simply by the number of pairs, as
-\begin{equation}
-    D_1 D_2 \equiv \frac{1}{N_{D1} N_{D2}} \sum_{n n'} f(T_n, T_{n'})
-\end{equation}
-and similarly for the other terms.
-This cross-correlation formulation can be extended to other estimators beyond \LS in a straightforward way.
 
 \subsection{Computational Performance}
 
@@ -538,6 +570,8 @@ Basis functions can also be input on a grid and then interpolated; the performan
 \KSF{Is there a need to say much more? If not, maybe doesn't deserve its own section - could this go in the implementation section? Or maybe tacked onto another small section if we have one that makes sense}
 \KSF{where to put other implemenation notes? e.g. using DD(s,mu) for realspace cf, with 1 big mu bin.}
 
+We don't actually take the inverse of the T matrix \ldots
+
 \subsection{Effect on Covariance Matrix Estimation}
 
 We have shown that \est results in \cf estimates that are just as accurate with fewer components.
@@ -546,7 +580,8 @@ The covariance matrix is difficult to compute theoretically;instead, it is usual
 The unbiased estimator for the sample covariance matrix is (e.g. \citealt{Anderson2003})
 \KSF{index notation getting clunky, thoughts?}
 \begin{equation}
-\bld{\hat{C}}^\mathrm{ML}_{ij} = \frac{1}{\NN{mocks}-1} \sum_{q=1}^{\NN{mocks}} \left( \left[\bld{\xi}_q \right]_i - \bar{\bld{\xi}}_i \right) \left( \left[\bld{\xi}_q \right]_j - \bar{\bld{\xi}}_j \right),
+%using \big and \bigg instead of \left and \right because the different sides give different sizes with the latter two
+\bld{\hat{C}}^\mathrm{ML}_{ij} = \frac{1}{\NN{mocks}-1} \sum_{q=1}^{\NN{mocks}} \bigg( \big[\bld{\xi}_q \big]_i - \bar{\bld{\xi}}_i \bigg) \bigg([\bld{\xi}_q \big]_j - \bar{\bld{\xi}}_j \bigg)\T,
 \end{equation}
 where $q$ denotes the index of the mock, $i$ and $j$ denote the index of the bin or component, $\bld{\xi}$ denotes the estimate in that bin for that mock, and $\bar{\bld{\xi}}$ denotes the mean value of the estimate in that bin across the mocks, where we have omitted the hat for clarity. \KSF{i removed the hats here because they didn't play nicely w the average bar; thoughts?}
 To get an unbiased estimate of the inverse covariance matrix, we require a correction factor, as the inverse of an unbiased estimator is not necessarily unbiased.
@@ -575,7 +610,7 @@ This means that we can safely reduce $\NN{bins}$, or in our replacement of bins 
 The covariance matrix will be the covariance between these basis functions. \KSF{worth noting that the structure of this covmat will be significantly different, esp if non-orthogonal?}
 To then achieve the same precision on the error on the cosmological parameters, a lower value of $\NN{mocks}$ becomes possible.
 This will significantly reduce requirements on mocks, which will be particularly important for upcoming large surveys. 
-
+\KSF{cite extensively lit on enormous number of mocks needed to get covmat right.}
 \KSF{I think the result of discussions was that there wasn't a good way of showing this without propagating all the way to cosmological parameters. Would love a figure showing lower covariance errors but not sure how without full propagation}
 
 \subsection{Further Applications}

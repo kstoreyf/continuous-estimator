@@ -16,6 +16,9 @@ catalogs/
 *.fdb_latexmk
 *.fls
 
+# other programs
+.vscode
+
 ############
 # Byte-compiled / optimized / DLL files
 __pycache__/
