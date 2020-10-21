@@ -53,8 +53,10 @@
 \newcommand{\GG}[1]{\mathsf{G}_{#1}}
 % comments
 \newcommand{\KSF}[1]{\textcolor{teal}{KSF says: #1}}
-\newcommand{\hogg}[1]{\textcolor{red}{Hogg says: #1}}
 %\newcommand{\KSF}[1]{\textcolor{teal}{}}
+\newcommand{\hogg}[1]{\textcolor{red}{Hogg says: #1}}
+% misc
+\newcommand{\documentname}{\textsl{Article}}
 
 % margins
 %\addtolength{\topmargin}{-0.75in}
@@ -121,9 +123,8 @@ The choice of basis can take into account the expected form of the \cf, as well 
 We show that \est can estimate the clustering of artificial data in representations that provide more accuracy with fewer basis functions than \LS.
 \Est achieves lower bias and lower variance than \LS. 
 We also demonstrate that the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale.
-Critically, these will permit reductions in the number of mock catalogs required for covariance estimation, currently the limiting step in \cf measurements.
+Critically, the reduction in the number of basis functions will lead to a reduction in the number of mock catalogs required for covariance estimation; this is currently the limiting step in \cf measurements.
 We discuss applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and potentially unifying real-space and Fourier-space approaches to clustering measurements.
-\KSF{say in abstract that we'll need far fewer mocks; ok to be repetitive}
 \end{abstract}
 
 %TODO: should have 6 keywords 
@@ -220,10 +221,10 @@ We discuss the implications and other possible applications in Section~\ref{sec:
 \section{Motivation and Formulation} 
 \label{sec:motiv}
 
-In this paper, we use the following notation.
+\KSF{TODO: change paper to documentname throughout}
+In this \documentname, we use the following notation.
 We write vectors in bold and lowercase, e.g. $\vv{}$; tensors in bold and uppercase, e.g. $\TT{}$; and unstructured data blobs in sans serif, e.g. $\GG{}$.
 A hat above a symbol, e.g. $\bld{\hat{\xi}}$, indicates an estimate of the value.
-\KSF{where should this notation note go?}
 
 \subsection{Standard Two-Point Correlation Function Estimation}
 
@@ -238,16 +239,16 @@ We can then write the \LS estimator as
 \begin{equation} \label{eq:ls}
     \bld{\hat{\xi}} = \frac{\vv{DD} - 2\,\vv{DR} + \vv{RR}}{\vv{RR}}.
 \end{equation}
-The pair counts are defined explicitly as
-\KSF{should i define something like $r_{ij} = |\bld{r}_{i} - \bld{r}_{j}|$ so i don't have to keep writing it out? or better to be explicit throughout?}
+The components of the pair-count vectors are defined explicitly as
 \begin{eqnarray}\displaystyle
     \label{eq:ls1}
     % \adjustlimits aligns the subscripts with and without primes, which are diff heights
     \left[ \vv{DD} \right]_k &\equiv& \frac{2}{\NN{D}(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'} i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) \\ 
     \left[ \vv{DR} \right]_k &\equiv& \frac{1}{\NN{D} \NN{R}} \sum_{n} \sum_{m} i(g_k < |\bld{r}_n - \bld{r}_m| < h_k) \\
     \label{eq:ls3}
-    \left[ \vv{RR} \right]_k &\equiv& \frac{2}{\NN{R}(\NN{R}-1)} \adjustlimits\sum_{m} \sum_{m'} i(g_k < |\bld{r}_m - \bld{r}_{m'}| < h_k),
+    \left[ \vv{RR} \right]_k &\equiv& \frac{2}{\NN{R}(\NN{R}-1)} \adjustlimits\sum_{m} \sum_{m'} i(g_k < |\bld{r}_m - \bld{r}_{m'}| < h_k)~,
 \end{eqnarray}
+\KSF{after eqns before where, always have comma (with tilde before)}
 where $\left[ \vv{} \right]_k$ is the pair counts in bin $k$ (which has bin edges $g_k$ and $h_k$), $i$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $\bld{r}$ is the tracer position, the $n$ and $n'$ indices index data positions, and the $m$ and $m'$ indices index random catalog positions.
 We assume here that the sums are over unique pairs, and that for auto-correlations they exclude self-pairs; the normalization prefactors then account for the total number of possible pairs, explaining the difference between the auto- and cross-correlation factors.
 The tracer position can be in real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this paper we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
@@ -269,11 +270,17 @@ Recall that the linear least-squares fit to a set of data is
 \bld{x} = [\bld{A}\T \bld{C}\inv \bld{A}]\inv [\bld{A}\T \bld{C}\inv \bld{y}]
 \end{equation}
 where $\bld{x}$ is the vector of best-fit parameters, $\bld{A}$ is a design matrix with zeroth and first order terms (and possibly higher order) functions of fitting features, $\bld{C}$ is the covariance matrix, and $\bld{y}$ is a column vector of $\bld{y}$ data to be fit.
-The second bracketed term projects the data onto the features; the first bracketed term renormalizes this quantity. \KSF{renormalizes what? this phrase was from a Hogg comment, want to make sure it's clear here.}
+The second bracketed factor $[\bld{A}\T \bld{C}\inv \bld{y}]$ projects the data onto the features (as in a matched filter). 
+The first bracketed factor $[\bld{A}\T \bld{C}\inv \bld{A}]\inv$ rescales the projected features into the space of the parameters.
+
+\KSF{TODO: work on this little paragraph}
+Each bin looks like the projection of the data onto the bin... rr is rescaling it.
+In the so-called natural estimator of the \cf, the form looks like the projection of the data onto the annulus; this analogy inspired the form of the form of \est.
 In the case of the \cf, the observed data is the pair counts at a given separation, and the weights are provided by the pair counts of the random catalog.
 Indeed, this is reminiscent of the so-called natural estimator of the \cf, $\bld{\xi} = \vv{DD}/\vv{RR} - 1$ (e.g. \citealt{Kerscher2000}).
-
 From this connection, we can infer the form of the estimator.
+\Est was inspired by analogy with this least-squares fitting; the data--data data-data
+\KSF{change to data--data (two dashes) throughout; same with Landy--Szalay. but continuous-function.}
 \KSF{What else to say in this section?? How to expand on what's here?}
 
 % TODO: fix this capitalization issue
@@ -283,7 +290,7 @@ From this connection, we can infer the form of the estimator.
 Inspired by least-squares fitting, we generalize the \LS estimator defined above in Equations~\ref{eq:ls1}-\ref{eq:ls3}.
 We generalize the indicator function $i$ to any function $\ff$, which returns a vector of length $K$ where $K$ is the number of basis functions.
 We further generalize the arguments of the function to any properties of the galaxies, rather than just the separation between pairs; we call $\GG{}$ the data payload for a single galaxy.
-This gives us, instead of pair counts, a vector of amplitudes of the basis functions, $\vv{}$. \KSF{it's a bit confusing to call these amplitudes (though they very much are) because our $\bld{a}$ we're calling amplitudes; can we use an additional descriptor for the latter? correlation amplitudes?}
+This gives us, instead of pair counts, a vector of projections of the basis functions, $\vv{}$. \KSF{audit paper for projections, amplitudes; be consistent}
 These vectors as defined as
 \begin{eqnarray}\displaystyle
     \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'} \ff(\GG{n}, \GG{n'}) \\
@@ -350,6 +357,8 @@ In this case, we can analytically compute the $\vv{RR}$ term, as well as the $\T
 The derivation and formulation of these terms are shown in Appendix~\ref{sec:analytic}.
 
 \KSF{Discuss the limit of infinitesimal bins? Do we know what this is?} \hogg{Yes, we should discuss this, and show how we are related to that.} \KSF{I'm not sure what to say about this.}
+\KSF{get philosophical about binning? either change to modeling, or go to limit of infinitesimal bins. here we do the latter and then project onto basis functions. some equivalence bw continuous functions and infinitestimal bins. add a paragraph on this to the discussion section.}
+\KSF{start off discussion with what have we done, limitations, what opportunities have we created. aka we got rid of binning.}
 
 We implement this estimator based on the correlation function package \texttt{Corrfunc} by \cite{Sinha2019}.
 \texttt{Corrfunc} is the state-of-the-art package for computing correlation functions and other clustering statistics; it is extremely fast and user-friendly, and is used in many published analyses.
@@ -368,8 +377,7 @@ We use an input power spectrum with the Planck cosmology, the same parameters us
 This assumes a cold dark matter model with $\Omega_m = 0.307115$, $\Omega_b = 0.048206$, $\sigma_8 = 0.8288$, $n_s = 0.9611$, and $h = 0.6777$.
 Our fiducial test set is 1000 realizations of periodic cubes with size (750 \hmpc)$^3$ and a galaxy number density of $2 \times 10^{-4}$.
 We choose to perform these tests on periodic boxes so that we may compute the random-random term analytically (see Appendix~\ref{sec:analytic}), significantly cutting down on computation time.
-We note, though, that we expect our results to hold for catalogs with realistic survey windows and random-random terms computed directly with \est.
-\KSF{I am realizing that it's a bit funny that our estimator hinges on the tensor random term, yet we are computing that analytically in all these tests. I think it's very fair, bc the formulation of the analytic $\vv{RR}$ \& $\TT{RR}$ terms is based on our formulation. I don't think this is a reason to change everything now; but maybe i should include the analytic formulations above, and refer to the appendix for the full derivation?}
+The results will hold for catalogs with realistic survey windows and random-random terms computed directly with \est.
 
 \subsection{Comparison of Standard Tophat Basis Functions}
 
@@ -377,7 +385,7 @@ We first estimate the correlation function of our mocks using the the standard e
 We choose 15 separation ($r$) bins in the range $36 < r < 156$ \hmpc, each with a width of 8 \hmpc; this was found to be the optimal bin width by \cite{Percival2014}, and is standard for two-point analyses.
 We apply the estimator to each of our 1000 mock catalogs.
 The mean of these estimated correlation functions is shown in Figure~\ref{fig:tophat} (grey squares); the error bars show the standard deviation of the 1000 mocks in each bin.
-\KSF{do i note the legend info here, or just in figure caption?}
+\KSF{do i note the legend info here, or just in figure caption? NOPE! TODO, change}
 We also show the true input correlation function (thin black line), and the bottom panel shows the absolute error between the estimated and true correlation functions.
 
 There remains an ambiguity in the $r$-value at which to plot the result of the standard estimator. 
@@ -412,7 +420,7 @@ This demonstrates that the standard tophat estimator is not a good representatio
 \end{figure}
 
 A natural extension of tophat basis functions is the B-spline.
-B-splines of order $n$ are piecewise polynomials of order $n-1$; they constitute the basis functions for spline interpolation. \KSF{do i need a citation here? would be a textbook probs...}
+B-splines of order $n$ are piecewise polynomials of order $n-1$; they constitute the basis functions for spline interpolation. \KSF{CITE something here, ``figure it out''}
 They have the nice property that the functions and their derivatives can be continuous, depending on the order.
 Further, B-splines are well-localized, which provides a more direct comparison to the typical tophat basis (which is entirely localized).
 For this demonstration we use fourth-order B-splines, which constitute the set of basis functions for a cubic spline, as they are the lowest-order spline to have a continuous first derivative.
@@ -437,7 +445,7 @@ Generally, the choice of basis functions should be tailored to the scientific us
 The measurement of the baryon acoustic oscillation (BAO) scale provides an apt use case for our estimator.
 The BAO feature is a peak in clustering on large scales, $\sim$150 Mpc ($\sim$100\hmpc), making it less sensitive to small-scale astrophysical effects.
 It is one of the best tools for constraining cosmological models, in particular the distance-redshift relation \citep{Kazin2010, Anderson2012, Anderson2014, Alam2016}.
-\KSF{what else do I need to cite for BAO?}
+\KSF{what else do I need to cite for BAO? cite eisenstein2005!}
 
 We base our BAO analysis on the method of the BOSS DR10 and 11 analysis \citep{Anderson2014}.
 We estimate the spherically averaged 3-dimensional correlation function, $\bld{\hat{\xi}}(r)$, where $r$ is the separation between pairs.
@@ -454,7 +462,7 @@ With isotropic analyses, there is a degeneracy between $D_\mathrm{A}$ and $H$, s
 Our estimator could straightforwardly perform an estimate of the anisotropic correlation function, but for demonstration purposes we perform an isotropic analysis here and focus on the recovered value of $\alpha$.
 
 In standard practice, the fitting function used to determine the value of $\alpha$ is 
-\KSF{should $\xi$ here should be bold? different than earlier because here it's written as a function of r - so for a given r, it returns a single value. but given a set of r values, it's a vector...}
+\KSF{should $\xi$ here should be bold? different than earlier because here it's written as a function of r - so for a given r, it returns a single value. but given a set of r values, it's a vector... NOT BOLD! unbold here. and in figure legend.}
 \begin{equation}
 \bld{\xi}^{\mathrm{fit}}(r) = B^2 \bld{\xi}^{\mathrm{mod}}(\alpha r) + \frac{a_1}{r^2} + \frac{a_2}{r} + a_3
 \end{equation}
@@ -485,7 +493,7 @@ In practice, we apply an iterative procedure to converge at our best estimate $\
 \begin{figure}[ht]
 \centering
     \includegraphics[width=0.8\textwidth]{bao_bases}
-    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $\bld{\xi}^\mathrm{mod}(\alpha_\mathrm{guess}\,r)$ term (darkest green) is the correlation function computed using fiducial model. The $\frac{\dd \bld{\xi}^\mathrm{mod}(\alpha_\mathrm{guess}\,r)}{\dd \alpha}$ term (second-to-darkest green) is the derivative of this model with respect to $\alpha$, which allows for the direct estimation of this scale dilation parameter. \KSF{what do about this inline fraction?} The other three terms (lighter greens) are nuisance parameters to fit the broadband shape. Here we show the basis functions with arbitrary scaling. \KSF{as these are shown scaled slightly differently than the $k_i$ values adopted for the fitting, should i still show the $k$s in the legend? or explain this instead of just saying ``arbitrary scaling''?} \KSF{should i leave ``guess'' in the legend labels, or remove for simplicity?}}
+    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $\bld{\xi}^\mathrm{mod}(\alpha_\mathrm{guess}\,r)$ term (darkest green) is the correlation function computed using fiducial model. The derivative term (second-to-darkest green) is the derivative of this model with respect to $\alpha$, which allows for the direct estimation of this scale dilation parameter. \KSF{what do about this inline fraction?} The other three terms (lighter greens) are nuisance parameters to fit the broadband shape. Here we show the basis functions with arbitrary scaling. \KSF{as these are shown scaled slightly differently than the $k_i$ values adopted for the fitting, should i still show the $k$s in the legend? or explain this instead of just saying ``arbitrary scaling''?} \KSF{should i leave ``guess'' in the legend labels, or remove for simplicity?} \KSF{fix line alignment in legend}} \KSF{add parenthetical to y axis (arbitrary units) \KSF{drop ks in legend}} \KSF{alpha guess should just be alpha}
     \label{fig:bao_bases}
 \end{figure}
 
@@ -513,10 +521,10 @@ This is critical for the efficient computation of a precise covariance matrix, a
     \caption{Estimation of the correlation function using our estimator with basis functions based on the BAO fitting function (orange dot-dashed). The line is the mean of the final estimate from the iteration procedure for 1000 mocks, and the shaded region is the $1\sigma$ variation. We also show the standard Landy-Szalay estimator, displayed as a tophat function (blue), as well as the true input correlation function (black). The basis functions are the same as those shown in Figure~\ref{fig:bao_bases}, with arbitrary scaling.}
 \end{figure}
 
-We note that these basis functions are significantly different than the tophat or B-spline bases previously explored, mainly because they are not localized.
+We note that these basis functions are significantly different than the tophat or B-spline bases previously explored.
+One important difference is that they are not localized.
 This means that data at all scales could contribute to all basis functions.
-It is then critical to ensure that the final parameter estimate does not rely on the range of scales chosen.
-We have confirmed that in this application, the result is robust to the chosen range as long as the scales cover the range where the feature of interest sits. \KSF{Need to check this again \& update}
+It is then critical for the investigator to ensure that the range of scales chosen is reasonable for the scientific problem at hand and that the final estimate of the parameter of interest does not depend on the details of this choice.
 
 \KSF{I will flesh out this paragraph once I perform the traditional method!}
 \Est with the BAO bases gives us an estimate for $\alpha$ for each of the 1000 mock catalogs.
@@ -529,20 +537,23 @@ Our estimate is more accurate and precise \dots
 
 \section{Discussion} \label{sec:discuss}
 
-\subsection{Relationship to Existing Estimators}
+\KSF{add initial paragraph about what we have done. This paper presented a method that estimates the correlation funciton without binning... reproduces orig results.... more expressive... way i would say things in a talk. could call this subsection ``summary of results''}
+
+\subsection{Relationship to Other Modifications of \cf Estimators}
 \label{sec:otherest}
 
-\Est has properties similar to existing estimators, including kernel density estimators and the marked correlation function.
-With the proper choice of basis functions, \est can in fact produce both of these estimators; it is more general than either of them.
+\Est is correct ...  
+However, on the surface it appears similar to other two-point function projects, including kernel density estimators and the marked correlation function.
+With the proper choice of basis functions, \est can in fact produce both of these estimators; it is more general than either of them. \KSF{not true; our inverse term breaks this. TODO: fix.}
+\KSF{look similar, but ours solves a different problem.}
 
 Kernel density estimation (KDE) is a class of methods for estimating a probability density function from a set of data.
 KDE methods essentially smooth the data with a given kernel, often a Gaussian.
-\KSF{should i cite the original KDE papers from the 50s and 60s? or not necessary bc not the focus?}
 This is useful when we want to reconstruct a distribution without making many assumptions about the data, as is required in parametric methods.
 KDEs have found use in many areas of astrophyics, for example to measure the 21cm power spectrum with reduced foreground contamination \citep{Trott2019}, and to estimate luminosity functions with superior performance compared to binned methods \citep{Yuan2020}.
 \KSF{there are others, should i list more citations? without describing?}
 \cite{Hatfield2016} uses a KDE approach to estimate the angular correlation function, in order to address the issues of information loss and arbitrary bin choice inherent to binning; they optimize for the kernel choice, and find a correlation function consistant with that of the binned method.
-\KSF{I couldnt find any other papers that use KDEs on correlation functions, but i found this one by chance. more to say here? the paper doesn't draw strong conclusions from this.}
+\KSF{because kde approaches dont involve the inverse tensor, they will give biased answers. (; they're not unbiased in any limit. more biased than LS in all contexts)}
 
 Specifically, kernel density estimators take the contribution of each data point to be a kernel function centered on that value, and sum these to determine the full distribution.
 In contrast, \est projects each data point onto fixed basis functions, which are distinct from the typical understanding of kernels.
@@ -588,7 +599,7 @@ where we define
 \end{equation}
 This formulation could be extended to nearly any linear combination of pair counts.
 The estimator of \cite{VargasMagana2013}, for instance, selects the optimal combination of pair counts; our estimators could be combined to create an even more generalized estimator.
-\KSF{should i mention the fact the other possibilities for the normalization term? e.g. some of the terms in V-M include DD in the denom, and there's an estimator with DRsquared in the denom. but i think these are straightforward to reformulate in our generalization?}
+\KSF{should i mention the fact the other possibilities for the normalization term? e.g. some of the terms in V-M include DD in the denom, and there's an estimator with DRsquared in the denom. but i think these are straightforward to reformulate in our generalization? A: when have strange powers of these terms, we don't know.}
 We note that the continous form of these estimators can be extended to cross-correlations in a straightforward way as expected.
 
 
@@ -609,10 +620,12 @@ Though the performance at the time of estimation may be slower than the traditio
 
 We detail a number of implementation choices here.
 Our formulation of \est requires the inverse of the random-random tensor $\TT{RR}$ to compute the amplitudes (Equation~\ref{eq:amplitude}).
-However, we don't compute this inverse directly, as can be unstable, and is not in fact the end result we are interested in: we want the dot product between $\TT{RR}\inv$ and the numerator $v$ of the estimator.
+However, we don't compute this inverse directly, as can be unstable, and is not in fact the end result we are interested in: we want the dot product between $\TT{RR}\inv$ and the numerator $\vv{}$ of the estimator.
 For this reason, we use the ``solve'' operation which computes the solution $\bld{a}$ of the well-determined matrix equation $\TT{RR}\,\bld{a}=\bld{v}$.
+\KSF{talk about condition number. Numerical precision will go down as condition number rises. If the condition number of the tensor gets large, then a rescaling of the basis functions can improve stability. }
 
 \KSF{What else should go in this section?}
+\KSF{tho don't need to choose binning, need to choose basis functions. we've actually increased the number of choices that the investigator can make. advantage is make it more expresive. (put this at beginning paragraph of discussion)}
 
 \subsection{Effect on Covariance Matrix Estimation}
 \label{sec:covariance}
@@ -622,18 +635,19 @@ This is critical when estimating the covariance matrix, which is necessary for p
 The covariance matrix is difficult to compute analytically, though there is promising progress on this front (e.g. \citealt{Wadekar2020}).
 For major analyses, it is usually estimated by evaluating the \cf on a large number of mock catalogs and computing the covariance between the bins (e.g. \citealt{Reid2010}; \citealt{Anderson2014}).
 The unbiased estimator for the sample covariance matrix is (e.g. \citealt{Anderson2003})
+\KSF{square brackets around C ML}
 \begin{equation}
 %using \big and \bigg instead of \left and \right because the different sides give different sizes with the latter two
 \bld{\hat{C}}^\mathrm{ML}_{ij} = \frac{1}{\NN{mocks}-1} \sum_{q=1}^{\NN{mocks}} \bigg( \big[\bld{\xi}_q \big]_i - \bar{\bld{\xi}}_i \bigg) \bigg([\bld{\xi}_q \big]_j - \bar{\bld{\xi}}_j \bigg)\T,
 \end{equation}
-where $q$ denotes the index of the mock, $i$ and $j$ denote the index of the bin or component, $\bld{\xi}$ denotes the estimate in that bin for that mock, and $\bar{\bld{\xi}}$ denotes the mean value of the estimate in that bin across the mocks, where we have omitted the hat for clarity. \KSF{i removed the hats here because they didn't play nicely w the average bar; thoughts?}
+where $q$ denotes the index of the mock, $i$ and $j$ denote the index of the bin or component, $\bld{\xi}$ denotes the estimate in that bin for that mock, and $\bar{\bld{\xi}}$ denotes the mean value of the estimate in that bin across the mocks, where we have omitted the hat for clarity. \KSF{i removed the hats here because they didn't play nicely w the average bar; thoughts? could do angle brackets...}
 To get an unbiased estimate of the inverse covariance matrix, we require a correction factor, as the inverse of an unbiased estimator is not necessarily unbiased.
 The unbiased estimator for the sample inverse covariance matrix can be shown to be \citep{Hartlap2007}
 \begin{equation}
 \bld{\hat{C}}\inv = \frac{\NN{mocks}-\NN{bins}-2}{\NN{mocks}-1} \left( \bld{\hat{C}}^\mathrm{ML} \right) \inv.
 \end{equation}
+\KSF{only unbiased if things are gaussian. say standard est, instead of unbiased.}
 
-%This prefactor correction results in the  propagates to the variance in 
 The variance in the elements of this estimator then have a dependence on $\NN{mocks}$ and $\NN{bins}$.
 This propagates to the derived cosmological parameters, resulting in an overestimation of the error bars (\citealt{Hartlap2007}; \citealt{Dodelson2013} \citealt{Percival2014}; \citealt{TaylorJoachimi2014}).
 Assuming that $\NN{mocks} >> \NN{bins}$ (and both much larger than the number of parameters to be estimated), and that the measurements are Gaussian distribued, the error bars are inflated by a factor of $(1 + \NN{bins}/\NN{mocks})$ (i.e., the true constraints are tighter than the derived ones).
@@ -644,6 +658,7 @@ For the Baryon Oscillation Spectroscopic Survey (BOSS, \citealt{Dawson2013}) DR9
 Future surveys will have more costly requirements on mock catalogs, with larger simulations necessary to cover the larger survey volumes.
 \KSF{I went down some rabbit holes trying to find the numbers for DES and other surveys, it's not as clear. Is it ok as is or should I keep digging?}
 \KSF{it turns out that at least for DR14, some approximate method was used, so they weren't full cosmo sims and didn't take that long. should i try to figure out which analyses still used/use full sims to cite? any leads here?}
+\KSF{surveys are thinking about approximate mocks and different strategies, but they could change the number of mocks needed over night by changing the number of basis. if mocks are good enough, then just get a more accurate estimate.}
 
 An alternative to increasing $\NN{mocks}$ is decreasing $\NN{bins}$ to achieve the same error on precision.
 In the standard method, this is shown to \emph{increase} the statistical error, albeit only slightly \citep{Percival2014}.
@@ -654,7 +669,6 @@ We have shown that we can use \est to estimate the \cf using fewer components an
 This means that we can safely reduce $\NN{bins}$, or in our case, the number $K$ of components (or basis functions).
 The covariance matrix will be the covariance between these components.
 To then achieve the same precision on the error on the cosmological parameters, a lower value of $\NN{mocks}$ becomes possible.
-\KSF{I think the result of discussions was that there wasn't a good way of showing this without propagating all the way to cosmological parameters. Would love a figure showing lower covariance errors but not sure how without full propagation}
 This will significantly reduce requirements on mock catalog construction, which will be particularly important for upcoming large surveys. 
 
 Another issue with the covariance of the standard estimator is that the uncertainty is highly correlated across bins.
@@ -673,7 +687,7 @@ This would be particularly important for unlocalized basis functions such as the
 The formulation of \est opens up many possibilities for extracting information from the correlation function.
 The most straightforward applications are standard basis functions or linearizeable astrophysical models, as we have shown here.
 Other applications for the direct estimation of cosmological parameters could include the growth rate of cosmic structure $f$ \citep{Satpathy2016, Reid2018} and primordial non-Gaussianity in the local density field $f^{local}_{NL}$ \citep{Karagiannis2014}.
-\KSF{mention idea of doing full cosmo model analysis by taking derivs wrt cosmological params? cool but less connected to citeable papers perhaps. or do you know any relevant papers to look at?}
+\KSF{mention idea of doing full cosmo model analysis by taking derivs wrt cosmological params? cool but less connected to citeable papers perhaps. or do you know any relevant papers to look at? A: mention this, don't need to cite anything. also HOD params}
 
 We can take our estimator a step further by choosing basis functions that depend not only on the separation between tracer pairs, but also on the properties of the tracers themselves.
 One such application is the redshift dependence of the Alcock-Paczynski effect \citep{AlcockPaczynski1979}, which can be used to constrain the matter density $\Omega_m$ and the dark energy equation of state parameter $w$ \citep{Li2016}.
@@ -682,7 +696,7 @@ The basis functions $f$ in this case would take the form
     \ff_k(\GG{n}, \GG{n'}) = \ff_k(|\bld{r}_n - \bld{r}_{n'}|, z_n, z_{n'}),
 \end{equation}
 where $z$ is the redshift of tracer $n$ or $n'$.
-Another potential use case is the luminosity and color dependence of galaxy clustering, which can be used to understand the relationship between galaxy formation and the LSS (e.g. \citealt{Zehavi2011}). \KSF{do i need to cite more here?}
+Another potential use case is the luminosity and color dependence of galaxy clustering, which can be used to understand the relationship between galaxy formation and the LSS (e.g. \citealt{Zehavi2011}). \KSF{do i need to cite more here? A: yes, big area, cite more}
 This could be extended to other galaxy properties; \est provides the flexibility to explore a high-dimensional parameter space, while binned methods become quickly limited by number statistics as one tries to include more parameters.
 
 Beyond these standard use cases, the estimator gives us the opportunity to investigate more subtle or exotic signals which are anomalous with respect to our conventional models.
@@ -696,17 +710,14 @@ While these effects would be highly degenerate with systematics, our estimator c
 Finally, our estimator can be directly related to a power spectrum analysis.
 We could choose a Fourier basis as our set of continuous functions.
 This would allow us to directly project the data onto Fourier modes.
-This represents a step towards unifying the correlation function and the power spectrum. \KSF{need to elaborate here; pointers on what to say appreciated!}
+This represents a step towards unifying the correlation function and the power spectrum.
 
-
-\section{Summary}
-
-\KSF{TODO: write short summary. probably. if we decide it is useful and not too repetitive.}
 
 \acknowledgements
 KSF was supported by the NASA FINESST grant [grant number] during the completion of this work.
 The authors thank Jeremy Tinker and Michael Blanton for helpful discussions, Roman Scoccimarro for insightful conversation, and the members of the Flatiron Astronomical Data Group for useful feedback.
 KSF would like to acknowledge significant code feedback and support from Manodeep Sinha, as well as Lehman Garrison.
+\KSF{Alex Barnett, David Grier, Lucinda Perez (Goddard people?)}
 KSF thanks Drew Jamieson, Chris Lovell for helpful discussion...
 All of the code used in this paper is available open-source at \texttt{github.com/kstoreyf/Corrfunc} and \texttt{github.com/kstoreyf/continuous-estimator}. 
 
@@ -716,12 +727,12 @@ All of the code used in this paper is available open-source at \texttt{github.co
 The estimate of the \cf with \est should not depend on the scaling of the chosen basis functions.
 Thus we expect \est to be invariant under affine transformations of the basis functions, meaning transformations that preserve collinearity and distance ratios; the following demonstrates this affine invariance.
 
-We represent the affine transformation by a transformation matrix $\bld{M}$ that modifies the basis functions $\ff$, such that 
+We represent the affine transformation by an invertible transformation matrix $\bld{M}$ that modifies the basis functions $\ff$, such that 
 \begin{equation}
 \ff' \leftarrow \bld{M}\,\ff
 \end{equation}
 where the prime indicates our affine-transformed basis.
-\KSF{im also using primes for indices, looks a bit confusing; another notation for this?}
+We choose $\bld{M}$ to be invertible to ensure the two bases have the same expressive capacity.
 Then in the primed basis, the pair counts become
 \begin{eqnarray}\displaystyle
 \vv{DD}' &=& \adjustlimits \sum_{n} \sum_{n'} \ff_{n n'}' = \sum_{n n'} \bld{M}\,\ff_{n n'} = \bld{M}\,\vv{DD}
@@ -757,12 +768,7 @@ and the estimator $\bld{\hat{\xi}}'$ in the primed basis, using the shorthand $\
 &=& \bld{\hat{\xi}}_{ll'}.
 \end{eqnarray}
 Thus after an affine transformation of the basis function, the resulting estimator is equivalent to the estimator in the original basis.
-
-We note that this requires $\bld{M}$ be invertible.
-However, any two equivalent bases must be related by the inverse of a transformation matrix, so this requirement is already satisfied.
-\KSF{I don't understand what i wrote here, what was i getting at?}
-
-\KSF{what more to say about this?}
+The method is shown to be affine invariant.
 
 
 \section{Computing the Random-Random Terms Analytically}\label{sec:analytic}
@@ -774,10 +780,10 @@ Here we derive this, and then derive the equivalent for our continuous-basis $\v
 Our goal is to estimate the number of pairs in a periodic cubic volume filled uniformly with tracers, $\vv{RR}^\mathrm{ana}$. 
 We first consider an annulus indexed by $k$ around a single galaxy, with radial edges $g_k$ and $h_k$. 
 This annulus has a volume $V_k$.
-Taking the box to have an average number density $\bar{n}$, the number of galaxies expected in the annulus is $N_k = V_k \bar{n}$, and thus our selected galaxy contributes $N_k$ pairs to the count.   
-\KSF{do i put mathspaces between multiplications when there's already a parenthesis?}
-We do this for each of the $\NN{D}-1$ other galaxies, and after including a factor of $\frac{1}{2}$ accounts for the fact that this double-counts pairs, we find a total pair count of $\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{2}(\NN{D}-1) N_k = \frac{1}{2}(\NN{D}-1) V_k \bar{n}$.
+Taking the box to have an average number density $\bar{n}$, the number of galaxies expected in the annulus is $N_k = V_k \, \bar{n}$, and thus our selected galaxy contributes $N_k$ pairs to the count.   
+We do this for each of the $\NN{D}-1$ other galaxies, and after including a factor of $\frac{1}{2}$ accounts for the fact that this double-counts pairs, we find a total pair count of $\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{2}(\NN{D}-1) N_k = \frac{1}{2}(\NN{D}-1) V_k \, \bar{n}$.
 For a cubic volume, $\bar{n} = \NN{D}/L^3$, so our final pair count for the annulus is 
+\KSF{add some thinspaces around here}
 \begin{equation}
 \left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{2} \frac{\NN{D}}{L^3} (\NN{D}-1) V_k.
 \end{equation}
@@ -834,7 +840,7 @@ This gives us our estimate $\hat{\alpha}$ of the scale dilation parameter from t
 \end{equation}
 where $k_0$ is the chosen scaling parameter for the derivative basis function as in Equation~\ref{eq:baoiter_fit}.
 
-We choose the convergence criterion to be when the fractional change in $\hat{\alpha}$ between subsequent iterations falls below a threshold, $c_\mathrm{thresh}$ \KSF{name for this variable?},
+We choose the convergence criterion to be when the fractional change in $\hat{\alpha}$ between subsequent iterations falls below a threshold, $c_\mathrm{thresh}$,
 \begin{equation}
     \left| \frac{\hat{\alpha}_i - \hat{\alpha}_{i-1}}{\hat{\alpha}_i} \right| < c_\mathrm{thresh}.
 \end{equation}
@@ -844,7 +850,6 @@ To achieve convergence, we need to be careful in choosing our next $\alpha_{\mat
 If it is far from the best estimate, $C_i$ will be large, and our resulting estimate $\hat{\alpha}_{i}$ will be inaccurate.
 We thus include a damping parameter $\eta$ between 0 and 1 to improve our convergence.
 Our next guess is then
-\KSF{what should the assignment symbol be here?}
 \begin{equation}
     \alpha_{\mathrm{guess},i+1} \leftarrow \alpha_{\mathrm{guess},i} + \eta\,C_i\,k_0.
 \end{equation}
@@ -855,7 +860,6 @@ We check if our estimate is jumping over the true value by checking if the error
 \subsection{Implementation Details}
 
 We implement the partial derivative in the fitting function as a finite difference between model with the our chosen value of $\alpha_\mathrm{guess}$, and the model with a value shifted by a small $\Delta \alpha$,
-\KSF{what should the assignment symbol be here?}
 \begin{equation}
     \frac{\dd \xi^\mathrm{mod}(\alpha s)}{\dd \alpha} \leftarrow \frac{\xi^\mathrm{mod}(\alpha_\mathrm{guess} s) - \xi^\mathrm{mod}((\alpha_\mathrm{guess} + \Delta \alpha)s)}{\Delta \alpha}.
 \end{equation}
