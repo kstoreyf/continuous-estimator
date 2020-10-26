@@ -39,6 +39,7 @@
 \newcommand{\LS}{LS\xspace}
 \newcommand{\foreign}[1]{\textsl{#1}}
 \newcommand{\etc}{\foreign{etc}}
+\newcommand{\eqt}[1]{equation~(\ref{#1})}
 
 % math
 \newcommand{\inv}{^{-1}}
@@ -92,17 +93,18 @@
 
 \begin{abstract}\noindent
 % Context / Aims
-The two-point correlation function (\cf) is the most important statistic in structure formation, used to measure the clustering of density field tracers (e.g. galaxies).
+\KSF{figure out whether should be correlation-function estimator w hyphen! A: i believe no, bc no ambiguity (https://apastyle.apa.org/learn/faqs/when-use-hyphen)}
+The two-point correlation function (\cf) is the most important statistic in structure formation, used to measure the clustering of density field tracers (e.g., galaxies).
 Current estimators of the 2pcf, including the standard Landy--Szalay (\LS) estimator, evaluate the \cf in hard-edged bins of separation between objects; this is inappropriate for the science context and results in a loss of information and a poor trade-off between bias and variance.
 %Methods
 We present a new estimator for the \cf, \emph{\est}, which generalizes \LS to a continuous representation and obviates binning in separation or any other pair property. 
 Our estimator replaces the binned pair counts with a linear superposition of basis functions; it outputs the best-fit linear combination of basis functions to describe the \cf. 
 It is closely related to the estimator used in linear least-squares fitting. 
-The choice of basis can take into account the expected form of the \cf, as well as its dependence on properties other than separation.
+The choice of basis can take into account the expected form of the \cf, as well as its dependence on properties other than pair separation (e.g., stellar mass or sky position).
 %Results
-We show that \est with a choice of cubic spline basis functions can perform an estimate of the clustering of artificial data that better represents the smoothness and shape of the \cf compared to \LS.
-We further demonstrate that the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale, using a small number of scientifically motivated basis functions.
-Critically, the reduction in the number of basis functions will lead to a reduction in the number of mock catalogs required for covariance estimation; this is currently the limiting step in \cf measurements.
+We show that \est with a choice of cubic-spline basis functions better represents the smoothness and shape of the \cf compared to \LS.
+We further demonstrate that the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale, using a small number of physically motivated basis functions.
+Critically, the reduction in the number of basis functions leads to a reduction in the number of mock catalogs required for covariance estimation; this is currently the limiting step in many \cf measurements.
 We discuss applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and investigating potential inhomogeneities or anisotropies in clustering.
 \end{abstract}
 
@@ -194,7 +196,7 @@ Let's assume we have a data catalog with $N_D$ objects within a sky volume.
 We also require a random catalog with $N_R$ objects distributed uniformly throughout the same volume.
 We can define a set of separation bins which we will use to estimate the \cf at various scales.
 We are then ready to sum in each bin the relevant pairs of objects within and across our catalogs.
-In standard notation, these pair counts are written as $DD$, $DR$, and $RR$, as in Equation~\ref{eq:lsintro}.
+In standard notation, these pair counts are written as $DD$, $DR$, and $RR$, as in \eqt{eq:lsintro}.
 To clarify that these are in fact vectors, with length $K$ where $K$ is the number of bins, we use the symbol $\vv{}$; then, for example, the data--data pair counts $DD$ become $\vv{DD}$.
 We can then write the \LS estimator as 
 \begin{equation} \label{eq:ls}
@@ -244,30 +246,31 @@ The analogy is clear in the so-called natural estimator of the \cf, $\bld{\hat{\
 
 We generalize the \LS estimator defined above in Equations~\ref{eq:ls1}-\ref{eq:ls3} by analogy with least-squares fitting.
 We generalize the indicator function $i$ to any function $\ff$, which returns a vector of length $K$ where $K$ is the number of basis functions.
-We further generalize the arguments of the function to any properties of the galaxies, rather than just the separation between pairs; we call $\GG{}$ the data payload for a single galaxy.
+We further generalize the arguments of the function to any properties of the galaxy pair, rather than just the separation between pairs; we call $\GG{ij}$ the data payload for the pair of galaxies $i$ and $j$.
 This gives us, instead of pair counts, a vector of projections of the basis functions, $\vv{}$.
 These projection vectors are defined as
 \begin{eqnarray}\displaystyle
-    \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'} \ff(\GG{n}, \GG{n'}) \\
-    \vv{DR} &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n}, \GG{m}) \\
-    \vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'} \ff(\GG{m}, \GG{m'}) \\
-    \TT{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'} \ff(\GG{m}, \GG{m'}) \cdot \ff\T(\GG{m}, \GG{m'}) \label{eq:qq_proj} ~,
+    \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'} \ff(\GG{n n'}) \\
+    \vv{DR} &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n m}) \\
+    \vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'} \ff(\GG{m m'}) \\
+    \TT{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'} \ff(\GG{m m'}) \cdot \ff\T(\GG{m}, \GG{m'}) \label{eq:qq_proj} ~,
 \end{eqnarray}
 where the summation notation and prefactors are the same as explained for the standard \LS estimator.
 
 We can now define \est as
 \begin{equation}
-    \hat{\xi}(\GG{l}, \GG{l'}) \equiv \bld{a}\T \cdot \ff(\GG{l}, \GG{l'}) \label{eq:xi_proj} ~,
+    \hat{\xi}(\GG{ll'}) \equiv \bld{a}\T \cdot \ff(\GG{ll'}) \label{eq:xi_proj} ~,
 \end{equation}
 \KSF{on bolding $\xi$ and f (aka whether they are vectors): i think here it should be unbolded, because this formula will give a single value for the correlation function given those galaxy properties. it was bold before. i think when we are just quoting $\bld{\hat{\xi}}$ it's bold, but when it's a funciton of anything else it's e.g. $\hat{\xi}(r)$. agree?}
 where $\bld{a}$ is a $K$-vector of the computed \emph{amplitudes} of the basis functions
 \begin{equation}
     \bld{a} \equiv \TT{RR}\inv \cdot (\vv{DD} - 2\,\vv{DR} + \vv{RR}) \label{eq:amplitude}
 \end{equation}
-and $\GG{l}$ and $\GG{l'}$ contain the data values at which to evaluate $\bld{\hat{\xi}}$.
-We emphasize that these are not real datapoints, but instead allow us to evaluate the \cf at any set of parameters.
-In the standard case, $\GG{l}$ and $\GG{l'}$ would effectively be an imaginary pair of galaxies that has a separate $r$ at which we want to evaluate $\xi$, and we would compute $\bld{\hat{\xi}}$ for such a pair at every separation we are interested in.
-With our general formulation, we could choose basis functions that depend on other galaxy properties, to investigate the effect of these on the \cf; then, we would also choose each $\GG{l}$ and $\GG{l'}$ pair to have values of properties at which we want to evaluate $\bld{\hat{\xi}}$. 
+and $\GG{ll'}$ contain the data values at which to evaluate $\bld{\hat{\xi}}$.
+We emphasize that this is not a real pair of galaxies, but instead allow us to evaluate the \cf at any set of parameters.
+In the standard case, $\GG{ll'}$ would effectively be an imaginary pair of galaxies that has a separation $r$ at which we want to evaluate $\xi$, and we would compute $\bld{\hat{\xi}}$ for such a pair at every separation we are interested in.
+With our general formulation, we could choose basis functions that depend on other galaxy properties, to investigate the effect of these on the \cf; then, we would also choose each $\GG{ll'}$ pair to have values of properties at which we want to evaluate $\bld{\hat{\xi}}$. 
+
 In the rest of this \documentname, however, we will only take into account the separation between pairs, and we will write $\hat{\xi}(r)$.
 
 \Est can be straightforwardly generalized to cross-correlations between two datasets.
@@ -275,7 +278,7 @@ In this case, we consider datasets $D_1$ and $D_2$, and associated random catalo
 We then have cross-correlations rather than auto-correlations for the data-data and random-random terms, and two different data-random terms, crossing each dataset with the opposite random catalog. 
 The data-data term becomes 
 \begin{equation}
-    \vv{D_1 D_2} \equiv \frac{1}{\NN{D_1}\,\NN{D_2}} \sum_{n_1} \sum_{n_2} \ff(\GG{n_1}, \GG{n_2}) ~,
+    \vv{D_1 D_2} \equiv \frac{1}{\NN{D_1}\,\NN{D_2}} \sum_{n_1} \sum_{n_2} \ff(\GG{n_1 n_2}) ~,
 \end{equation}
 where $n_1$ and $n_2$ index the data points in each catalog, and the normalization factor is now simply the product of catalog sizes as we are no longer concerned with double-counting.
 The other terms ($\vv{D_1 R_2}$, $\vv{D_2 R_1}$, $\vv{R_1 R_2}$, $\TT{R_1 R_2}$) generalize as one would expect.
@@ -283,13 +286,13 @@ The amplitudes then become
 \begin{equation}\displaystyle
     \bld{a} \equiv \TT{R_1 R_2}\inv \cdot (\vv{D_1 D_2} - \vv{D_1 R_2} - \vv{D_2 R_1} + \vv{R_1 R_2})
  \end{equation}
-and we use this to compute the estimator as in Equation~\ref{eq:xi_proj}.
+and we use this to compute the estimator as in \eqt{eq:xi_proj}.
 
 If we consider only the pair separation, and make a proper choice of $\ff$, \est reduces to the \LS estimator.
-Explicitly, from our full galaxy pair data $\GG{n}$ and $\GG{n'}$, we can use only their separation,  $|\bld{r}_n - \bld{r}_{n'}|$.
+Explicitly, from our full galaxy pair data $\GG{n n'}$, we can use only their separation,  $|\bld{r}_n - \bld{r}_{n'}|$.
 We can then define a set of $K$ basis functions $\ff$ as
 \begin{equation}
-\ff_k(\GG{n}, \GG{n'}) =  i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) ~.
+\ff_k(\GG{n n'}) =  i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) ~.
 \end{equation}
 This is the common tophat (or rectangular) function; the index $k$ denotes a particular bin in separation, and here also indexes the basis functions, as each top-hat is a separate basis function.
 In this case the $\vv{DD}$, $\vv{DR}$ and $\vv{RR}$ projection vectors simply become binned pair counts, with bin edges $g_k$ and $h_k$ as before.
@@ -367,7 +370,7 @@ This demonstrates that the standard tophat estimator is not a good representatio
 
 \centering
     \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_spline}
-    \caption{A comparison between \est with a cubic spline basis function (thick red) and a standard tophat basis (thin blue). The top panel shows the basis functions used for each measurement. The middle panel shows the mean of the estimated correlation functions for each of the 1000 mock catalogs compared to the true input \cf (thin black); the shaded region is the standard deviation. The lower panel shows the absolute error between the estimate and true \cf. It is clear that the spline basis function results in a correlation function that is a better representation of the true \cf in its shape and smoothness.}
+    \caption{A comparison between \est with a cubic-spline basis function (thick red) and a standard tophat basis (thin blue). The top panel shows the basis functions used for each measurement. The middle panel shows the mean of the estimated correlation functions for each of the 1000 mock catalogs compared to the true input \cf (thin black); the shaded region is the standard deviation. The lower panel shows the absolute error between the estimate and true \cf. It is clear that the spline basis function results in a correlation function that is a better representation of the true \cf in its shape and smoothness.}
     \label{fig:spline}
 \end{figure}
 
@@ -377,14 +380,14 @@ They have the nice property that the functions and their derivatives can be cont
 Further, B-splines are well-localized, which provides a more direct comparison to the typical tophat basis (which is entirely localized).
 For this demonstration we use fourth-order B-splines, which constitute the set of basis functions for a cubic spline, as they are the lowest-order spline to have a continuous first derivative.
 
-We compare the estimator with a cubic spline basis to the standard estimator, reformulated as continuous functions using a tophat basis; the results are shown in Figure~\ref{fig:spline}.
+We compare the estimator with a cubic-spline basis to the standard estimator, reformulated as continuous functions using a tophat basis; the results are shown in Figure~\ref{fig:spline}.
 The basis functions are shown in the top panel of the figure.
 We use the same tophat basis as above.
-For the cubic spline basis, we use the same $r$-range and number of basis functions, and knots chosen to evenly span the range. 
-The cubic spline bases on the edge have different shapes such that they remain normalized; we note that generally, one should choose the basis functions such that the range of the \cf that is of interest does not depend on the range of the basis functions.
+For the cubic-spline basis, we use the same $r$-range and number of basis functions, and knots chosen to evenly span the range. 
+The cubic-spline bases on the edge have different shapes such that they remain normalized; we note that generally, one should choose the basis functions such that the range of the \cf that is of interest does not depend on the range of the basis functions.
 
-The estimator using the cubic spline basis clearly produces a better fit to the true correlation function in its shape and smoothness at every point across the scale range, compared to the estimator using the tophat basis.
-The bottom panel shows the error with respect to the truth; the cubic spline estimator is more generally more accurate, and straightforward to compare to the truth (or model) at every scale.
+The estimator using the cubic-spline basis clearly produces a better fit to the true correlation function in its shape and smoothness at every point across the scale range, compared to the estimator using the tophat basis.
+The bottom panel shows the error with respect to the truth; the cubic-spline estimator is more generally more accurate, and straightforward to compare to the truth (or model) at every scale.
 On the other hand, in order to compare the binned correlation to a model, one must integrate the model over the bin range, though in practice the model is often just evaluated at the effective $r$ of each bin.
 This comparison demonstrates that there exist other sets of basis functions that produce better representations of the data compared to the standard tophat/binned estimator.
 The choice of a high-order spline may be useful for cases in which one wants a mostly localized yet representative estimate of the \cf, or smooth derivatives.
@@ -458,7 +461,7 @@ We apply our iterative estimation procedure to each of the 1000 mocks; the mean 
 We show the BAO basis functions in the top panel, as in Figure~\ref{fig:bao_bases}.
 We compare \est using the BAO bases with that using tophat bases, as in the previous sections.
 The correlation function estimated with the BAO bases clearly produces a more representative estimate at all scales.
-The estimate is also smoother than that produced using the cubic spline basis functions (Figure~\ref{fig:spline}).
+The estimate is also smoother than that produced using the cubic-spline basis functions (Figure~\ref{fig:spline}).
 More importantly, it is scientifically motivated: the estimator directly gives us the relative contributions of the terms of the BAO fitting functions.
 Further, the BAO-based estimate requires only five components, while the tophat basis requires 15 components (or bins, in the standard approach) in the same scale range.
 This is critical for the efficient computation of a precise covariance matrix, as the errors depend on the number of components used for the estimate, as described in Section~\ref{sec:covariance}.
@@ -498,7 +501,7 @@ This \documentname presented a method to estimate the two-point correlation func
 It generalizes the standard \cf estimator in a manner inspired by least-squares fitting: \est projects the data onto a set of user-chosen basis functions, and applies a normalization based on a random catalog.
 Using a set of artificial mock catalogs, we showed that our method exactly reproduces the results of the standard approach with the choice of tophat basis functions, but in a way that demonstrates what the estimator is really measuring, namely a constant amplitude of clustering at every point within a radial separation bin.
 \Est, however, has the capacity to be much more expressive than the standard estimator with a different choice of basis functions.
-We demonstrated its use with cubic spline basis functions, which results in a correlation function estimate that ios much more representative of the expected shape and smoothness of the \cf.
+We demonstrated its use with cubic-spline basis functions, which results in a correlation function estimate that ios much more representative of the expected shape and smoothness of the \cf.
 Further, \est can be tailored to the scientific use case; we apply to it a toy baryon acoustic feature analysis, choosing basis functions to be the terms of a modified BAO fitting function.
 This produced an estimate of the \cf that inherently reflects our beliefs about its form, and allowed us to directly estimate the scale dilation parameter with improved accuracy and precision compared to the standard estimator. \KSF{UPDATE this last line when analysis is done.}
 
@@ -565,7 +568,7 @@ We elaborate on the use cases for incorporating further tracer information into 
 \label{sec:beyondls}
 
 While we have formulated our estimator as a generalization of \LS, as this is the standard used in \cf analyses and has optimal properties under certain conditions, we can also reformulate it for other estimators.
-Our formulation currently requires a normalization term (i.e. denominator) based on the random--random counts; for \LS we replace this with our $\TT{RR}$ term (Equation~\ref{eq:qq_proj}).
+Our formulation currently requires a normalization term (i.e. denominator) based on the random--random counts; for \LS we replace this with our $\TT{RR}$ term (\eqt{eq:qq_proj}).
 This is also the case for the \cite{PeeblesHauser1974} (natural) estimator and the \cite{Hewett1982} estimator:
 \begin{eqnarray}
     %using text so hyphens show up properly
@@ -578,7 +581,7 @@ We can also straightforwardly generalize estimators which have a data--random cr
 \end{equation}
 where we define
 \begin{equation}
-    \TT{DR} = \frac{2}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n}, \GG{m}) \cdot \ff\T(\GG{n}, \GG{m}) ~.
+    \TT{DR} = \frac{2}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n m}) \cdot \ff\T(\GG{n m}) ~.
 \end{equation}
 
 The continous form of these estimators can be extended to cross-correlations in a straightforward way as expected.
@@ -603,7 +606,7 @@ Basis functions can also be input on a grid (of separation or any other property
 Though the performance at the time of estimation may be slower than the traditional estimator, the choice of basis may significantly save computational time in other areas, such as reducing the number of mock catalogs required for covariance matrix estimation; see Section~\ref{sec:covariance}.
 
 We detail a number of implementation choices here.
-Our formulation of \est requires the inverse of the random--random tensor $\TT{RR}$ to compute the amplitudes (Equation~\ref{eq:amplitude}).
+Our formulation of \est requires the inverse of the random--random tensor $\TT{RR}$ to compute the amplitudes (\eqt{eq:amplitude}).
 However, we don't compute this inverse directly, as can be unstable, and is not in fact the end result we are interested in: we want the dot product between $\TT{RR}\inv$ and the numerator $\vv{}$ of the estimator.
 For this reason, we use the ``solve'' operation which computes the solution $\bld{a}$ of the well-determined matrix equation $\TT{RR}\,\bld{a}=\bld{v}$.
 We also make sure to report the condition number of the tensor, as numerical precision decreases as the condition number rises.
@@ -683,7 +686,7 @@ Another class of applications involves a choice of basis functions that depend n
 One such use case is the redshift dependence of the Alcock--Paczynski effect \citep{AlcockPaczynski1979}, which can be used to constrain the matter density $\Omega_m$ and the dark energy equation of state parameter $w$ \citep{Li2016}.
 The basis functions $f$ in this case would take the form
 \begin{equation}
-    \ff_k(\GG{n}, \GG{n'}) = \ff_k(|\bld{r}_n - \bld{r}_{n'}|, z_n, z_{n'}) ~,
+    \ff_k(\GG{n n'}) = \ff_k(|\bld{r}_n - \bld{r}_{n'}|, z_n, z_{n'}) ~,
 \end{equation}
 where $z$ is the redshift of tracer $n$ or $n'$.
 \Est would then output a \cf that is a function of both separation and redshift, providing a continuous way to look at the redshift dependence of clustering.
@@ -736,7 +739,7 @@ Then in the primed basis, the pair counts become
 \\
 \vv{RR}' &=& \adjustlimits \sum_{m} \sum_{m'} \ff_{m m'}' = \sum_{m m'} \bld{M}\,\ff_{m m'} = \bld{M}\,\vv{RR} ~,
 \end{eqnarray}
-where we use the shorthand $\ff_{i j} = \ff(\GG{i}, \GG{j})$ and we have omitted the normalization factors for clarity.
+where we use the shorthand $\ff_{i j} = \ff(\GG{i j})$ and we have omitted the normalization factors for clarity.
 In the last step, we have factored $\bld{M}$ out of the summation and written the primed projection vectors in terms of the unprimed vectors. 
 
 For the random--random tensor we have
@@ -753,7 +756,7 @@ Then the amplitudes in the primed basis become
 &=& (\bld{M}\T)\inv \, \TT{RR}\inv \cdot [\vv{DD} - 2\,\vv{DR} + \vv{RR}] \\
 &=& (\bld{M}\T)\inv \, \bld{a}
 \end{eqnarray}
-and the estimator $\bld{\hat{\xi}}'$ in the primed basis, using the shorthand $\hat{\xi}_{ij} = \hat{\xi}(\GG{i}, \GG{j})$, is 
+and the estimator $\bld{\hat{\xi}}'$ in the primed basis, using the shorthand $\hat{\xi}_{ij} = \hat{\xi}(\GG{i j})$, is 
 \begin{eqnarray}\displaystyle
 \hat{\xi}_{ll'}' &=& \bld{a}\Tp \cdot \ff_{ll'} \\
 \hat{\xi}_{ll'}' &=& [(\bld{M}\T)\inv \, \bld{a}]\T \cdot (\bld{M}\,\ff_{ll'}) \\
@@ -768,7 +771,7 @@ The method is shown to be affine invariant.
 
 \section{Computing the Random--Random Terms Analytically}\label{sec:analytic}
 
-The autocorrelation of the random catalog is meant to approximate the window function. 
+The autocorrelation of the random catalog is meant to approximate the autocorrelation of the window function. 
 When we have a periodic cube, we can compute this $\vv{RR}$ term analytically in the standard approach to correlation function estimation.
 Here we derive this, and then derive the equivalent for our continuous-basis $\vv{RR}$ and $\TT{RR}$ terms.
 
@@ -788,12 +791,12 @@ We can represent this more generally as an integral,
 V_k = \int_{g_k}^{h_k} dV = 4\pi \int_{g_k}^{h_k} r^2 \, dr ~,
 \end{equation}
 where we assume spherical symmetry.
-We can easily generalize this to any basis function $\ff_k(r)$ that is only a function of $r$,
+We can generalize this to any basis function $\ff_k(r)$ that is only a function of $r$,
 \begin{equation}
 V_k = 4\pi  \int_{g_k}^{h_k} \ff_k(r) \, r^2 \, dr ~,
 \end{equation}
 where $k$ is now the index of the basis functions.
-We can see that this reduces to Equation~\ref{eq:vol_tophat} when $\ff(r)$ is the tophat function (returning 1 or 0 depending on whether or not $r$ falls between $g_k$ and $h_k$).
+This reduces to \eqt{eq:vol_tophat} when $\ff(r)$ is the tophat function (returning 1 or 0 depending on whether or not $r$ falls between $g_k$ and $h_k$).
 
 Combining the above equations gives us our full generalized analytic random--random projection vector $\vv{RR}^\mathrm{ana}$, which has elements
 \begin{equation}
@@ -802,18 +805,19 @@ Combining the above equations gives us our full generalized analytic random--ran
 where we are now integrating over all values of $r$ we are interested in from some $r_\mathrm{min}$ to $r_\mathrm{max}$.
 (For non-localized basis functions, the fully correct thing would be to integrate from $-\infty$ to $\infty$, though some bounds must be chosen in practice.)
 
-Based on the definition of $\TT{RR}$ in Equation~\ref{eq:qq_proj} as the outer product of the basis function vector and its transpose, we can see that the elements of the analytic random--random tensor $\TT{RR}^\mathrm{ana}$ can be written as
+Based on the definition of $\TT{RR}$ in \eqt{eq:qq_proj} as the sum of outer products of the basis function vectors and their transposes, the elements of the analytic random--random tensor $\TT{RR}^\mathrm{ana}$ can be written as
 \begin{equation}
 \left[ \TT{RR}^\mathrm{ana} \right]_{kk'} = \frac{1}{2} \, \frac{\NN{D}}{L^3} (\NN{D}-1) \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} \ff_k(r) \, \ff_{k'}(r) \, r^2 \, dr ~.
 \end{equation}
-This could be further generalized to account for basis functions that take other properties as input.
+This could be further generalized to account for basis functions that take properties other than pair separation as input.
 
 When considering a periodic box, the natural estimator is no longer biased, so we can also avoid computing the cross-correlation term $\vv{DR}$ and calculate the amplitudes as 
+\KSF{TODO: make sure this is true and cite!}
 \begin{equation}
 \bld{a}^{\mathrm{ana}} = \left[ \TT{RR}^\mathrm{ana} \right]\inv \cdot \vv{DD} ~.
 \end{equation}
-Looking back, it might have seemed strange that we use $\NN{D}$ in calculating the analytical term $\vv{RR}^\mathrm{ana}$, but we now see that this normalization prefactor cancels out with that of the $\vv{DD}$ term.
-Finally, we use these amplitudes $\bld{a}^{\mathrm{ana}}$ to compute the correlation function $\bld{\hat{\xi}}^{\mathrm{ana}}$ as before in Equation~\ref{eq:xi_proj}.
+Looking back, it might have seemed strange that we use $\NN{D}$ in calculating the analytic term $\vv{RR}^\mathrm{ana}$, but this normalization prefactor in fact cancels out with that of the $\vv{DD}$ term.
+Finally, we use these amplitudes $\bld{a}^{\mathrm{ana}}$ to compute the correlation function $\bld{\hat{\xi}}^{\mathrm{ana}}$ as before in \eqt{eq:xi_proj}.
 
 This analytic form for the continuous estimator could be extended to basis functions that depend on other tracer properties in addition to pair separation.
 In this case, one would have to integrate over these axes as well, but the idea is the same.
@@ -823,18 +827,18 @@ In this case, one would have to integrate over these axes as well, but the idea 
 
 \subsection{Iterative Procedure}
 
-\Est can be used to measure the baryon acoustic oscillation (BAO) scale by choosing the basis functions to terms of a BAO fitting function, as described in Section~\ref{sec:bao}.
+\Est can be used to measure the baryon acoustic oscillation (BAO) scale by choosing the basis functions to terms of a BAO fitting function, as described in Section~\ref{sec:bao} and shown in Figures~\ref{fig:bao} and~\ref{fig:bao_bases}.
 For this application, we need to choose a fiducial cosmology for our bases, which will be offset from the true cosmology.
-This offset can be encoded by a scale dilation parameter $\alpha$, which contains the information about the BAO scale; see Equation~\ref{eq:alpha}. 
+This offset can be encoded by a scale dilation parameter $\alpha$, which contains the information about the BAO scale; see \eqt{eq:alpha}. 
 As our fitting function requires a fiducial model and an initial guess of this parameter, $\alpha_\mathrm{guess}$, and then determines the change needed, an iterative procedure is needed to converge to the best-fit value.
 
 We start with assuming that we have chosen our fiducial model to match our true cosmology (we in all likelihood have not, but it's not a bad initial guess), giving us an initial $\alpha_\mathrm{guess} = 1.0$. 
-We then apply \est to perform the measurement, and obtain the magnitude of the projection $C$ for the derivative term in our model as in Equation~\ref{eq:baoiter_fit}. 
+We then apply \est to perform the measurement, and obtain the magnitude of the projection $C$ for the derivative term in our model as in \eqt{eq:baoiter_fit}. 
 This gives us our estimate $\hat{\alpha}$ of the scale dilation parameter from this initial model; for the $i$th iteration, we have
 \begin{equation}
     \hat{\alpha}_{i} = \alpha_{\mathrm{guess},i} + C_i \, k_0 ~,
 \end{equation}
-where $k_0$ is the chosen scaling parameter for the derivative basis function as in Equation~\ref{eq:baoiter_fit}.
+where $k_0$ is the chosen scaling parameter for the derivative basis function as in \eqt{eq:baoiter_fit}.
 
 We choose the convergence criterion to be when the fractional change in $\hat{\alpha}$ between subsequent iterations falls below a threshold, $c_\mathrm{thresh}$,
 \begin{equation}
@@ -855,12 +859,13 @@ We check if our estimate is jumping over the true value by checking if the error
 
 \subsection{Implementation Details}
 
-We implement the partial derivative in the fitting function as a finite difference between model with the our chosen value of $\alpha_\mathrm{guess}$, and the model with a value shifted by a small $\Delta \alpha$,
+We implement the partial derivative in the fitting function of \eqt{eq:baoiter_fit} as a finite difference between model with the our chosen value of $\alpha_\mathrm{guess}$, and the model with a value shifted by a small $\Delta \alpha$,
 \begin{equation}
     \frac{\dd \xi^\mathrm{mod}(\alpha \, r)}{\dd \alpha} \leftarrow \frac{\xi^\mathrm{mod}(\alpha_\mathrm{guess} \, r) - \xi^\mathrm{mod}((\alpha_\mathrm{guess} + \Delta \alpha) \, r)}{\Delta \alpha} ~.
 \end{equation}
-In our implemenation we take $\Delta \alpha = 0.001$; we check that our results are insensitive to this choice.
+In our implemenation we take $\Delta \alpha = 0.001$; we have checked that our results are insensitive to this choice.
 
+\KSF{hogg Q: is this just numerical stability? otherwise not affine invariant. K: i believe so; converges faster and does not get stuck in numerical cycles. should i specify numerical stability?}
 We choose the magnitudes of the basis functions $k$ to set them at similar scales, providing improved stability in convergence.
 We find that the values $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$ provide the fastest convergence, though the results are insensitive to choices near these values.
 

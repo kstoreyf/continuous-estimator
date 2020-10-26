@@ -15,6 +15,7 @@ catalogs/
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+*.pdf
 
 # other programs
 .vscode
