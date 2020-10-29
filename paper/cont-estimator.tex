@@ -205,13 +205,13 @@ The components of the pair-count vectors are defined explicitly as
 \begin{eqnarray}\displaystyle
     \label{eq:ls1}
     % \adjustlimits aligns the subscripts with and without primes, which are diff heights
-    \left[ \vv{DD} \right]_k &\equiv& \frac{2}{\NN{D}(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'} i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) \\ 
-    \left[ \vv{DR} \right]_k &\equiv& \frac{1}{\NN{D} \NN{R}} \sum_{n} \sum_{m} i(g_k < |\bld{r}_n - \bld{r}_m| < h_k) \\
+    \left[ \vv{DD} \right]_k &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n' < n} i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) \\ 
+    \left[ \vv{DR} \right]_k &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} i(g_k < |\bld{r}_n - \bld{r}_m| < h_k) \\
     \label{eq:ls3}
-    \left[ \vv{RR} \right]_k &\equiv& \frac{2}{\NN{R}(\NN{R}-1)} \adjustlimits\sum_{m} \sum_{m'} i(g_k < |\bld{r}_m - \bld{r}_{m'}| < h_k) ~,
+    \left[ \vv{RR} \right]_k &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits\sum_{m} \sum_{m'<m} i(g_k < |\bld{r}_m - \bld{r}_{m'}| < h_k) ~,
 \end{eqnarray}
 where $\left[ \vv{} \right]_k$ is the pair counts in bin $k$ (which has bin edges $g_k$ and $h_k$), $i$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $\bld{r}$ is the tracer position, the $n$ and $n'$ indices index data positions, and the $m$ and $m'$ indices index random catalog positions.
-We assume here that the sums are over unique pairs, and that for auto-correlations they exclude self-pairs; the normalization prefactors then account for the total number of possible pairs, explaining the difference between the auto- and cross-correlation factors.
+The sums are over unique pairs, and for auto-correlations they exclude self-pairs; the normalization prefactors then account for the total number of possible pairs, explaining the difference between the auto- and cross-correlation factors.
 The tracer position can be in real or redshift space, or broken down into the transverse and line-of-sight directions in the anisotropic correlation function; in this \documentname we consider the isotropic real-space \cf for simplicity, but the estimators detailed here apply equally well to these alternative configurations.
 The estimator is also easily applicable to cross-correlations of two data sets.
  
@@ -228,7 +228,8 @@ Clustering estimation is closely related to least-squares fitting.
 We are essentially trying to find the best representation of spatial data in the space of two-point radial separation.
 Recall that the linear least-squares fit to a set of data is
 \begin{equation}
-\bld{x} = [\bld{A}\T\,\bld{C}\inv\,\bld{A}]\inv \, [\bld{A}\T\,\bld{C}\inv\,\bld{y}] ~,
+    \label{eq:leastsq}
+    \bld{x} = [\bld{A}\T\,\bld{C}\inv\,\bld{A}]\inv \, [\bld{A}\T\,\bld{C}\inv\,\bld{y}] ~,
 \end{equation}
 where $\bld{x}$ is the vector of best-fit parameters, $\bld{A}$ is a design matrix containing functions of fitting features, $\bld{C}$ is the covariance matrix, and $\bld{y}$ is a column vector of $\bld{y}$ data to be fit.
 The second bracketed factor $[\bld{A}\T\,\bld{C}\inv\,\bld{y}]$ projects the data onto the features (as in a matched filter). 
@@ -239,38 +240,44 @@ The analogy is clear in the so-called natural estimator of the \cf, $\bld{\hat{\
 \Est was inspired by this connection with least-squares fitting; we detail its formulation in the following section.
 
 
-% TODO: fix this capitalization issue
 \subsection{\Est}
 \label{sec:est}
 
-We generalize the \LS estimator defined above in Equations~\ref{eq:ls1}-\ref{eq:ls3} by analogy with least-squares fitting.
+We generalize the \LS estimator defined above in equations~(\ref{eq:ls1}--\ref{eq:ls3}) by analogy with least-squares fitting.
 We generalize the indicator function $i$ to any function $\ff$, which returns a vector of length $K$ where $K$ is the number of basis functions.
 We further generalize the arguments of the function to any properties of the galaxy pair, rather than just the separation between pairs; we call $\GG{ij}$ the data payload for the pair of galaxies $i$ and $j$.
-This gives us, instead of pair counts, a vector of projections of the basis functions, $\vv{}$.
+This gives us, instead of pair counts, a vector $\vv{}$ of \textit{projections} of the basis functions.
 These projection vectors are defined as
 \begin{eqnarray}\displaystyle
-    \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'} \ff(\GG{n n'}) \\
+    \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'<n} \ff(\GG{n n'}) \\
     \vv{DR} &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n m}) \\
-    \vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'} \ff(\GG{m m'}) \\
-    \TT{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'} \ff(\GG{m m'}) \cdot \ff\T(\GG{m}, \GG{m'}) \label{eq:qq_proj} ~,
+    \vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) \\
+    \TT{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) \cdot \ff\T(\GG{m}, \GG{m'}) \label{eq:qq_proj} ~,
 \end{eqnarray}
-where the summation notation and prefactors are the same as explained for the standard \LS estimator.
-\KSF{TODO: note that the T form is motivated by affine invariance, cite appendix.}
+where the prefactors are as explained for the standard \LS estimator.
 
 We can now define \est as
 \begin{equation}
-    \hat{\xi}(\GG{ll'}) \equiv \bld{a}\T \cdot \ff(\GG{ll'}) \label{eq:xi_proj} ~,
+    \label{eq:xi_proj}
+    \hat{\xi}(\GG{ll'}) \equiv \bld{a}\T \cdot \ff(\GG{ll'}) ~,
 \end{equation}
 where $\bld{a}$ is a $K$-vector of the computed \emph{amplitudes} of the basis functions
 \begin{equation}
-    \bld{a} \equiv \TT{RR}\inv \cdot (\vv{DD} - 2\,\vv{DR} + \vv{RR}) \label{eq:amplitude}
+    \label{eq:amplitude}
+    \bld{a} \equiv \TT{RR}\inv \cdot (\vv{DD} - 2\,\vv{DR} + \vv{RR})
 \end{equation}
 and $\GG{ll'}$ contains the data values at which to evaluate $\bld{\hat{\xi}}$.
-We emphasize that here $\GG{ll'}$ does not represent a real pair of galaxies, but instead allows us to evaluate the \cf at any set of parameters.
+Note that we do not bold $\hat{\xi}$ in $\hat{\xi}(\GG{ll'})$ as this indicates the evaluation of the \cf at a particular point in parameter space, which outputs a scalar, while in the form $\bld{\hat{\xi}}$ we are representing the full vector output of the estimator.
+
+The choices in this formulation are explained by analogy with least-squares fitting.
+In the amplitudes $\bld{a}$, the linear combination of vectors $(\vv{DD} - 2\,\vv{DR} + \vv{RR})$ projects the pair information onto the features; the $\TT{RR}\inv$ factor rescales these projected features into the space of the parameters of $\bld{\hat{\xi}}$.
+This then explains the formulation of the $\TT{RR}$ factor: we require an invertible matrix to perform the rescaling, and in the case of the \cf the rescaling of the data is performed by the autocorrelation of the random catalog.
+The exact formulation of this factor as the sum of outer products of the basis function vectors and their transposes is motivated by the desire that the estimator be invariant under affine transformations, such as a rescaling of the basis functions or a rotation in the basis space (see Appendix~\ref{sec:affine}).
+
+We emphasize that $\GG{ll'}$ in \eqt{eq:xi_proj} does not represent a real pair of galaxies, but instead allows us to evaluate the \cf at any set of parameters.
 In the standard case (see \eqt{eq:ff_separation} below), $\GG{ll'}$ would effectively be the data for imaginary pair of galaxies $l$ and $l'$ that have a separation $r$ at which we want to evaluate $\bld{\hat{\xi}}$, and we would compute $\bld{\hat{\xi}}$ for such a pair at every separation in which we are interested.
 With our general formulation, we could choose basis functions that depend on other galaxy properties (see Section~\ref{sec:applications}); then, we would also choose each $\GG{ll'}$ pair to have values of these properties at which we want to evaluate $\bld{\hat{\xi}}$.
 In the experiments in this \documentname, however, we will only take into account the separation between pairs, so we will write $\hat{\xi}(r)$.
-We also note that we do not bold $\hat{\xi}(r)$ or $\hat{\xi}(\GG{ll'})$ as these indicate the evaluation of the \cf at a particular point in parameter space, which outputs a scalar, while in the form $\bld{\hat{\xi}}$ we are representing the full vector output of the estimator.
 
 \Est can be straightforwardly generalized to cross-correlations between two datasets.
 In this case, we consider datasets $D_1$ and $D_2$, and associated random catalogs $R_1$ and $R_2$. 
