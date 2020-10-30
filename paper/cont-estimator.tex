@@ -777,17 +777,15 @@ The autocorrelation of the random catalog is meant to approximate the autocorrel
 When we have a periodic cube, we can compute this $\vv{RR}$ term analytically in the standard approach to correlation function estimation.
 Here we derive this, and then derive the equivalent for our continuous-basis $\vv{RR}$ and $\TT{RR}$ terms.
 
-Our goal is to estimate the number of pairs in a periodic cubic volume filled uniformly with tracers, $\vv{RR}^\mathrm{ana}$. 
+Our goal is to estimate the normalized number of pairs in a periodic cubic volume filled uniformly with tracers, $\vv{RR}^\mathrm{ana}$. 
 We first consider an annulus indexed by $k$ around a single galaxy, with radial edges $g_k$ and $h_k$. 
 This annulus has a volume $V_k$.
 Taking the box to have an average number density $\bar{n}$, the number of galaxies expected in the annulus is $N_k = V_k \, \bar{n}$, and thus our selected galaxy contributes $N_k$ pairs to the count.   
-We do this for each of the $\NN{D}-1$ other galaxies, and after including a factor of $\frac{1}{2}$ accounts for the fact that this double counts pairs, we find a total pair count of $\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{2} \, (\NN{D}-1) \, N_k = \frac{1}{2} \, (\NN{D}-1) \, V_k \, \bar{n}$.
-For a cubic volume, $\bar{n} = \NN{D}/L^3$, so our final pair count for the annulus is 
-\begin{equation}
-\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{2} \, \frac{\NN{D}}{L^3} \, (\NN{D}-1) \, V_k ~.
-\end{equation}
+We do this for each of the $\NN{R}-1$ other galaxies, and after including a factor of $\frac{1}{2}$ to account for the fact that this double counts pairs, we find a total pair count of $\frac{1}{2} \, (\NN{R}-1) \, N_k = \frac{1}{2} \, (\NN{R}-1) \, V_k \, \bar{n}$.
+For a cubic volume, $\bar{n} = \NN{R}/L^3$, so our final pair count for the annulus is  $\frac{1}{2} \, \NN{R}(\NN{R}-1) \, V_k \, / L^3$.
+We want the normalized pair counts, so we divide by the number of unique pairs, $\NN{R}(\NN{R}-1)/2$; this cancels out all instances of $\NN{R}$, as it should as this approximation is not actually using random catalog, and leaves us with $\left[ \vv{RR}^\mathrm{ana} \right]_k = V_k / L^3 ~.$
 
-We next need to compute $V_k$; for hard-edged radial bins, we can compute $V_k$ simply as the difference between spherical volumes. 
+We now need to compute $V_k$; for hard-edged radial bins, we can compute $V_k$ simply as the difference between spherical volumes. 
 We can represent this more generally as an integral,
 \begin{equation} \label{eq:vol_tophat}
 V_k = \int_{g_k}^{h_k} dV = 4\pi \int_{g_k}^{h_k} r^2 \, dr ~,
@@ -802,23 +800,23 @@ This reduces to \eqt{eq:vol_tophat} when $\ff(r)$ is the tophat function (return
 
 Combining the above equations gives us our full generalized analytic random--random projection vector $\vv{RR}^\mathrm{ana}$, which has elements
 \begin{equation}
-\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{2} \, \frac{\NN{D}}{L^3} \,(\NN{D}-1) \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} \ff_k(r) \, r^2 \, dr ~,
+\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{L^3} \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} \ff_k(r) \, r^2 \, dr ~,
 \end{equation}
 where we are now integrating over all values of $r$ we are interested in from some $r_\mathrm{min}$ to $r_\mathrm{max}$.
 (For non-localized basis functions, the fully correct thing would be to integrate from $-\infty$ to $\infty$, though some bounds must be chosen in practice.)
 
 Based on the definition of $\TT{RR}$ in \eqt{eq:qq_proj} as the sum of outer products of the basis function vectors and their transposes, the elements of the analytic random--random tensor $\TT{RR}^\mathrm{ana}$ can be written as
 \begin{equation}
-\left[ \TT{RR}^\mathrm{ana} \right]_{kk'} = \frac{1}{2} \, \frac{\NN{D}}{L^3} (\NN{D}-1) \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} \ff_k(r) \, \ff_{k'}(r) \, r^2 \, dr ~.
+\left[ \TT{RR}^\mathrm{ana} \right]_{kk'} = \frac{1}{L^3} \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} \ff_k(r) \, \ff_{k'}(r) \, r^2 \, dr ~.
 \end{equation}
 This could be further generalized to account for basis functions that take properties other than pair separation as input.
 
-When considering a periodic box, the natural estimator is no longer biased, so we can also avoid computing the cross-correlation term $\vv{DR}$ and calculate the amplitudes as 
-\KSF{TODO: make sure this is true and cite!}
+For the periodic box case, we can think about the cross-correlation term $\vv{DR}$ similarly; now we are taking each of the $\NN{D}$ galaxies in the data catalog and estimating the normalized pair counts of their cross-correlation with a theoretical random catalog.
+It turns out that the resulting projection vector for the cross-correlation is exactly the same as for the random autocorrelation, $\vv{RR}^\mathrm{ana}  = \vv{DR}^\mathrm{ana}$.
+Thus the Landy-Szalay estimator reduces to the natural estimator, and we can compute the analytic amplitudes for \est as
 \begin{equation}
 \bld{a}^{\mathrm{ana}} = \left[ \TT{RR}^\mathrm{ana} \right]\inv \cdot \vv{DD} ~.
 \end{equation}
-Looking back, it might have seemed strange that we use $\NN{D}$ in calculating the analytic term $\vv{RR}^\mathrm{ana}$, but this normalization prefactor in fact cancels out with that of the $\vv{DD}$ term.
 Finally, we use these amplitudes $\bld{a}^{\mathrm{ana}}$ to compute the correlation function $\bld{\hat{\xi}}^{\mathrm{ana}}$ as before in \eqt{eq:xi_proj}.
 
 This analytic form for the continuous estimator could be extended to basis functions that depend on other tracer properties in addition to pair separation.
@@ -867,13 +865,9 @@ We implement the partial derivative in the fitting function of \eqt{eq:baoiter_f
 \end{equation}
 In our implemenation we take $\Delta \alpha = 0.001$; we have checked that our results are insensitive to this choice.
 
-\KSF{hogg Q: is this just numerical stability? otherwise not affine invariant. K: i believe so; converges faster and does not get stuck in numerical cycles. should i specify numerical stability?}
-\KSF{want it to say that these choices improve stability; relatedly, low condition number. word convergence should not appear. should only be numerical stability; convergence should only depend on changing alpha. concerned if condition number > 1000. print once contructed Trr and about to run solve. set ks so basis functions have same mean squared amplitudes. another way to do would be compute Trr, then change ks so that all diagonal elements are the same. if bases are not indepenedent, or close to not, then will get high condition number.}
-We choose the magnitudes of the basis functions $k$ to set them at similar scales, providing improved stability in convergence.
-We find that the values $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$ provide the fastest convergence, though the results are insensitive to choices near these values.
+We choose the magnitudes of the basis functions $k$ to set them at similar scales, providing improved stability.
+We use the values $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$, though we check that the results are insensitive to choices near these values.
 
-
-%need style file error
 %\bibliographystyle{apj} 
 %\bibliography{paper}
 % To copy from mendeley locally: in paper dir, [cp ~/code/bibtex/LSS-est_paper.bib .]
