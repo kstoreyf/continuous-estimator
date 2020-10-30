@@ -1,20 +1,10 @@
 % This project is part of the Continuous-Function Estimator project
-% Copyright 2019 the authors.
+% Copyright 2020 the authors.
 
-% to-do
-% -----
-
-% style notes
-% -----------
-% - line break at sentence breaks
-
-%\documentclass[twocolumn]{aastex62}
-%\documentclass[12 pt]{article}
 \documentclass[modern]{aastex62}
 
 \usepackage[sort&compress]{natbib}
 \usepackage{graphicx}
-\graphicspath{ {./images/} }
 \usepackage{xspace}
 \usepackage{xcolor}
 \usepackage{bm}
@@ -22,7 +12,6 @@
 \parindent=19pt
 
 % aastex parameters
-%%\hypersetup{linkcolor=red,citecolor=green,filecolor=cyan,urlcolor=magenta}
 \received{XXX}
 %\revised{not yet}
 \accepted{YYY}
@@ -31,8 +20,7 @@
 \shortauthors{storey-fisher and hogg}
 
 % language
-\newcommand{\cf}{2pcf\xspace} %2pF? 2PCF? %TODO: fix spacing after
-% to capitalize or not to capitalize? leaning no
+\newcommand{\cf}{2pcf\xspace}
 \newcommand{\Est}{The Continuous-Function Estimator\xspace}
 \newcommand{\est}{the Continuous-Function Estimator\xspace}
 \newcommand{\documentname}{\textsl{Article}\xspace}
@@ -48,7 +36,7 @@
 \newcommand{\Tp}{^{'\mathsf{T}}}
 \newcommand{\hmpc}{$h^{-1}\,$Mpc}
 \newcommand{\dd}{\mathrm{d}}
-\newcommand{\bld}[1]{\bm{#1}} %\mathbf gives very different look!
+\newcommand{\bld}[1]{\bm{#1}}
 \newcommand{\vv}[1]{\bld{v}_\mathrm{#1}}
 \newcommand{\TT}[1]{\bld{T}_\mathrm{#1}}
 \newcommand{\ff}{\bld{f}}
@@ -58,10 +46,6 @@
 % comments
 \newcommand{\KSF}[1]{\textcolor{teal}{KSF says: #1}}
 \newcommand{\hogg}[1]{\textcolor{red}{Hogg says: #1}}
-
-% margins
-%\addtolength{\topmargin}{-0.75in}
-%\addtolength{\textheight}{1.50in}
 
 % affiliations
 \newcommand{\ccpp}{\affiliation{%
@@ -93,7 +77,7 @@
 \begin{abstract}\noindent
 % Context / Aims
 The two-point correlation function (\cf) is the most important statistic in structure formation, used to measure the clustering of density field tracers (e.g., galaxies).
-Current estimators of the 2pcf, including the standard Landy--Szalay (\LS) estimator, evaluate the \cf in hard-edged bins of separation between objects; this is inappropriate for the science context and results in a loss of information and a poor trade-off between bias and variance.
+Current estimators of the \cf, including the standard Landy--Szalay (\LS) estimator, evaluate the \cf in hard-edged bins of separation between objects; this is inappropriate for the science context and results in a loss of information and a poor trade-off between bias and variance.
 %Methods
 We present a new estimator for the \cf, \emph{\est}, which generalizes \LS to a continuous representation and obviates binning in separation or any other pair property. 
 Our estimator replaces the binned pair counts with a linear superposition of basis functions; it outputs the best-fit linear combination of basis functions to describe the \cf. 
@@ -106,9 +90,7 @@ Critically, the reduction in the number of basis functions leads to a reduction 
 We discuss applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and investigating potential inhomogeneities or anisotropies in clustering.
 \end{abstract}
 
-%TODO: should have 6 keywords 
-%via Unified Astronomy Thesauras (UAT), http://astrothesaurus.org/concept-select/
-\keywords{Astrostatistics techniques (1886), Baryon acoustic oscillations (138), Cosmology (343), Two-point correlation function (1951), Large-scale structure of the universe (902), Redshift surveys (1378)}
+\keywords{Two-point correlation function (1951), Large-scale structure of the universe (902), Cosmology (343), Astrostatistics techniques (1886), Baryon acoustic oscillations (138), Redshift surveys (1378), Clustering (1908), Spatial point processes (1915), Cosmological parameters from large-scale structure (340)}
 
 \section{Introduction}
 
@@ -118,7 +100,7 @@ In particular, LSS measures the Baryon Acoustic Oscillation (BAO) scale \citep{C
 The distance traveled by these density waves before recombination imprints a feature on the statistical description of the LSS, which can be used to determine the characteristic BAO length scale \citep{PeeblesYu1970, EisensteinHu1998}.
 The LSS also contains the signature of redshift-space distortions caused by the peculiar velocities of galaxies, which are used to measure the growth rate of structure \citep{Kaiser1987}.
 Additionally, the LSS can be used to constrain galaxy formation in conjunction with models of galaxy bias (e.g., \citealt{Hamilton1988},  \citealt{Li2006}, \citealt{Zehavi2011}, \citealt{Durkalec2018}).
-With current observations, the LSS is well-described by a cold dark matter model with a cosmological constant, the standard $\Lambda$CDM model \citep{Planck2018}.
+With current observations, the LSS is well-described by a cold dark matter model with a cosmological constant, the standard $\Lambda$CDM model (e.g., \citealt{Alam2016}).
 Upcoming galaxy surveys including DESI \citep{Aghamousa2016}, Euclid \citep{Laureijs2011}, and LSST \citep{Ivezic2018} will observe larger volumes with improved measurements, allowing us to test $\Lambda$CDM to even higher precision.
 
 The most important statistic for characterizing the LSS is the two-point correlation function (\cf).
@@ -162,8 +144,6 @@ An estimator proposed by \cite{VargasMagana2013} iterates over sets of mock cata
 An alternative estimator, the marked correlation function (e.g., \citealt{WhitePadmanabhan2009}), avoids the use of a random catalog altogether: it considers the ratio between the \cf and a weighted correlation function in which weights are assigned based on galaxy properties, such as the local density.
 These estimators have all taken probabilistic approaches; others have taken a likelihood approach.
 \cite{BaxterRozo2013} introduced a maximum likelihood estimator for the \cf, which achieves lower variance compared to the \LS estimator, enabling finer binning and requiring a smaller random catalog for the same precision.
-% TODO: kernel methods to cite and destroy here?
-% minimal in intro: after lit review ("variations" paragraph) - in some ways what we're doing bears some resemblance to mcf, because we're weighting the pairs by functions, and kernel estimates bc we're projecting the pairs onto basis functions; we will discuss below that our method is distinct from both of these approaches. think of this careful address as talking to referree or referree-like reader
 
 These estimators present improvements to \LS, but they are still limited to estimates in separation bins.
 Some require additional computational costs or layers of complexity, so the standard formulation of \LS continues to be the default estimator used in most analyses.
@@ -179,6 +159,7 @@ This \documentname is organized as follows.
 In Section~\ref{sec:motiv}, we motivate our estimator and explain its formulation.
 We demonstrate its application on a simulated data set, including a toy BAO analysis, in Section~\ref{sec:experiments}.
 We discuss the implications and other possible applications in Section~\ref{sec:discuss}. 
+
 
 \section{Motivation and Formulation} 
 \label{sec:motiv}
@@ -237,7 +218,6 @@ The first bracketed factor $[\bld{A}\T\,\bld{C}\inv\,\bld{A}]\inv$ rescales the 
 Standard two-point correlation function estimators are effectively performing such a projection: each bin is the projection of the data pair counts onto the radial separation annulus, and the random-random term rescales this feature.
 The analogy is clear in the so-called natural estimator of the \cf, $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$ (e.g., \citealt{Kerscher2000}), with $\vv{DD}$ aligning with the second bracketed factor and $\vv{RR}$ aligning with the first (the division can be written as an inverse factor).
 \Est was inspired by this connection with least-squares fitting; we detail its formulation in the following section.
-
 
 \subsection{\Est}
 \label{sec:est}
@@ -343,6 +323,13 @@ The results will hold for catalogs with realistic survey windows and random--ran
 
 \subsection{Comparison of Standard Tophat Basis Functions}
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_theory8}
+    \caption{A comparison between \est with a tophat basis (thin blue lines) and the standard estimator (grey squares). The top panel shows the basis functions used for the tophat estimator. The middle panel shows the mean of the estimated correlation functions for 1000 mock catalogs, compared to the true input \cf (thin black line); the shaded region and errorbars are the standard deviation of the \cf estimate. The lower panel shows the absolute error between the estimate and true \cf. \Est with a tophat basis is exactly equivalent to the standard estimator, but in a continuous form, emphasizing the fact that binning results in a poor representation of the true \cf.}
+    \label{fig:tophat}
+\end{figure}
+    
 We first estimate the correlation function of our mocks using the the standard estimator.
 We choose 15 separation ($r$) bins in the range $36 < r < 156$ \hmpc, each with a width of 8 \hmpc; this was found to be the optimal bin width by \cite{Percival2014}, and is standard for two-point analyses.
 We apply the estimator to each of our 1000 mock catalogs.
@@ -363,23 +350,8 @@ In fact, we emphasize that this step function is exactly what the standard estim
 When we look at the error with respect to the truth (bottom panel), the error blows up at the edges of each bin, where the continuous estimate deviates most significantly from the truth.
 This demonstrates one way in which the standard tophat estimator is not a good representation of the true \cf.
 
-\begin{figure}[t]
-\centering
-    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_theory8}
-    \caption{A comparison between \est with a tophat basis (thin blue lines) and the standard estimator (grey squares). The top panel shows the basis functions used for the tophat estimator. The middle panel shows the mean of the estimated correlation functions for 1000 mock catalogs, compared to the true input \cf (thin black line); the shaded region and errorbars are the standard deviation of the \cf estimate. The lower panel shows the absolute error between the estimate and true \cf. \Est with a tophat basis is exactly equivalent to the standard estimator, but in a continuous form, emphasizing the fact that binning results in a poor representation of the true \cf.}
-    \label{fig:tophat}
-\end{figure}
-
 \subsection{Demonstration using Spline Basis Functions}
 \label{sec:spline}
-
-\begin{figure}[ht]
-
-\centering
-    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_spline}
-    \caption{A comparison between \est with a cubic-spline basis function (thick red) and a standard tophat basis (thin blue). The top panel shows the basis functions used for each measurement. The middle panel shows the mean of the estimated correlation functions for each of the 1000 mock catalogs compared to the true input \cf (thin black); the shaded region is the standard deviation. The lower panel shows the absolute error between the estimate and true \cf. It is clear that the spline basis function results in a correlation function that is a better representation of the true \cf in its shape and smoothness.}
-    \label{fig:spline}
-\end{figure}
 
 A natural extension of tophat basis functions is the B-spline.
 B-splines of order $n$ are piecewise polynomials of order $n-1$; they constitute the basis functions for spline interpolation \citep{deBoor1987}.
@@ -400,6 +372,12 @@ This comparison demonstrates that there exist other sets of basis functions that
 The choice of a high-order spline may be useful for cases in which one wants a mostly localized yet representative estimate of the \cf, or smooth derivatives.
 Generally, the choice of basis functions should be tailored to the scientific use case; in the next section we explore the case of a BAO analysis.
 
+\begin{figure}[ht]
+    \centering
+        \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_spline}
+        \caption{A comparison between \est with a cubic-spline basis function (thick red) and a standard tophat basis (thin blue). The top panel shows the basis functions used for each measurement. The middle panel shows the mean of the estimated correlation functions for each of the 1000 mock catalogs compared to the true input \cf (thin black); the shaded region is the standard deviation. The lower panel shows the absolute error between the estimate and true \cf. It is clear that the spline basis function results in a correlation function that is a better representation of the true \cf in its shape and smoothness.}
+        \label{fig:spline}
+    \end{figure}    
 
 \subsection{BAO Scale Estimation Test}
 \label{sec:bao}
@@ -443,18 +421,18 @@ In this case, the free parameters are $B^2$, $C$, $a_1$, $a_2$, and $a_3$.
 Note that in theory the choice of $k_i$ values shouldn't matter as the estimator is affine invariant (see Appendix~\ref{sec:affine}), but in practice reasonable choices are important for stability.
 The adopted $k_i$ values are noted in Appendix~\ref{sec:baoiter}.
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.8\textwidth]{bao_bases}
+    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $\xi^\mathrm{mod}(\alpha\,r)$ term (darkest green) is the correlation function computed using fiducial model, with some scale dilation $\alpha$. The derivative term (second-to-darkest green) is the derivative of this model with respect to $\alpha$, which allows for the direct estimation of this parameter. The other three terms (lighter greens) are nuisance parameters to fit the broadband shape.}
+    \label{fig:bao_bases}
+\end{figure}
+
 To use the estimator for a BAO measurement, we input these five terms as the five basis functions of our estimator.
 The estimator outputs an amplitude vector $\bld{a}$ as described in Section~\ref{sec:est}, which describes the contribution of each basis function---precisely the values of the free parameters, scaled by $k_i$.
 From the value of $C$, we can determine our estimate of the scale dilation parameter, $\hat{\alpha}$, as $\hat{\alpha} = \alpha_\mathrm{guess} + C\,k_0$, based on the definition of finite derivatives. 
 With this formulation, a value of $C=0$ indicates that the current $\alpha_\mathrm{guess}$ gives the best fit to the data (given the chosen cosmological model), while nonzero values give the magnitude and direction of the necessary change in the scale dilation parameter to optimally fit the data.
 In practice, we apply an iterative procedure to converge at our best estimate $\hat{\alpha}$; this procedure and other implementation details are described in Appendix~\ref{sec:baoiter}.
-
-\begin{figure}[ht]
-\centering
-    \includegraphics[width=0.8\textwidth]{bao_bases}
-    \caption{The set of basis functions used to fit for the BAO scale using our estimator. The $\xi^\mathrm{mod}(\alpha\,r)$ term (darkest green) is the correlation function computed using fiducial model, with some scale dilation $\alpha$. The derivative term (second-to-darkest green) is the derivative of this model with respect to $\alpha$, which allows for the direct estimation of this parameter. The other three terms (lighter greens) are nuisance parameters to fit the broadband shape.}
-    \label{fig:bao_bases}
-\end{figure}
 
 We demonstrate this method using our set of lognormal mock catalogs.
 We construct a recovery test following that in \cite{Hinton2019}.
@@ -463,6 +441,13 @@ As we know the cosmology used for our mock catalogs, we can compute the true val
 (Here our choice of fiducial model happened to be close to the true model, so our $\alpha_{\text{true}}$ is very close to 1; this is typical, as our cosmological model is fairly well-constrained.)
 With this fiducial model, we can construct the basis functions for our estimator; these are shown (with $\alpha=1$ and arbitrary scaling) in Figure~\ref{fig:bao_bases}.
 
+\label{fig:bao}
+\begin{figure}[t]
+\centering
+    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_baoiter}
+    \caption{Estimation of the correlation function using our estimator with basis functions based on the BAO fitting function (thick green). The line is the mean of the final estimate from the iteration procedure for 1000 mocks, and the shaded region is the $1\sigma$ variation. We also show the standard Landy--Szalay estimator, displayed as a tophat function (thin blue), as well as the true input correlation function (thin black). The basis functions are the same as those shown in Figure~\ref{fig:bao_bases}, with arbitrary scaling.}
+\end{figure}
+
 We apply our iterative estimation procedure to each of the 1000 mocks; the mean of the resulting estimates for the correlation function is shown in Figure~\ref{fig:bao}.
 We show the BAO basis functions in the top panel, as in Figure~\ref{fig:bao_bases}.
 We compare \est using the BAO bases with that using tophat bases, as in the previous sections.
@@ -470,18 +455,11 @@ The correlation function estimated with the BAO bases clearly produces a more re
 The estimate is also smoother than that produced using the cubic-spline basis functions (Figure~\ref{fig:spline}).
 More importantly, it is scientifically motivated: the estimator produces the relative contributions of the terms of the BAO fitting functions.
 This allows us to directly estimate the value of $\alpha$ for each of the 1000 mock catalogs.
-The median estimate of the recovered scale dilation parameter is $\alpha=0.9975 \pm 0.0290$, where the uncertainty is the mean of the 16th and 84th percentile differences from the median; our estimate is very close to the true value of $\alpha = 0.9987$.
+The median estimate of the recovered scale dilation parameter is $\alpha=0.9975 \pm 0.0290$, where the uncertainty is based on the 16th and 84th percentiles; our estimate is very close to the true value of $\alpha = 0.9987$.
 
 We emphasize that the BAO-based estimate requires only five components, while the tophat basis requires 15 components (or bins, in the standard approach) in the same scale range.
 This is critical for the efficient computation of a precise covariance matrix, as the errors depend on the number of components used for the estimate, as described in Section~\ref{sec:covariance}.
 \Est with the BAO basis functions could reduce the number of mocks needed to achieve the same precision by a factor of a few to an order of magnitude; as these expensive cosmological simulations are currently the limiting step in two-point analyses, this could be highly impactful.
-
-\label{fig:bao}
-\begin{figure}[th]
-\centering
-    \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_baoiter}
-    \caption{Estimation of the correlation function using our estimator with basis functions based on the BAO fitting function (thick green). The line is the mean of the final estimate from the iteration procedure for 1000 mocks, and the shaded region is the $1\sigma$ variation. We also show the standard Landy--Szalay estimator, displayed as a tophat function (thin blue), as well as the true input correlation function (thin black). The basis functions are the same as those shown in Figure~\ref{fig:bao_bases}, with arbitrary scaling.}
-\end{figure}
 
 We note that these basis functions are significantly different than the tophat or B-spline bases previously explored.
 One important difference is that they are not localized.
@@ -555,7 +533,6 @@ That is, it can estimate a multi-dimensional correlation function as a function 
 This provides a more flexible way to look at the dependence of the \cf on the property, and has similar applicability to breaking parameter degeneracies.
 We elaborate on the use cases for incorporating further tracer information into the choice of bases functions in Section~\ref{sec:applications}.
 
-
 \subsection{Beyond the Landy--Szalay Estimator}
 \label{sec:beyondls}
 
@@ -581,7 +558,6 @@ This formulation could also be extended to nearly any linear combination of pair
 The estimator of \cite{VargasMagana2013}, for instance, selects the optimal combination of pair counts; our estimators could be combined to create an even more generalized estimator.
 However, some estimator formulations use powers of these terms that are nontrivial to reformulate as normalization tensors for our estimation approach; we leave this problem for furture work.
 
-
 \subsection{Implementation and Computational Performance}
 \label{sec:comp}
 
@@ -606,7 +582,6 @@ However, we don't compute this inverse directly, as can be unstable, and is not 
 For this reason, we use the ``solve'' operation which computes the solution $\bld{a}$ of the well-determined matrix equation $\TT{RR}\,\bld{a}=\bld{v}$.
 We also make sure to report the condition number of the tensor, as numerical precision decreases as the condition number rises.
 If the condition number large, then a rescaling of the basis functions or a rotation in the basis space can improve stability.
-
 
 \subsection{Effect on Covariance Matrix Estimation}
 \label{sec:covariance}
@@ -715,7 +690,9 @@ KSF would like to acknowledge significant code feedback and support from Manodee
 KSF also thanks Roman Scoccimarro, David Grier, Alex Barnett, Lucia Perez, James Rhoads, Sangeeta Malhotra, Drew Jamieson, and Chris Lovell for helpful discussions.
 All of the code used in this \documentname is available open-source at \texttt{github.com/kstoreyf/Corrfunc} and \texttt{github.com/kstoreyf/continuous-estimator}. 
 
+
 \appendix
+
 \section{Affine Invariance of the Estimator}\label{sec:affine}
 
 The estimate of the \cf with \est should not depend on the scaling of the chosen basis functions.
@@ -862,9 +839,6 @@ In our implemenation we take $\Delta \alpha = 0.001$; we have checked that our r
 We choose the magnitudes of the basis functions $k$ to set them at similar scales, providing improved stability.
 We use the values $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$, though we check that the results are insensitive to choices near these values.
 
-%\bibliographystyle{apj} 
-%\bibliography{paper}
-% To copy from mendeley locally: in paper dir, [cp ~/code/bibtex/LSS-est_paper.bib .]
 \bibliography{LSS-est_paper}
 
 \end{document}
