@@ -57,7 +57,6 @@
 
 % comments
 \newcommand{\KSF}[1]{\textcolor{teal}{KSF says: #1}}
-%\newcommand{\KSF}[1]{\textcolor{teal}{}} #to see doc w/o comments
 \newcommand{\hogg}[1]{\textcolor{red}{Hogg says: #1}}
 
 % margins
@@ -114,13 +113,13 @@ We discuss applications and limitations of \est for present and future studies o
 \section{Introduction}
 
 The large-scale structure (LSS) of the Universe is critical to our understanding of fundamental cosmology. 
-It encodes information about the physics of the early Universe and the subsequent expansion history. \KSF{cite something here - zeldovich or something. maybe 2, one for early u and one for expansion history.}
-In particular, LSS measures the Baryon Acoustic Oscillation (BAO) scale \citep{Eisenstein2005}, which results from density fluctuations in the baryon--photon fluid.
+It encodes information about the physics of the early Universe and the subsequent expansion history \citep{SunyaevZeldovich1970, HuSugiyama1996, Riess1998}.
+In particular, LSS measures the Baryon Acoustic Oscillation (BAO) scale \citep{Cole2005, Eisenstein2005}, which results from density fluctuations in the baryon--photon fluid.
 The distance traveled by these density waves before recombination imprints a feature on the statistical description of the LSS, which can be used to determine the characteristic BAO length scale \citep{PeeblesYu1970, EisensteinHu1998}.
 The LSS also contains the signature of redshift-space distortions caused by the peculiar velocities of galaxies, which are used to measure the growth rate of structure \citep{Kaiser1987}.
-Additionally, the LSS can be used to constrain galaxy formation in conjunction with models of galaxy bias (e.g., \citealt{Hamilton1988}, \citealt{Budavari2003}, \citealt{Li2006}, \citealt{Abbas2006}, \citealt{Zehavi2011}, \citealt{Skibba2014}, \citealt{Durkalec2018}). \KSF{do i not need all these citations here? do i need more elsewhere in the intro?}
-With current observations, the LSS is well-described by a cold dark matter model with a cosmological constant, the standard $\Lambda$CDM model. \KSF{cite construction of lcdm model, and another for fact that good fit to obs}
-Upcoming galaxy surveys will observe larger volumes with improved measurements, allowing us to test $\Lambda$CDM to even higher precision. \KSF{cite desi, euclid, rubin}
+Additionally, the LSS can be used to constrain galaxy formation in conjunction with models of galaxy bias (e.g., \citealt{Hamilton1988},  \citealt{Li2006}, \citealt{Zehavi2011}, \citealt{Durkalec2018}).
+With current observations, the LSS is well-described by a cold dark matter model with a cosmological constant, the standard $\Lambda$CDM model \citep{Planck2018}.
+Upcoming galaxy surveys including DESI \citep{Aghamousa2016}, Euclid \citep{Laureijs2011}, and LSST \citep{Ivezic2018} will observe larger volumes with improved measurements, allowing us to test $\Lambda$CDM to even higher precision.
 
 The most important statistic for characterizing the LSS is the two-point correlation function (\cf).
 It measures the excess frequency at which any two galaxies are separated by a given distance, compared to a uniform distribution; effectively, it characterizes the strength of clustering at a given spatial scale.
@@ -407,7 +406,7 @@ Generally, the choice of basis functions should be tailored to the scientific us
 
 The measurement of the baryon acoustic oscillation (BAO) scale provides an apt use case for our estimator.
 The BAO feature is a peak in clustering on large scales, $\sim$150 Mpc ($\sim$100\hmpc), making it less sensitive to small-scale astrophysical effects.
-It is one of the best tools for constraining cosmological models, in particular the distance--redshift relation \citep{Eisenstein2005, Kazin2010, Anderson2012, Anderson2014, Alam2016}.
+It is one of the best tools for constraining cosmological models, in particular the distance--redshift relation \citep{Cole2005, Eisenstein2005, Kazin2010, Anderson2012, Anderson2014, Alam2016}.
 
 We base our BAO analysis on the method of the BOSS DR10 and 11 analysis \citep{Anderson2014}.
 We estimate the spherically averaged 3-dimensional correlation function, $\hat{\xi}(r)$, where $r$ is the separation between pairs.
@@ -428,8 +427,7 @@ In standard practice, the fitting function used to determine the value of $\alph
 \xi^{\mathrm{fit}}(r) = B^2 \xi^{\mathrm{mod}}(\alpha r) + \frac{a_1}{r^2} + \frac{a_2}{r} + a_3 ~,
 \end{equation}
 where $B$ is a constant that allows for a large-scale bias, and $a_1$, $a_2$, and $a_3$ are nuisance parameters to account for the broadband shape.
-A $\chi^2$ fit is performed with five free parameters: $\alpha$, $B$, $a_1$, $a_2$, and $a_3$. 
-\KSF{TODO: KSF is figuring out how this actually done and flesh out this paragraph!}
+A $\chi^2$ fit is performed at intervals of $\Delta \alpha$, with $B$, $a_1$, $a_2$, and $a_3$ as free parameters. 
 The resulting value for $\alpha$ is used to derive the actual values of the distance scales of interest.
 Typically, density-field reconstruction is performed before applying the estimator to correct for nonlinear growth around the BAO scale \citep{Eisenstein2007}; for our toy example, we omit this step.
 
@@ -470,8 +468,11 @@ We show the BAO basis functions in the top panel, as in Figure~\ref{fig:bao_base
 We compare \est using the BAO bases with that using tophat bases, as in the previous sections.
 The correlation function estimated with the BAO bases clearly produces a more representative estimate at all scales.
 The estimate is also smoother than that produced using the cubic-spline basis functions (Figure~\ref{fig:spline}).
-More importantly, it is scientifically motivated: the estimator directly gives us the relative contributions of the terms of the BAO fitting functions.
-Further, the BAO-based estimate requires only five components, while the tophat basis requires 15 components (or bins, in the standard approach) in the same scale range.
+More importantly, it is scientifically motivated: the estimator produces the relative contributions of the terms of the BAO fitting functions.
+This allows us to directly estimate the value of $\alpha$ for each of the 1000 mock catalogs.
+The median estimate of the recovered scale dilation parameter is $\alpha=0.9975 \pm 0.0290$, where the uncertainty is the mean of the 16th and 84th percentile differences from the median; our estimate is very close to the true value of $\alpha = 0.9987$.
+
+We emphasize that the BAO-based estimate requires only five components, while the tophat basis requires 15 components (or bins, in the standard approach) in the same scale range.
 This is critical for the efficient computation of a precise covariance matrix, as the errors depend on the number of components used for the estimate, as described in Section~\ref{sec:covariance}.
 \Est with the BAO basis functions could reduce the number of mocks needed to achieve the same precision by a factor of a few to an order of magnitude; as these expensive cosmological simulations are currently the limiting step in two-point analyses, this could be highly impactful.
 
@@ -489,14 +490,6 @@ It is then critical for the investigator to ensure that the range of scales chos
 The nonlocality also means that the covariance matrix between the components will have a very different structure than typical binned covariance matrices.
 We return to this issue in Section~\ref{sec:covariance}.
 
-\KSF{I will flesh out the following paragraph once I perform the traditional method!}
-\Est with the BAO bases gives us an estimate for $\alpha$ for each of the 1000 mock catalogs.
-These are shown in comparison with the values estimated using the traditional fitting approach in Figure ZZZ. \KSF{update} 
-The methods produce similar values of $\alpha$ \dots 
-The mean estimate of the recovered scale dilation parameter is $\alpha=XXX \pm YYY$, very close to the true value of $\alpha = 0.9987$.
-The mean estimate using the traditional approach is $\alpha=XXX \pm YYY$.
-Our estimate is more accurate and precise \dots 
-
 
 \section{Discussion} \label{sec:discuss}
 
@@ -508,7 +501,7 @@ Using a set of artificial mock catalogs, we showed that our method exactly repro
 \Est, however, has the capacity to be much more expressive than the standard estimator with a different choice of basis functions.
 We demonstrated its use with cubic-spline basis functions, which results in a correlation function estimate that is much more representative of the expected shape and smoothness of the \cf.
 Further, \est can be tailored to the scientific use case; we apply to it a toy baryon acoustic feature analysis, choosing basis functions to be the terms of a modified BAO fitting function.
-This produced an estimate of the \cf that inherently reflects our beliefs about its form, and allowed us to directly estimate the scale dilation parameter with improved accuracy and precision compared to the standard estimator. \KSF{UPDATE this last line when analysis is done.}
+This produced an estimate of the \cf that inherently reflects our beliefs about its form, and allowed us to directly estimate the scale dilation parameter with a hight level of accuracy.
 
 While these are just a few example applications of our estimator (for others see Section~\ref{sec:applications}), they demonstrate the problems solved and opportunities created with \est.
 In getting rid of the need for binning, the estimator can produce a much more \textit{representative} correlation function; a mixture of tophats is a very poor representation of the \cf. 
@@ -593,10 +586,12 @@ However, some estimator formulations use powers of these terms that are nontrivi
 \label{sec:comp}
 
 We implement \est within the widely used correlation function package \texttt{Corrfunc} \citep{Sinha2019}.
-In some sense, the most important implementation note is that we are capitalizing on all of the good engineering in Corrfunc that produces very fast pair identification. \KSF{TODO: reword}
-The package is written in C with python bindings and utilities.
-For every computation of the pair separation, we additionally pass the separation and any additional tracer information to the user-defined basis function.
-We output the traditional pair counts as well as our component vector and, if desired, the component tensor.
+\texttt{Corrfunc} performs extremely fast pair identification, and can estimate common types of correlation functions on both theoretical boxes and on-sky data.
+The package is written in C with python bindings and utilities, and it very modular and user-friendly.
+Our implentation of \est capitalizes on the power of \texttt{Corrfunc}, adding the necessary functionality into the existing framework.
+We allow the user to define the basis functions for continuous-function estimation, and for every pair identified, we pass the separation and any additional required tracer information to the basis functions.
+We output the projection vector and the projection tensor, as well as the traditional pair counts.
+We include additional functions to compute the amplitudes from these projections, and then to evaluate the continuous correlation function for these amplitudes at the desired points in parameter space, giving the user a high level of control at every step.
 
 The computational scaling for our estimator is by definition the same as the traditional method, as pair-finding remains the limiting factor.
 However, because \est must evaluate the set of basis functions for each pair of galaxies, it can take longer.
@@ -642,11 +637,6 @@ For the BOSS DR14 fiducial \cf results, 1000 mocks and 18 bins were used \cite{A
 Some surveys have already turned to approximate methods for these mock catalogs instead of performing full cosmological simulations, as the cost is prohibitive.
 Future surveys will have even more costly requirements on mock catalogs, with larger simulations necessary to cover the larger survey volumes and more realistic mocks required to achieve the desired accuracy and precision on the covariance matrix.
 
-% Our estimator can significantly lower these requirements by 
-% \KSF{I went down some rabbit holes trying to find the numbers for DES and other surveys, it's not as clear. Is it ok as is or should I keep digging?}
-% \KSF{it turns out that at least for DR14, some approximate method was used, so they weren't full cosmo sims and didn't take that long. should i try to figure out which analyses still used/use full sims to cite? any leads here?}
-% \KSF{surveys are thinking about approximate mocks and different strategies, but they could change the number of mocks needed over night by changing the number of basis. if mocks are good enough, then just get a more accurate estimate.}
-
 An alternative to increasing $\NN{mocks}$ is decreasing $\NN{bins}$ to achieve the same error on precision.
 In the binned standard method, this is shown to \emph{increase} the statistical variance, albeit only slightly \citep{Percival2014}.
 A substantial increase in bin width would prevent capturing information in finer clustering features; even the relatively broad BAO peak requires a bin size on the order of its width of $\sim$10\hmpc.
@@ -675,9 +665,18 @@ Any covariance estimate will have to estimate these covariances well, but of cou
 
 The formulation of \est opens up many possibilities for extracting information from the correlation function.
 The most straightforward applications are standard basis functions or linearizeable astrophysical models, as we have shown for the standard BAO fitting function (Section~\ref{sec:bao}).
-Other applications for the direct estimation of cosmological parameters could include the growth rate of cosmic structure $f$ \citep{Satpathy2016, Reid2018} and primordial non-Gaussianity in the local density field $f^{local}_{NL}$ \citep{Karagiannis2014}.
 
-One could take this idea even further by choosing as basis functions a parametrized model of the \cf and the derivatives of this model with respect to the parameters of interest, such as cosmological parameters or halo occupation distribution parameters.
+One natural set of applications is extensions of the isotropic real-space analyses presented in this work.
+We could extend the spherically-averaged BAO analysis to a full anisotropic analysis, estimating the correlation function $\hat{\xi}(s, \mu)$ as a function of both the redshift-space separation $s$ and the cosine $\mu$ of the angle between $s$ and the line-of-sight direction (e.g. \citealt{Anderson2013}).
+This is typically done with a fine binning along the $\mu$ direction and then compressed into angular moments via multipoles or clustering wedges \citep{Kazin2012}; \est could obviate this line-of-sight binning in addition to the binning along separation as we have shown.
+Our estimator could similarly be extended to the 2-dimensional correlation function  $\hat{\xi}(r_p, \pi)$ used to separate out the effects of redshift-space distortions, with a parameterization of the pair separations parallel ($\pi$) and perpendicular ($r_p$) to the line of sight; this can then be integrated to give the projected real-space correlation function $w_p(r_p)$ \citep{DavisPeebles1983}.
+This projected \cf provides another useful way to test $\Lambda$CDM (e.g. \citealt{Nuza2013}).
+Our estimator could also be directly related to a power spectrum analysis by selecting a Fourier basis as our set of continuous functions, whhich would directly the data onto Fourier modes.
+This could represent a step towards unifying correlation function and power spectrum estimation.
+
+\Est could be applied to the direct estimation of cosmological parameters beyond the distance-redshift relation.
+For instance, one perform an analysis focused on the growth rate of cosmic structure $f$ \citep{Satpathy2016, Reid2018}, or the primordial non-Gaussianity in the local density field $f^{local}_{NL}$ \citep{Karagiannis2014}.
+One could take this idea even further by choosing as basis functions a parametrized model of the \cf and the derivatives of this model with respect to all the parameters of interest, including cosmological parameters or halo occupation distribution parameters.
 \Est would then directly output the projection of the \cf onto the derivative terms, which would then be translatable to changes in the  model that best fits the data.
 This is analogous to the BAO analysis performed in Section~\ref{sec:bao}, but with a higher-dimensional space of derivatives of parameters of interest.
 This approach would essentially perform a direct estimation of the parameters, without the need for the intermediate steps of binning and fitting.
@@ -708,14 +707,9 @@ With our estimator, we could introduce a dependence on location or direction int
 \Est would allow for a more precise estimate of this dependence as it doesn't require any sort of patches or spatial binning, instead estimating a multi-dimensional continuous \cf.
 While these effects would be highly degenerate with systematics, our estimator combined with robust systematics mitigation opens investigation channels into new physics.
 
-Finally, our estimator can be directly related to a power spectrum analysis.
-We could choose a Fourier basis as our set of continuous functions.
-This would allow us to directly project the data onto Fourier modes.
-This represents a step towards unifying the correlation function and the power spectrum.
-
 
 \acknowledgements
-KSF was supported by the NASA FINESST grant [grant number] \KSF{FILL OUT} during the completion of this work.
+KSF was supported by the Future Investigators in NASA Earth and Space Science and Technology (FINESST) award number 80NSSC20K1545 during the completion of this work.
 The authors thank Jeremy Tinker and Michael Blanton for helpful insights, and the members of the Flatiron Astronomical Data Group for useful feedback.
 KSF would like to acknowledge significant code feedback and support from Manodeep Sinha and Lehman Garrison.
 KSF also thanks Roman Scoccimarro, David Grier, Alex Barnett, Lucia Perez, James Rhoads, Sangeeta Malhotra, Drew Jamieson, and Chris Lovell for helpful discussions.
