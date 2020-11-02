@@ -75,19 +75,7 @@
 \flatiron
 
 \begin{abstract}\noindent
-% Context / Aims
-The two-point correlation function (\cf) is the most important statistic in structure formation, used to measure the clustering of density field tracers (e.g., galaxies).
-Current estimators of the \cf, including the standard Landy--Szalay (\LS) estimator, evaluate the \cf in hard-edged bins of separation between objects; this is inappropriate for the science context and results in a loss of information and a poor trade-off between bias and variance.
-%Methods
-We present a new estimator for the \cf, \emph{\est}, which generalizes \LS to a continuous representation and obviates binning in separation or any other pair property. 
-Our estimator replaces the binned pair counts with a linear superposition of basis functions; it outputs the best-fit linear combination of basis functions to describe the \cf. 
-It is closely related to the estimator used in linear least-squares fitting. 
-The choice of basis can take into account the expected form of the \cf, as well as its dependence on properties other than pair separation (e.g., stellar mass or sky position).
-%Results
-We show that \est with a choice of cubic-spline basis functions better represents the smoothness and shape of the \cf compared to \LS.
-We further demonstrate that the estimator can be used to directly estimate the Baryon Acoustic Oscillation scale, using a small number of physically motivated basis functions.
-Critically, the reduction in the number of basis functions leads to a reduction in the number of mock catalogs required for covariance estimation; this is currently the limiting step in many \cf measurements.
-We discuss applications and limitations of \est for present and future studies of large-scale structure, including determining the dependence of clustering on galaxy properties and investigating potential inhomogeneities or anisotropies in clustering.
+The two-point correlation function (2pcf) is the key statistic in structure formation; it measures the clustering of galaxies or other density field tracers. Estimators of the 2pcf, including the standard Landy--Szalay (LS) estimator, evaluate the 2pcf in hard-edged separation bins, which is scientifically inappropriate and results in a poor trade-off between bias and variance. We present a new 2pcf estimator, the Continuous-Function Estimator, which generalizes LS to a continuous representation and obviates binning in separation or any other pair property. Our estimator, inspired by the mathematics of least-squares fitting, replaces binned pair counts with projections onto basis functions; it outputs the best linear combination of basis functions to describe the 2pcf. The choice of basis can take into account the expected form of the 2pcf, as well as its dependence on pair properties other than separation. We show that the Continuous-Function Estimator with a cubic-spline basis better represents the shape of the 2pcf compared to LS. We also estimate directly the baryon acoustic scale, using a small number of physically-motivated basis functions. Critically, this leads to a reduction in the number of mock catalogs required for covariance estimation, which is currently the limiting step in many 2pcf analyses. We discuss further applications of the Continuous-Function Estimator, including determination of the dependence of clustering on galaxy properties and searches for potential inhomogeneities or anisotropies in large-scale structure.
 \end{abstract}
 
 \keywords{Two-point correlation function (1951), Large-scale structure of the universe (902), Cosmology (343), Astrostatistics techniques (1886), Baryon acoustic oscillations (138), Redshift surveys (1378), Clustering (1908), Spatial point processes (1915), Cosmological parameters from large-scale structure (340)}
