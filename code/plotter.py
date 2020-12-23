@@ -387,10 +387,16 @@ def plot_bases(bases, colors, names=None, rescale_by=None):
             base *= rescale_by[i]
         plt.plot(r, base, color=colors[i], label='{}'.format(names[i]), lw=2)
     if names is not None:
-        plt.legend()
-
+        leg = plt.legend()
+        cb = leg._legend_box._children[-1]._children[0]
+        for ib in cb._children:
+            ib.align = "center"
+            ax = plt.gca()
+    
     plt.xlabel(r'separation $r$ ($h^{-1}\,$Mpc)')
-    plt.ylabel('basis functions $f_k(r)$')
+    plt.ylabel('basis functions $f_k(r)$ (arbitrary units)')
     plt.ylim(-0.002, 0.005)
+    plt.xlim(40, 150)
+    
     ax = plt.gca()
     ax.xaxis.set_minor_locator(AutoMinorLocator())
