@@ -1,4 +1,10 @@
 import numpy as np
+import glob
+import matplotlib
+from matplotlib import pyplot as plt
+
+from scipy.interpolate import interp1d
+from scipy.optimize import curve_fit
 
 
 def get_label(pt):
@@ -67,3 +73,252 @@ def inverse_covariance(cov, N):
     Nb = cov.shape[0]
     prefac = float(N - Nb - 2)/float(N - 1)
     return prefac * inv
+
+
+def load_data(cat_tag, cf_tag, Nrealizations=1000, return_amps=False, return_extra=False):
+    
+    cat_dir = '../catalogs'
+    result_dir = '../results/results_lognormal{}'.format(cat_tag)
+
+    rs = []
+    xis = []
+    amps = []
+    n_converged = 0
+
+    for Nr in range(Nrealizations):
+
+        if 'baoiter' in cf_tag:
+            fn_pattern = f"cf{cf_tag}_converged_*{cat_tag}_rlz{Nr}.npy"
+            matches = glob.glob(f'{result_dir}/{fn_pattern}')
+            for cf_fn in matches:
+                r_avg, xi, amp, proj, extra = np.load(cf_fn, allow_pickle=True)
+                n_converged +=1
+                break #should only be 1 match; but probs better way to do this
+            if len(matches)==0:
+                continue
+        else:
+            cf_fn = '{}/cf{}{}_rlz{}.npy'.format(result_dir, cf_tag, cat_tag, Nr)
+            r_avg, xi, amp, proj, extra = np.load(cf_fn, allow_pickle=True)
+        rs.append(r_avg)
+        xis.append(xi)
+        amps.append(amp)
+        
+    if 'baoiter' in cf_tag:
+        print(f'Number converged: {n_converged}/{Nrealizations}')
+    
+    
+    result = [rs, xis]    
+    if return_amps:
+        result.append(amps)
+    if return_extra:
+        result.append(extra)
+    return result
+
+
+def load_true(cat_tag, bias=1.0):
+    cat_dir = '../catalogs'
+    true_fn = '{}/inputs/cat{}_Rh_xi.txt'.format(cat_dir, cat_tag)
+    r_true, xi_true = np.loadtxt(true_fn, unpack=True)
+    xi_true *= bias**2
+    return r_true, xi_true
+
+
+def load_bao(cat_tag, cf_tag, Nr):
+    
+    cat_dir = '../catalogs'
+    result_dir = '../results/results_lognormal{}'.format(cat_tag)
+
+    rs = []
+    xis = []
+    amps = []
+    extras = []
+    niters = []
+    assert 'baoiter' in cf_tag, "baoiter not in cf_tag!"
+    fn_pattern = f"cf{cf_tag}_*{cat_tag}_rlz{Nr}.npy"
+    matches = glob.glob(f'{result_dir}/{fn_pattern}')
+    
+    for cf_fn in matches:
+        r_avg, xi, amp, proj, extra_dict = np.load(cf_fn, allow_pickle=True)
+    
+        rs.append(r_avg)
+        xis.append(xi)
+        amps.append(amp)
+        extras.append(extra_dict)
+
+        fn_split = cf_fn.split('_')
+        for nn in fn_split:
+            if nn.startswith('niter'):
+                niter = int(nn[len('niter'):])
+                niters.append(niter)
+    return rs, xis, amps, extras, niters
+
+
+# deriv: 2ax + b = 0
+# x = -b/(2a)
+def quadratic(x, a, b, c):
+    return a*x**2 + b*x + c
+
+
+def find_peaks_center(r_arr, xi_arr, rpeak_guess, bws, r_widths=[11.0], region=(85,115), show_bad=False, return_fit=True):
+    print(bws, r_widths)
+    xi_arr = np.array(xi_arr)
+    if len(xi_arr.shape)<3:
+        r_arr = [r_arr]
+        xi_arr = [xi_arr]
+        
+    ntags = np.array(xi_arr).shape[0]
+    N = np.array(xi_arr).shape[1]
+    n_bad_tot = 0
+    
+    if show_bad:
+        plt.figure()
+        #plt.ylim(-0.01, 0.05)
+        plt.xlim(36, 156)
+    
+    r_peak_arr = np.zeros((ntags, N))
+    for i in range(ntags):
+        bw = bws[i]
+        r_width = r_widths[i]
+
+        rs = r_arr[i]
+        xis = xi_arr[i]
+        
+        n_nans = 0
+        n_botedge = 0
+        n_topedge = 0
+        #r_maxes = []
+        #r_peaks = []
+        for j in range(N):
+            r = rs[j]
+            xi = xis[j]
+
+            xi_func = interp1d(r, xi, kind='cubic')
+            
+            r_edges = np.arange(min(r), max(r)+bw, bw)
+            r_avg = 0.5*(r_edges[:-1] + r_edges[1:])
+            
+            r_points = r_avg[np.where(np.abs(r_avg-rpeak_guess)<r_width)]
+            assert len(r_points)>2, "Bad points! <3"
+            
+            xi_points = [xi_func(rp) for rp in r_points]
+            popt, _ = curve_fit(quadratic, r_points, xi_points)
+            a, b, c = popt
+
+            if a>0:
+                r_peak_arr[i][j] = np.random.choice(region)
+                if show_bad:
+                    plt.plot(r, xi+n_bad_tot*0.005)
+                n_nans += 1
+                n_bad_tot += 1
+                continue
+
+            r_peak = -b/(2*a)
+            if r_peak<region[0]:
+                r_peak=region[0]
+                n_botedge +=1
+                if show_bad:
+                    plt.plot(r, xi+n_bad_tot*0.005)
+                n_bad_tot += 1    
+            elif r_peak>region[1]:
+                r_peak=region[1]
+                n_topedge += 1
+                if show_bad:
+                    plt.plot(r, xi+n_bad_tot*0.005)
+                n_bad_tot += 1
+            r_peak_arr[i][j] = r_peak
+#             if r_peak<region[0] or r_peak>region[1]:
+#                 r_peak = np.NaN
+#                 n_nans += 1
+        #r_peak_arr.append(np.array(r_peaks))
+        
+        print('Number of NaNs:', n_nans, ', Bottom edges:', n_botedge, ', Top edges:', n_topedge, "total:", n_nans+n_botedge+n_topedge)
+     
+    if show_bad:
+        plt.ylim(-0.01, n_nans/45.)
+
+    bad_arrays = [n_nans, n_botedge, n_topedge]
+    fit_arrays = [r_points, xi_points, popt]
+    if return_fit:
+        return r_peak_arr, bad_arrays, fit_arrays
+    else:
+        return r_peak_arr, bad_arrays
+
+
+def find_peaks_max(r_arr, xi_arr, bws, r_widths=[14.0], region=(85,115), show_bad=False, return_fit=False):
+    xi_arr = np.array(xi_arr)
+    if len(xi_arr.shape)<3:
+        r_arr = [r_arr]
+        xi_arr = [xi_arr]
+    ntags = np.array(xi_arr).shape[0]
+    N = np.array(xi_arr).shape[1]
+    
+    r_peak_arr = []
+    for i in range(ntags):
+        bw = bws[i]
+        r_width = r_widths[i]
+        print(bw, r_width)
+
+        n_bad_tot = 0
+        if show_bad:
+            plt.figure()
+
+        rs = r_arr[i]
+        xis = xi_arr[i]
+        
+        n_nans = 0
+        n_botedge = 0
+        n_topedge = 0     
+        
+        r_peaks = []
+        for j in range(N):
+            r = rs[j]
+            xi = xis[j]
+
+            xi_func = interp1d(r, xi, kind='cubic')
+
+            r_edges = np.arange(min(r), max(r)+bw, bw)
+            r_avg = 0.5*(r_edges[:-1] + r_edges[1:])
+            
+            peak_region = np.array([(rr, xi_func(rr)) for rr in r_avg if region[0]<rr<region[1]])
+            i_max = np.argmax(peak_region[:,1])
+            r_max = peak_region[i_max][0]
+
+            bad_imaxes = [0, len(peak_region)-1]
+            if i_max in bad_imaxes:
+                r_peaks.append(np.NaN)
+                n_nans += 1
+                n_bad_tot += 1
+                if show_bad:
+                    plt.plot(r, xi+n_bad_tot*0.005)
+                continue
+
+            r_points = r_avg[np.where(np.abs(r_avg-r_max)<r_width)]
+            assert len(r_points)>2, "Bad points! <3"
+            xi_points = [xi_func(rp) for rp in r_points]
+            
+            # use least_sq
+            popt, _ = curve_fit(quadratic, r_points, xi_points)
+            a, b, c = popt
+
+            r_peak = -b/(2*a)
+            if r_peak<region[0]:
+                r_peak=region[0]
+                n_botedge += 1
+            elif r_peak>region[1]:
+                r_peak=region[1]
+                n_topedge += 1
+            r_peaks.append(r_peak)
+
+        r_peak_arr.append(r_peaks)
+        
+        print('Number of NaNs:', n_nans, ', Bottom edges:', n_botedge, ', Top edges:', n_topedge, "total:", n_nans+n_botedge+n_topedge)
+
+    if show_bad:
+        plt.ylim(-0.01, n_bad_tot*0.005+0.01)
+
+    bad_arrays = [n_nans, n_botedge, n_topedge]
+    fit_arrays = [r_points, xi_points, popt]
+    if return_fit:
+        return r_peak_arr, bad_arrays, fit_arrays
+    else:
+        return r_peak_arr, bad_arrays 
