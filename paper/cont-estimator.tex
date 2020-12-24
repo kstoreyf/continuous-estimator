@@ -46,6 +46,7 @@
 % comments
 \newcommand{\KSF}[1]{\textcolor{teal}{KSF says: #1}}
 \newcommand{\hogg}[1]{\textcolor{red}{Hogg says: #1}}
+\newcommand{\new}[1]{\textbf{#1}}
 
 % affiliations
 \newcommand{\ccpp}{\affiliation{%
@@ -94,29 +95,33 @@ With current observations, the LSS is well-described by a cold dark matter model
 Upcoming galaxy surveys including DESI \citep{Aghamousa2016}, Euclid \citep{Laureijs2011}, and LSST \citep{Ivezic2018} will observe larger volumes with improved measurements, allowing us to test $\Lambda$CDM to even higher precision.
 
 The most important statistic for characterizing the LSS is the two-point correlation function (\cf).
-It measures the excess frequency at which any two galaxies are separated by a given distance, compared to a uniform distribution; effectively, it characterizes the strength of clustering at a given spatial scale.
+\new{It measures the excess probability of finding two galaxies are separated by a given distance, compared to a spatially random Poisson distribution;} effectively, it characterizes the strength of clustering at a given spatial scale.
 The \cf is the primary tool for extracting cosmological information from galaxy redshift surveys.
 Such correlation function analyses include \cite{Hawkins2003} for the 2dF Galaxy Redshift Survey (2dFGRS, \citealt{Colless2001}), \cite{Alam2016} for the Baryon Oscillation Spectroscopic Survey (BOSS, \citealt{Dawson2013}) DR12 analysis, and \cite{Elvin-Poole2017} for the Dark Energey Survey (DES, \citealt{DES2005}).
 
-Estimators of the \cf have been studied extensively (e.g., \citealt{PeeblesHauser1974}; \citealt{DavisPeebles1983}; \citealt{Hamilton1993}).
 Traditionally, the \cf is estimated in bins of radial separation.
-This binning introduces inherent limitations.
-First, the choice of bins requires a trade-off between bias and variance: fewer bins may bias the result, while more bins increases the variance of measurement.
+\new{Recent work has focused on the inappropriateness and limitations of binning in astrophysical contexts.}
+Broadly, binning adds arbitrary boundaries between continuous data; results should not depend on bin choice, yet they sometimes do.
+\new{It also results in the well-known trade-off between bias and variance: fewer bins may bias the result (i.e. reduce the accuracy), while more bins will increase the variance of measurement (i.e. reduce the precision)}.
 Finite-width bins also result in a loss of information about the property in which one is binning.
-As we work towards extreme precision in large-scale structure, maximizing the information we extract with our analyses will become increasingly important.
+\new{These issues have been demonstrated in various fields of astrophysics.}
+\new{\cite{Kipping2010} showed that temporal binning of transit lightcurves results in inaccurately recovered system parameters.}
+\cite{Lanzuisi2017} noted that the choice of binning axis impacts the detected correlation between the luminosity of active galactic nuclei and their host galaxies; \cite{Grimmett2020} devised a method to investigate this correlation in a continuous manner using a hierarchical Bayesian model, eliminating the need for binning.
+\new{\cite{Brout2020} found that binning supernovae data causes a larger systematic error in inferred cosmological parameters, while performing an unbinned analysis allows the data to self-calibrate out these systematic uncertainties.}
+From this literature it is clear that, when analyzing smooth quantities, binning is sinning.
+
+\new{The issue of binning is particularly relevant in LSS analyses.}
+\cite{Bailoni2016} explored the dependence of clustering analyses on the number of redshift bins, finding a non-negligible difference in cosmological parameter uncertainties.
+The implications for BAO analyses were explored by \cite{Percival2014}, who found that the effects of bin width are small but non-negligible; they showed that there is an optimal bin width given the analysis method that trades off statistical uncertainty against bias in the derived BAO peak location.
 Additionally, the error on the inverse covariance matrix estimate depends on the number of bins, with a larger number of bins resulting in a larger error that propogates to the estimated parameters \citep{Hartlap2007, Percival2014}.
 This can be balanced by using a large number of mock galaxy catalogs, but these can be exceedingly expensive to generate.
 This is currently the limiting step in LSS analyses, with on the order of 1000 mock catalogs tailored to the survey needed to achieve the desired precision on the parameters.
-The requirements on the covariance matrix will get even more stringent as survey size increases and we push towards higher precision; the connection of this liming step with bin choice merits scrutiny of binning in \cf analyses.
+The requirements on the covariance matrix will get even more stringent as survey size increases and we push towards higher precision; the connection of this limiting step with bin choice merits scrutiny of binning in \cf analyses.
+Finally, the loss of information inherent in binning may become a critical bottleneck as we work towards extreme precision in LSS analyses.
 
-More generally, binning adds arbitrary boundaries between continuous data; results should not depend on bin choice, yet they sometimes do.
-\cite{Lanzuisi2017} noted that the choice of binning axis impacts the detected correlation between the luminosity of active galactic nuclei and their host galaxies; \cite{Grimmett2020} devised a method to investigate this correlation in a continuous manner using a hierarchical Bayesian model, eliminating the need for binning.
-\cite{Bailoni2016} explored the dependence of clustering analyses on the number of redshift bins, finding a non-negligible difference in cosmological parameter uncertainties.
-The implications for BAO analyses were explored by \cite{Percival2014}, who found that the effects of bin width are small but non-negligible; they showed that there is an optimal bin width given the analysis method that trades off statistical uncertainty against bias in the derived BAO peak location.
-From this literature, it is clear that, when analyzing smooth quantities such as LSS statistics, binning is sinning.
-
+Estimators of the \cf have been studied extensively (e.g., \citealt{PeeblesHauser1974}; \citealt{DavisPeebles1983}; \citealt{Hamilton1993}).
 One of the difficulties in performing a two-point estimate is that nontrivial survey boundaries would bias a direct summation of pair counts.
-To account for the boundaries as well as regions corrupted by issues such as bright foreground stars, typically a large set of random points are Poisson-distributed within the acceptable survey window.
+To account for the boundaries as well as \new{corrupted regions (e.g. by bright foreground stars)}, typically a large set of random points are \new{Poisson-distributed} within the acceptable survey window.
 The pairwise correlations of these unclustered points are used to normalize out the survey window.
 The current standard estimator, proposed by \cite{LandySzalay1993} (hereafter \LS), takes this approach.
 It involves a summation of the data--data pairs $DD$ in each separation bin, normalized by random--random pairs $RR$ as well as the data--random pairs $DR$ to improve the bias properties of the estimator.
@@ -126,7 +131,7 @@ The \LS estimator of the correlation function $\hat{\xi}_k$ for the $k^\mathrm{t
 \end{equation}
 Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}.
 Estimators of the \cf must also take into account the imperfect nature of the survey, including systematic effects, the target completeness, and fiber collisions.
-To account for these, each galaxy pair is sometimes assigned a weight, and pair counts are replaced by the sum of pair weights.
+To account for these, each galaxy pair is typically assigned a weight, and pair counts are replaced by the sum of pair weights.
 
 Variations on traditional \cf estimation have been proposed in recent years.
 \cite{Demina2016} replaced the $DR$ and $RR$ terms with an integral over the probability map, reducing computation time and increasing precision.
@@ -140,10 +145,11 @@ Some require additional computational costs or layers of complexity, so the stan
 
 In this \documentname, we present a new estimator for the correlation function, \est, which generalizes the \LS estimator to produce a continuous estimation of the \cf. 
 \Est projects the galaxy pairs onto a set of continuous basis functions and directly computes the best-fit linear combination of these functions.
-The basis representation can depend on the pair separation as well as other desired properties, and can also utilize the known form of the \cf.
+The basis representation can depend on the pair separation as well as other desired properties, and can utilize the known form of the \cf.
 For tophat basis functions, the estimator exactly reduces to the \LS estimator. 
-\Est removes the need for binning and produces a more representative estimate of the \cf with fewer basis functions, reducing requirements on mock catalogs for covariance matrix computation.
+\Est removes the need for binning and produces a more representative estimate of the \cf with fewer basis functions, \new{increasing the accuracy and} reducing requirements on mock catalogs for covariance matrix computation.
 It is particularly well-suited to the analysis of LSS features such as the BAO peak; we find that we can accurately locate the peak with fewer components compared to standard analyses.
+\KSF{TODO: include reference to summary section here?}
 
 This \documentname is organized as follows. 
 In Section~\ref{sec:motiv}, we motivate our estimator and explain its formulation.
@@ -162,7 +168,7 @@ A hat above a symbol, e.g. $\bld{\hat{\xi}}$, indicates an estimate of the value
 
 The standard approach to estimating the two-point correlation function involves counting pairs of tracers within a survey volume as a function of separation scale.
 Let's assume we have a data catalog with $N_D$ objects within a sky volume.
-We also require a random catalog with $N_R$ objects distributed uniformly throughout the same volume.
+We also require a random catalog with $N_R$ objects Poisson-distributed throughout the same volume.
 We can define a set of separation bins which we will use to estimate the \cf at various scales.
 We are then ready to sum in each bin the relevant pairs of objects within and across our catalogs.
 In standard notation, these pair counts are written as $DD$, $DR$, and $RR$, as in \eqt{eq:lsintro}.
@@ -221,7 +227,7 @@ These projection vectors are defined as
     \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'<n} \ff(\GG{n n'}) \\
     \vv{DR} &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n m}) \\
     \vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) \\
-    \TT{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) \cdot \ff\T(\GG{m}, \GG{m'}) \label{eq:qq_proj} ~,
+    \TT{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) \cdot \ff\T(\GG{m m'}) \label{eq:qq_proj} ~,
 \end{eqnarray}
 where the prefactors are as explained for the standard \LS estimator.
 
@@ -291,11 +297,7 @@ We can also write down the form of \est when we are working with a periodic box 
 In this case, we can analytically compute the $\vv{RR}$ term, as well as the $\TT{RR}$ term, and use the natural form of the \cf estimator.
 The derivation and formulation of these terms are shown in Appendix~\ref{sec:analytic}.
 
-We implement this estimator based on the correlation function package \texttt{Corrfunc} by \cite{Sinha2019}.
-\texttt{Corrfunc} is the state-of-the-art package for computing correlation functions and other clustering statistics; it is extremely fast and user-friendly, and is used in many published analyses.
-It is also modular and open-source, making it a natural choice as a base for our implementation.
-Our implementation of \est is also open-source and available at \texttt{github.com/kstoreyf/Corrfunc}.
-Implementation details are discussed in Section~\ref{sec:comp}.
+We discuss the implementation of \est in Section~\ref{sec:comp}.
 
 
 \section{Experiments and Results}
@@ -305,7 +307,7 @@ Implementation details are discussed in Section~\ref{sec:comp}.
 
 We demonstrate the application of \est on a set of artifical data.
 We generate lognormal mock catalogs \citep{ColesJones1991} using the \texttt{lognormal\_galaxies} code by \citep{Agrawal2017}.
-We use an input power spectrum with the Planck cosmology, the same parameters used for the MultiDark--PATCHY simulations \citep{Kitaura2016} made for the Baryon Oscillation Spectroscopic Survey (BOSS, \citealt{Dawson2013}.
+We use an input power spectrum with the Planck cosmology, the same parameters used for the MultiDark--PATCHY simulations \citep{Kitaura2016} made for the Baryon Oscillation Spectroscopic Survey (BOSS, \citealt{Dawson2013}).
 This assumes a cold dark matter model with $\Omega_m = 0.307115$, $\Omega_b = 0.048206$, $\sigma_8 = 0.8288$, $n_s = 0.9611$, and $h = 0.6777$.
 Our fiducial test set is 1000 realizations of periodic cubes with size (750 \hmpc)$^3$ and a galaxy number density of $2 \times 10^{-4}$ $h^{3}\,$Mpc$^{-3}$.
 We choose to perform these tests on periodic boxes so that we may compute the random--random term analytically (see Appendix~\ref{sec:analytic}), significantly cutting down on computation time.
@@ -345,8 +347,8 @@ This demonstrates one way in which the standard tophat estimator is not a good r
 
 A natural extension of tophat basis functions is the B-spline.
 B-splines of order $n$ are piecewise polynomials of order $n-1$; they constitute the basis functions for spline interpolation \citep{deBoor1987}.
-They have the nice property that the functions and their derivatives can be continuous, depending on the order.
-Further, B-splines are well-localized, which provides a more direct comparison to the typical tophat basis (which is entirely localized).
+They have the nice property that the functions and their derivatives can be continuous, depending on the order; \new{this might be important in inference contexts where it is useful to have differentiable models with respect to the parameters of interest, and generally aligns with our belief that physical models of the universe are analytic (i.e. have derivatives of all orders).}
+Additionally, B-splines are well-localized, which provides a more direct comparison to the typical tophat basis (which is entirely localized).
 For this demonstration we use fourth-order B-splines, which constitute the set of basis functions for a cubic spline, as they are the lowest-order spline to have a continuous first derivative.
 
 We compare the estimator with a cubic-spline basis to the standard estimator, reformulated as continuous functions using a tophat basis; the results are shown in Figure~\ref{fig:spline}.
@@ -356,7 +358,7 @@ For the cubic-spline basis, we use the same $r$-range and number of basis functi
 The cubic-spline bases on the edge have different shapes such that they remain normalized; we note that generally, one should choose the basis functions such that the range of the \cf that is of interest does not depend on the range of the basis functions.
 
 The estimator using the cubic-spline basis clearly produces a better fit to the true correlation function in its shape and smoothness at every point across the scale range, compared to the estimator using the tophat basis.
-The bottom panel shows the error with respect to the truth; the cubic-spline estimator is more generally more accurate, and straightforward to compare to the truth (or model) at every scale.
+The bottom panel shows the error with respect to the truth; the \new{cubic-spline estimator is generally more accurate}, and straightforward to compare to the truth (or model) at every scale.
 On the other hand, in order to compare the binned correlation to a model, one must integrate the model over the bin range, though in practice the model is often just evaluated at the effective $r$ of each bin.
 This comparison demonstrates that there exist other sets of basis functions that produce better representations of the data compared to the standard tophat/binned estimator.
 The choice of a high-order spline may be useful for cases in which one wants a mostly localized yet representative estimate of the \cf, or smooth derivatives.
@@ -397,7 +399,8 @@ In standard practice, the fitting function used to determine the value of $\alph
 where $B$ is a constant that allows for a large-scale bias, and $a_1$, $a_2$, and $a_3$ are nuisance parameters to account for the broadband shape.
 A $\chi^2$ fit is performed at intervals of $\Delta \alpha$, with $B$, $a_1$, $a_2$, and $a_3$ as free parameters. 
 The resulting value for $\alpha$ is used to derive the actual values of the distance scales of interest.
-Typically, density-field reconstruction is performed before applying the estimator to correct for nonlinear growth around the BAO scale \citep{Eisenstein2007}; for our toy example, we omit this step.
+\new{Typically, analyses have to correct for the broadening of the BAO peak due to nonlinear growth \citep{Eisenstein2007}; approaches include computing the model with a damping parameter, or performing density-field reconstruction before applying the estimator.
+As we use lognormal mocks, we do not need to perform this step, but a realistic analysis must either used a damped model for the basis functions (as we describe below) or reconstruct the density field.}
 
 The form of the standard fitting function is well-suited to our estimator, as it is a few-parameter model with a linear combination of terms.
 To use our estimator to estimate $\alpha$, we add a term that includes the partial derivative of the model with respect to $\alpha$.
@@ -461,17 +464,9 @@ We return to this issue in Section~\ref{sec:covariance}.
 
 \section{Discussion} \label{sec:discuss}
 
-\subsection{Summary of Results and Limitations}
+\subsection{Estimator Usage and Limitations}
 
-This \documentname presented a method to estimate the two-point correlation function without the need for binning.
-It generalizes the standard \cf estimator in a manner inspired by least-squares fitting: \est projects the data onto a set of user-chosen basis functions, and applies a normalization based on a random catalog.
-Using a set of artificial mock catalogs, we showed that our method exactly reproduces the results of the standard approach with the choice of tophat basis functions, but in a way that demonstrates what the estimator is really measuring, namely a constant amplitude of clustering at every point within a radial separation bin.
-\Est, however, has the capacity to be much more expressive than the standard estimator with a different choice of basis functions.
-We demonstrated its use with cubic-spline basis functions, which results in a correlation function estimate that is much more representative of the expected shape and smoothness of the \cf.
-Further, \est can be tailored to the scientific use case; we apply to it a toy baryon acoustic feature analysis, choosing basis functions to be the terms of a modified BAO fitting function.
-This produced an estimate of the \cf that inherently reflects our beliefs about its form, and allowed us to directly estimate the scale dilation parameter with a hight level of accuracy.
-
-While these are just a few example applications of our estimator (for others see Section~\ref{sec:applications}), they demonstrate the problems solved and opportunities created with \est.
+In this \documentname we have performed a few example applications of our estimator (for others see Section~\ref{sec:applications}); these demonstrate the problems solved and opportunities created with \est.
 In getting rid of the need for binning, the estimator can produce a much more \textit{representative} correlation function; a mixture of tophats is a very poor representation of the \cf. 
 We almost always expect some sort of continuity in the functions we work with; nature does not bin.
 In principle, one can ``avoid binning'' by working in the limit of infinitesimal bins.
@@ -481,10 +476,21 @@ In some sense, our method can be seen as effectively working in the limit of inf
 One of the problems with binning is that there are choices to be made in bin widths and locations.
 We note that our approach does not actually help these choice issues.
 In fact, \est expands investigator choice almost infinitely, as the space of possible basis functions is far larger than the space of possible binnings.
-That said, since the selection of basis functions can be designed for the science case at hand, the choices can be better motivated and lead directly to the final estimate one in which one is interested (e.g., our BAO estimate in Section~\ref{sec:bao}).  
+That said, \new{there are ways to make a well-motivated selection of basis functions.
+In cases where there is a clear scientific model that can be represented as a linear combination of terms, choosing this will result in the most direct recovery of the parameters of interest (e.g., our BAO estimate in Section~\ref{sec:bao}).
+When the investigator would like to remain model-agnostic and desires a continuous estimate, the choice of a basis such as splines, wavelets, or Fourier components may be appropriate.
+There are various ways to compare the choice of basis functions; one approach is to perform cross-validation, which has proven useful in choosing histogram bins and kernels for density estimation \citep{Rudemo1982, Hogg2008}.}
 
-Our approach does have certain limitations.
-One restriction is the fact that the \cf forms of interest must be representable in terms of a linear combination of basis functions; this makes \est less appropriate in the case of nonlinear models.
+\new{We also note that \est could be prone to both over- and under-fitting.
+If a model that contains a particular feature is used directly as basis functions, and that feature is not present in the data, the estimator may output a \cf that is not representative of the data.
+On the other hand, if a feature is not present in the basis functions but exists in the data, \est could smooth out or obscure it.
+However, both of these issues arise in similar ways with the standard approach of binning and then fitting to a model that is not representative of the data.
+Still, it is true that the binned data may capture certain features that the chosen model doesn't.
+Additional model flexibility could be included when using \est to address this concern.
+We also suggest that investigators perform exploratory analysis with the standard estimator at various bin widths, and compare thes e to the results given by \est with the chosen set of basis functions.}
+
+Our approach has a few other notable limitations.
+One restriction is the fact that the \cf forms of interest must be representable in terms of a linear combination of basis functions; this makes \est less appropriate in the case of nonlinear models \new{(though often a linearization can be performed).}
 The estimator must also evaluate the basis functions for every pair of objects, so highly complex functions may become intractable.
 Finally, our estimator inherits many of the limitations of the Landy--Szalay estimator, including the fact that it contains a bias on clustered data and has non-optimal variance properties.
 However, \est is further generalizable to other forms of the estimator (Section~\ref{sec:beyondls}), so in principle there is a formulation that further ameliorates these \LS-related limitations.
@@ -551,16 +557,18 @@ However, some estimator formulations use powers of these terms that are nontrivi
 \subsection{Implementation and Computational Performance}
 \label{sec:comp}
 
-We implement \est within the widely used correlation function package \texttt{Corrfunc} \citep{Sinha2019}.
-\texttt{Corrfunc} performs extremely fast pair identification, and can estimate common types of correlation functions on both theoretical boxes and on-sky data.
-The package is written in C with python bindings and utilities, and it very modular and user-friendly.
+We implement \est within the correlation function package \texttt{Corrfunc} \citep{Sinha2019}.
+\new{\texttt{Corrfunc} is the state-of-the-art package for computing correlation functions and other clustering statistics; it is written in C with python bindings and utilities.
+It is used in many published analyses, and it is modular, user-friendly, and open-source.}
+\texttt{Corrfunc} performs extremely fast pair identification, and can estimate correlation functions on both theoretical boxes and on-sky data.
 Our implentation of \est capitalizes on the power of \texttt{Corrfunc}, adding the necessary functionality into the existing framework.
 We allow the user to define the basis functions for continuous-function estimation, and for every pair identified, we pass the separation and any additional required tracer information to the basis functions.
 We output the projection vector and the projection tensor, as well as the traditional pair counts.
 We include additional functions to compute the amplitudes from these projections, and then to evaluate the continuous correlation function for these amplitudes at the desired points in parameter space, giving the user a high level of control at every step.
+\new{Our implementation of \est is also open-source and available at \texttt{github.com/kstoreyf/Corrfunc}.}
 
 The computational scaling for our estimator is by definition the same as the traditional method, as pair-finding remains the limiting factor.
-However, because \est must evaluate the set of basis functions for each pair of galaxies, it can take longer.
+However, because \est must evaluate the set of basis functions for each pair of galaxies, \new{it can decrease the computational performance (i.e. decrease the speed and increase the computational cost) compared to the traditional estimator}.
 For simple basis functions like splines, this will only marginally decrease performance.
 For more complicated functions, \est may incur significant extra computational expense.
 Basis functions can also be input on a grid (of separation or any other property) and then interpolated; the performance is then similar for all functions, depending on how the interpolation is done, but interpolating each function for each pair does somewhat decrease the performance.
@@ -568,7 +576,7 @@ Though the performance at the time of estimation may be slower than the traditio
 
 We detail a number of implementation choices here.
 Our formulation of \est requires the inverse of the random--random tensor $\TT{RR}$ to compute the amplitudes (\eqt{eq:amplitude}).
-However, we don't compute this inverse directly, as can be unstable, and is not in fact the end result we are interested in: we want the dot product between $\TT{RR}\inv$ and the numerator $\vv{}$ of the estimator.
+However, we don't compute this inverse directly, \new{as it can be unstable}, and is not in fact the end result we are interested in: we want the dot product between $\TT{RR}\inv$ and the numerator $\vv{}$ of the estimator.
 For this reason, we use the ``solve'' operation which computes the solution $\bld{a}$ of the well-determined matrix equation $\TT{RR}\,\bld{a}=\bld{v}$.
 We also make sure to report the condition number of the tensor, as numerical precision decreases as the condition number rises.
 If the condition number large, then a rescaling of the basis functions or a rotation in the basis space can improve stability.
@@ -576,8 +584,8 @@ If the condition number large, then a rescaling of the basis functions or a rota
 \subsection{Effect on Covariance Matrix Estimation}
 \label{sec:covariance}
 
-We have shown that \est results in \cf estimates that are just as accurate as binned estimates, with fewer components.
-This is critical when estimating the covariance matrix, which is required for standard parameter inference.
+\new{We have shown that \est, with a proper choice of basis functions, results in \cf estimates that are more accurate and use fewer components than binned estimates.}
+This reduction in component number is critical when estimating the covariance matrix, which is required for standard parameter inference.
 The covariance matrix is difficult to compute analytically, though there is promising progress on this front (e.g., \citealt{Wadekar2020}).
 For major analyses, it is usually estimated by evaluating the \cf on a large number of mock catalogs and computing the covariance between the bins (e.g., \citealt{Reid2010}; \citealt{Anderson2014}).
 The unbiased estimator for the sample covariance matrix is (e.g., \citealt{Anderson2003})
@@ -671,6 +679,30 @@ Another possibility is anisotropy in the cosmic acceleration, which could leave 
 With our estimator, we could introduce a dependence on location or direction into our basis functions, and constrain the potential deviation from homogeneity or isotropy.
 \Est would allow for a more precise estimate of this dependence as it doesn't require any sort of patches or spatial binning, instead estimating a multi-dimensional continuous \cf.
 While these effects would be highly degenerate with systematics, our estimator combined with robust systematics mitigation opens investigation channels into new physics.
+
+
+\section{Summary}
+
+In this \documentname, we have presented a new approach to estimating the two-point correlation function for large-scale structure analyses, \est, without the need for binning.
+It generalizes the standard \cf estimator in a manner inspired by least-squares fitting: it projects the data onto a set of user-chosen basis functions, and applies a normalization based on a random catalog.
+\new{\Est has many advantages over traditional \cf estimation, including that it can:
+\begin{itemize}
+    \item Produce continuous two-point correlation functions that can be evaluated at any pair separation, removing the need for binning in  separation;
+    \item Incorporate other tracer properties into the basis functions, removing the need for binning along other axes;
+    \item Produce correlation functions that reflect our prior beliefs about the smoothness and shape of the \cf, given a well-motivated choice of basis functions;
+    \item Use basis functions that are tailored to the scientific goal, such as directly using the model as bases, avoiding an intermediate fitting step;
+    \item Result in correlation functions that are more accurate with fewer components, lowering  requirements on costly mock catalogs.
+\end{itemize}
+There remain some limitations of \est, most notably that it inherits many of the issues of the Landy--Szalay estimator upon which it is based, including non-optimal variance properties, a bias at large scales, and a reliance on a random catalog.}
+
+We demonstrated \est on a set of artificial mock catalogs.
+We first showed that our method exactly reproduces the results of the standard approach with the choice of tophat basis functions, but in a way that demonstrates what the estimator is really measuring, namely a constant amplitude of clustering at every point within a radial separation bin.
+We next showed that \est has the capacity to be much more expressive than the standard estimator: we demonstrated this with the choice of cubic-spline basis functions, which results in a correlation function estimate that is representative of the expected shape and smoothness of the \cf.
+Further, we demonstrated that \est can be tailored to the scientific use case.
+We applied to it a toy baryon acoustic feature analysis, choosing basis functions to be the terms of a modified BAO fitting function.
+This produced an estimate of the \cf that inherently reflects our beliefs about its form, and resulted in a direct estimate of the scale dilation parameter with a high level of accuracy.
+
+\new{\Est provides the opportunity for improved precision and accuracy in current and future large-scale structure surveys, as well as for the detection of novel signals in clustering analyses.}
 
 
 \acknowledgements
