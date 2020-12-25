@@ -495,10 +495,19 @@ The estimator must also evaluate the basis functions for every pair of objects, 
 Finally, our estimator inherits many of the limitations of the Landy--Szalay estimator, including the fact that it contains a bias on clustered data and has non-optimal variance properties.
 However, \est is further generalizable to other forms of the estimator (Section~\ref{sec:beyondls}), so in principle there is a formulation that further ameliorates these \LS-related limitations.
 
-\subsection{Relationship to Other Modifications of \cf Estimators}
+\subsection{Relationship to Other Estimators of Second-Order Statistics}
 \label{sec:otherest}
 
-On the surface, \est appears similar to other two-point function projects, including kernel density estimators \citep {Hatfield2016} and the marked correlation function \citep{Beisbart2000}.
+\new{The problem of computing two-point statistics with non-trivial survey boundaries is a topic of significant study in the statistical point process literature \citep{Ripley1981, Illian2008, Diggle2013}.
+Much of this work focuses on the correlation integral $C(r)$, which measures the average number of data points in a sphere of radius $r$ centered on a typical point; this is related by a factor of the density to the Ripley K-function \citep{Ripley1976}. These are closely connected to the two-point correlation function by an integral relation.
+Estimators for $C(r)$ involve various ways of correcting for the survey boundary, such as local weights to correct for points near survey edges, and corrections based on the set covariance of the window function.
+These typically do not require binning, as they are measuring an average of quantities local to each point, and can be computed at any value of $r$.
+These $C(r)$ estimators are directly related to estimators for the \cf; the $DR$ and $RR$ pair counts are in fact Monte Carlo versions of the geometric $C(r)$ corrections mentioned \citep{Kerscher1999}.
+However, the required shift to finite bins when estimating the two-point correlation function results in increased variance due to shot noise, and even the best estimator studied (\LS) is only unbiased in the limit of zero bin width for unclustered data.
+As we rely the two-point correlation function for our standard cosmological analyses due to its theoretical interpretability, the unbinned correlation integral estimators do not represent viable alternatives to current \cf estimators.
+While \est shares the avoidance of binning of these $C(r)$ estimators, it is not related in a more fundamental manner, instead generalizing directly from the the binned \LS estimator.}
+
+On the surface, \est also appears similar to other two-point function projects, including kernel density estimators \citep {Hatfield2016} and the marked correlation function \citep{Beisbart2000}.
 While these formulations look similar, ours solves a different problem than these estimators.
 
 Kernel density estimation (KDE) is a class of methods for estimating a probability density function from a set of data.
