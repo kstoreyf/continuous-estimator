@@ -218,6 +218,7 @@ Standard two-point correlation function estimators are effectively performing su
 The analogy is clear in the so-called natural estimator of the \cf, $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$ (e.g., \citealt{Kerscher2000}), with $\vv{DD}$ aligning with the second bracketed factor and $\vv{RR}$ aligning with the first (the division can be written as an inverse factor).
 \Est was inspired by this connection with least-squares fitting; we detail its formulation in the following section.
 
+
 \subsection{\Est}
 \label{sec:est}
 
@@ -294,7 +295,7 @@ In this case the $\vv{DD}$, $\vv{DR}$ and $\vv{RR}$ projection vectors simply be
 The $\TT{RR}$ tensor becomes diagonal, with its diagonal elements equal to the elements of the $\vv{RR}$ vector.
 Then the evaluation of the amplitudes $\bld{a}$ and the correlation function estimate $\bld{\hat{\xi}}$ results in the equivalent of the \LS estimator--just displayed in a continuous form.
 
-\KSF{THIS PARAGRAPH NEEDS HOGG EYES / RED PEN}
+\KSF{THIS PARAGRAPH NEEDS HOGG PASS / RED PEN}
 \new{We arrived at the formulation of \est by heuristic reasoning; we show that this formulation is correct by the following argument. 
 Consider taking the \LS estimator to the limit of infinitesimal bins.
 One could then rotate these bins into the space of a chosen set of basis functions, and then re-sum the counts in the infinitesimal bins into the form of the basis functions.
@@ -897,6 +898,88 @@ In our implementation we take $\Delta \alpha = 0.001$; we have checked that our 
 
 We choose the magnitudes of the basis functions $k$ to set them at similar scales, providing improved stability.
 We use the values $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$, though we check that the results are insensitive to choices near these values.
+
+\section{Least -Squares Fitting and The Continuous-Function Estimator}
+
+\KSF{THIS IS ME TRYING TO FIGURE THINGS OUT; CLOSE BUT NOT THERE YET!}
+We can see the connection between \est and least-squares fitting.
+We can rewrite $\vv{DD}$ as (omitting the normalization factors for clarity)
+\KSF{i think the normalization might be important here but i can't figure out how to write in matrix notation in a sensible way; it would be y dot y}
+%tophat normalization: 1/(sum_nn',k f_k(Gnn')) = (sum_nn',k A_nn'k)^-1
+\begin{equation}
+    \vv{DD}  \equiv \bld{A}_{\mathrm{DD}}\T\,\bld{y_\mathrm{DD}} ~,
+\end{equation}
+where $\bld{A}$ is a design matrix of the values of the basis functions for each pair (``features'') that has dimensions $\NN{DP} \times K$ where $\NN{DP} = 2/(\NN{D}(\NN{D}-1))$ is shorthand for the number of pairs,
+\KSF{this notation is terrible! should define a new symbol for the number of pairs}
+\begin{equation}
+    \bld{A}_{\mathrm{DD},nn'k} = f_k(\GG{n n'}) ~.  
+\end{equation}
+and $y$ is a vector of the pair observations.
+For the case of the discrete correlation function, the observable we care about is the occupation number $\mathcal{N}$ of cells where we define a grid such that each cell contains 1 or 0 galaxies.
+The vector $y$ enumerates the cell pairs, $\bld{y}_{nn'} = \mathcal{N}_n\mathcal{N}_{n'}$, but we only need to consider the cell pairs containing galaxies, so $y$ is simply a vector of ones.
+
+Similarly, 
+\begin{eqnarray}
+    \vv{DR} &\equiv& \bld{A}_{\mathrm{DR}}\T\,\bld{y}_\mathrm{DR} \\
+    \vv{RR} &\equiv& \bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR} \\
+    \TT{RR} &\equiv& \bld{A}_{\mathrm{RR}}\T\,\bld{A}_{\mathrm{RR}} ~.
+\end{eqnarray}
+Then our amplitude vector looks like
+\begin{equation}
+    \bld{a} = [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD} - 2\,\bld{A}_{\mathrm{DR}}\T\,\bld{y}_\mathrm{DR} + \bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] ~.
+\end{equation}
+The final term in this equation is the least-squares estimator for the correlation function amplitudes for the random catalog,
+\begin{equation}
+    \bld{\hat{a}}_{\mathrm{RR,lsq}} = [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] ~.
+\end{equation}
+Recall that we have not included any weights in this description, but their inclusion via a covariance matrix would lead to a generalized least squares formulation.
+
+Now let's look at the quantity that \cite{Tessore2018} identified as the least-squares estimator for the two-point correlation function,
+\begin{equation}
+    \bld{\hat{\xi}}_\mathrm{lsq} = [\bld{A}\T \bld{W} \bld{A}]\inv \, [\bld{A}\T \bld{W} \bld{y}] ~,
+\end{equation}
+where $\bld{W}$ is the weight matrix (note that in our case we have taken the weight matrix to be the identity for now), and this estimator is for the matrix equation
+\begin{equation}
+    \langle \bld{y} \rangle = \bld{A} \bld{\xi} ~.
+\end{equation}
+For the case of continuous large-scale structure, we care about the correlation function of the overdensity field, $\langle \delta_i \delta_j \rangle$.
+We can relate this to the discrete case with
+\begin{eqnarray}
+    \langle \mathcal{N}_i \mathcal{N}_j \rangle &=& \langle n_i n_j \rangle \delta V_i \delta V_j \\
+    &=& \langle [\bar{n}(1+\delta_i)] [\bar{n}(1+\delta_j)] \rangle \delta V_i \delta V_j \\
+    &=& [1 + \langle \delta_i \delta_j \rangle] \bar{n}^2 \delta V_i \delta V_j
+\end{eqnarray}
+where $\delta V$ is the volume of the grid cell and $n$ is the continuous number density field, and we have assumed the overdensity field has zero mean.
+This gives us the expectation value of the continuous estimator compared to the discrete, 
+\begin{equation}
+    \langle \delta_i \delta_j \rangle = \frac{\langle \mathcal{N}_i \mathcal{N}_j \rangle}{\bar{n}^2  \delta V_i \delta V_j} - 1 ~.
+\end{equation}
+\KSF{is this next bit true? check!}
+For an unclustered random catalog, $\langle \delta_i \delta_j \rangle = 0$, giving $\langle \mathcal{N}_{\mathrm{R},i} \mathcal{N}_{\mathrm{R},j} \rangle = \bar{n}_R^2  \delta V_i \delta V_j$, so 
+\begin{equation}
+    \langle \delta_i \delta_j \rangle = \frac{\langle \mathcal{N}_i \mathcal{N}_j \rangle}{\langle \mathcal{N}_{\mathrm{R},i} \mathcal{N}_{\mathrm{R},j} \rangle} - 1 ~.
+\end{equation}
+This is the natural estimator for the correlation function, which we have seen before as $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$.
+
+We can now relate the \cite{Tessore2018} estimator for the continuous-field \cf to ours for the discrete tracer \cf.
+Looking at the form of the estimator, we see that \KSF{this is not legal, the units aren't right! still trying to figure out...}
+\begin{equation}
+\hat{\bld{\xi}}_\mathrm{lsq} = \frac{\hat{\bld{\xi}}_\mathrm{DD} - \hat{\bld{\xi}}_\mathrm{RR}}{\hat{\bld{\xi}}_\mathrm{RR}}  ~.       
+\end{equation}
+Using the least-squares estimator, the numerator of this becomes $ \left( [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] \right) - \left( [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] \right)$.
+This is closely related to the amplitude $\bld{a}$ we have defined above. 
+Consider the amplitudes we have formulated for the natural estimator (as opposed to Landy-Szalay), 
+\begin{equation}
+    \bld{a} = [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD} - \bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] ~.
+\end{equation}
+We can rewrite this as 
+\begin{eqnarray}
+    \bld{a} &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] - [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}]  ~. \\
+    &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] - \hat{\bld{\xi}}_\mathrm{RR} \\
+    &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}] [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] - \hat{\bld{\xi}}_\mathrm{RR} \\
+    &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}] \hat{\bld{\xi}}_\mathrm{DD} - \hat{\bld{\xi}}_\mathrm{RR} ~.\\
+\end{eqnarray}
+The factor preceding $\hat{\bld{\xi}}_\mathrm{DD}$ is essentially performing a rescaling of the data space into the random space. \KSF{???}
 
 \bibliography{LSS-est_paper}
 
