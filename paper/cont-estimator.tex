@@ -253,6 +253,7 @@ We further generalize the arguments of the function to any properties of the gal
 This gives us, instead of pair counts, a vector $\vv{}$ of \textit{projections} of the basis functions.
 These projection vectors are defined as
 \begin{eqnarray}\displaystyle
+    \label{eq:vdd}
     \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'<n} \ff(\GG{n n'}) \\
     \vv{DR} &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n m}) \\
     \vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) ~,
@@ -899,87 +900,133 @@ In our implementation we take $\Delta \alpha = 0.001$; we have checked that our 
 We choose the magnitudes of the basis functions $k$ to set them at similar scales, providing improved stability.
 We use the values $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$, though we check that the results are insensitive to choices near these values.
 
-\section{Least -Squares Fitting and The Continuous-Function Estimator}
+\section{Least-Squares Fitting and The Continuous-Function Estimator}
 
-\KSF{THIS IS ME TRYING TO FIGURE THINGS OUT; CLOSE BUT NOT THERE YET!}
-We can see the connection between \est and least-squares fitting.
-We can rewrite $\vv{DD}$ as (omitting the normalization factors for clarity)
-\KSF{i think the normalization might be important here but i can't figure out how to write in matrix notation in a sensible way; it would be y dot y}
-%tophat normalization: 1/(sum_nn',k f_k(Gnn')) = (sum_nn',k A_nn'k)^-1
+We can formalize the connection between \est and least-squares fitting.
+Let's return to the definition of the correlation function for LSS. 
+For the case of continuous large-scale structure, we care about the correlation function of the overdensity field, $\langle \delta_i \delta_j \rangle$.
+This can be defined in terms of a the continuous galaxy number density field $n$, 
 \begin{equation}
-    \vv{DD}  \equiv \bld{A}_{\mathrm{DD}}\T\,\bld{y_\mathrm{DD}} ~,
+    \delta = \frac{n - \bar{n}}{\bar{n}}
 \end{equation}
-where $\bld{A}$ is a design matrix of the values of the basis functions for each pair (``features'') that has dimensions $\NN{DP} \times K$ where $\NN{DP} = 2/(\NN{D}(\NN{D}-1))$ is shorthand for the number of pairs,
-\KSF{this notation is terrible! should define a new symbol for the number of pairs}
+Now for the case of the discrete correlation function, we can imagine defining a fine grid of cells of volume $\Delta V$ throughout our survey volume such that each cell contains exactly 0 or 1 galaxies. 
+Then we can consider the occupation number $\mathcal{N}$ of each cell, where $\mathcal{N}$ is 0 or 1.
+We can relate the continuous and discrete cases with
+\begin{eqnarray}
+    \langle \mathcal{N}_i \mathcal{N}_j \rangle &=& \langle n_i n_j \rangle \Delta V_i \Delta V_j \\
+    &=& \langle [\bar{n}(1+\Delta_i)] [\bar{n}(1+\delta_j)] \rangle \Delta V_i \Delta V_j \\
+    &=& [1 + \langle \delta_i \delta_j \rangle] \bar{n}^2 \Delta V_i \Delta V_j
+\end{eqnarray}
+where we have assumed that the overdensity field has zero mean.
+This gives us the expectation value of the continuous estimator compared to the discrete, 
 \begin{equation}
-    \bld{A}_{\mathrm{DD},nn'k} = f_k(\GG{n n'}) ~.  
+    \langle \delta_i \delta_j \rangle = \frac{\langle \mathcal{N}_i \mathcal{N}_j \rangle}{\bar{n}^2  \Delta V_i \Delta V_j} - 1 ~.
 \end{equation}
-and $\bld{y}$ is a vector of the pair observations.
-For the case of the discrete correlation function, the observable we care about is the occupation number $\mathcal{N}$ of cells where we define a grid such that each cell contains 1 or 0 galaxies.
-The vector $\bld{y}$ enumerates the cell pairs, $\bld{y}_{nn'} = \mathcal{N}_n\mathcal{N}_{n'}$, but we only need to consider the cell pairs containing galaxies, so $y$ is simply a vector of ones.
+This is the origin of the natural estimator for the correlation function that we have seen before, $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$, where we use the random-random pair counts to normalize out the volume correlations in the denominator. 
 
+Now we are prepared to return to our formulation of \est.
+We first construct a vector of the occupation numbers of data pairs $\bld{\tilde{y}}_\mathrm{DD}$.
+As we are only considering pairs that exist, this is simply a vector of ones.
+The data-random vector $\bld{\tilde{y}}_\mathrm{DR}$ and random-random vector $\bld{\tilde{y}}_\mathrm{RR}$ are similarly defined.
+
+We also construct a design matrix $\bld{\tilde{A}}_\mathrm{DD}$ of the features for each of the $\NN{DD}$ data pairs, which has dimensions $\NN{DD} \times K$, where $K$ is the number of features.
+In the language of \est, the features are the values of the basis functions $\ff$ given the properties of the pair, and $K$ is the number of basis functions.
+We define the data-random design matrix $\bld{\tilde{A}}_\mathrm{DR}$ and random-random design matrix $\bld{\tilde{A}}_\mathrm{RR}$ in the same manner.
+
+Then can write data projection vector $\vv{DD}$ of \eqt{eq:vdd} as
+\begin{equation}
+    \vv{DD}  \equiv \frac{1}{\NN{DD}} \bld{\tilde{A}}_{\mathrm{DD}}\T\,\bld{\tilde{y}}_\mathrm{DD} ~,
+\end{equation}
 Similarly, 
 \begin{eqnarray}
-    \vv{DR} &\equiv& \bld{A}_{\mathrm{DR}}\T\,\bld{y}_\mathrm{DR} \\
-    \vv{RR} &\equiv& \bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR} \\
-    \TT{RR} &\equiv& \bld{A}_{\mathrm{RR}}\T\,\bld{A}_{\mathrm{RR}} ~.
+    \vv{DR} &\equiv& \frac{1}{\NN{DR}} \bld{\tilde{A}}_{\mathrm{DR}}\T\,\bld{\tilde{y}}_\mathrm{DR} ~, \\
+    \vv{RR} &\equiv& \frac{1}{\NN{RR}} \bld{\tilde{A}}_{\mathrm{RR}}\T\,\bld{\tilde{y}}_\mathrm{RR} ~, \\
+    \TT{RR} &\equiv& \frac{1}{\NN{RR}} \bld{\tilde{A}}_{\mathrm{RR}}\T\,\bld{\tilde{A}}_{\mathrm{RR}} ~.
 \end{eqnarray}
-Then our amplitude vector looks like
+Then our amplitude vector of \eqt{eq:amplitude} looks like
 \begin{equation}
-    \bld{a} = [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD} - 2\,\bld{A}_{\mathrm{DR}}\T\,\bld{y}_\mathrm{DR} + \bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] ~.
+    \bld{\hat{a}} = \left[ \frac{1}{\NN{RR}}\,\bld{\tilde{A}}_{\mathrm{RR}}\T \, \bld{\tilde{A}}_{\mathrm{RR}} \right]\inv 
+    \left[ \frac{1}{\NN{DD}}\,\bld{\tilde{A}}_{\mathrm{DD}}\T\,\bld{\tilde{y}}_\mathrm{DD} 
+    - 2\,\frac{1}{\NN{DR}}\,\bld{\tilde{A}}_{\mathrm{DR}}\T\,\bld{\tilde{y}}_\mathrm{DR} 
+    + \frac{1}{\NN{RR}}\,\bld{\tilde{A}}_{\mathrm{RR}}\T\,\bld{\tilde{y}}_\mathrm{RR} \right] ~.
 \end{equation}
-The final term in this equation is the least-squares estimator for the correlation function amplitudes for the random catalog,
+
+Recall that the cross-correlation of the random catalog is intended to approximate the cross-correlation of the survey window function.
+With this in mind, let's start with a survey window divided up into cells such that each contains 0 or 1 galaxies from the data catalog.
+Then we construct the design matrix $\bld{A}$ of all of the $\NN{CC}$ \textit{cell pairs}, which has dimensions  $\NN{CC} \times K$.
+This contains features which are the values of the basis functions $\ff$ given the properties of the cell pair, such as the separation $r$ between the cells).
+We can imagine the limit of the random catalog in which the points fill all of the cells:
 \begin{equation}
-    \bld{\hat{a}}_{\mathrm{RR,lsq}} = [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] ~.
+    \lim_{\NN{RR}\to\NN{CC}} \bld{\tilde{A}}_{\mathrm{RR}} = \bld{A}
 \end{equation}
-Recall that we have not included any weights in this description, but their inclusion via a covariance matrix would lead to a generalized least squares formulation.
+so the term $\frac{1}{\NN{RR}} \, \bld{\tilde{A}}_{\mathrm{RR}}\T \, \bld{\tilde{A}}_{\mathrm{RR}} \rightarrow \frac{1}{\NN{CC}} \bld{A}\T \, \bld{A}$.
+This is now a proper design matrix that contains the features of the independent variables (cell pairs) and no information about the data.
+We can now write our full occupation number vectors $\bld{y}$ considering all possible cell pairs.
+The full data-data vector $\bld{y}_\mathrm{DD}$ now has length $\NN{CC}$ with elements 1 (in the case that the cell pair hosts a data pair) or 0 (otherwise).
+The full data-random vector $\bld{y}_\mathrm{DR}$ and full random-random vector $\bld{y}_\mathrm{RR}$ are similarly defined.
+When we take the product of such a vectors with the full design matrix, we recover the same result as when we had just considered existing pairs,
+\begin{equation}
+    \vv{DD} \equiv \frac{1}{\NN{DD}} \bld{A}\T\,\bld{y}_\mathrm{DD} = \frac{1}{\NN{DD}} \bld{\tilde{A}}_{\mathrm{DD}}\T\,\bld{\tilde{y}}_\mathrm{DD}
+\end{equation}
+and similarly with the other projection vectors.
+We can then rewrite our amplitudes as
+\begin{align}
+    \bld{\hat{a}} &= \left[ \frac{1}{\NN{CC}} \, \bld{A}\T \, \bld{A} \right]\inv \left[ \frac{1}{\NN{DD}}\,\bld{A}\T\,\bld{y}_\mathrm{DD} 
+    - 2\,\frac{1}{\NN{DR}}\,\bld{A}\T\,\bld{y}_\mathrm{DR} 
+    + \frac{1}{\NN{RR}}\,\bld{A}\T\,\bld{y}_\mathrm{RR} \right] \\
+    &=  \frac{\NN{CC}}{\NN{DD}}\,\left[\bld{A}\T \, \bld{A} \right]\inv \,\bld{A}\T\,\bld{y}_\mathrm{DD} 
+    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\left[ \bld{A}\T \, \bld{A} \right]\inv\,\bld{A}\T\,\bld{y}_\mathrm{DR} \notag\\
+    & \hspace{18em} + \frac{\NN{CC}}{\NN{RR}}\,\left[\bld{A}\T \, \bld{A} \right]\inv\,\bld{A}\T\,\bld{y}_\mathrm{RR} ~.
+\end{align}
 
 Now let's look at the quantity that \cite{Tessore2018} identified as the least-squares estimator for the two-point correlation function,
 \begin{equation}
     \bld{\hat{\xi}}_\mathrm{lsq} = [\bld{A}\T \bld{W} \bld{A}]\inv \, [\bld{A}\T \bld{W} \bld{y}] ~,
 \end{equation}
-where $\bld{W}$ is the weight matrix (note that in our case we have taken the weight matrix to be the identity for now), and this estimator is for the matrix equation
+where $\bld{W}$ is the weight matrix.
+This is the solution to the matrix equation
 \begin{equation}
+    \label{eq:xi_eqn}
     \langle \bld{y} \rangle = \bld{A} \bld{\xi} ~.
 \end{equation}
-For the case of continuous large-scale structure, we care about the correlation function of the overdensity field, $\langle \delta_i \delta_j \rangle$.
-We can relate this to the discrete case with
-\begin{eqnarray}
-    \langle \mathcal{N}_i \mathcal{N}_j \rangle &=& \langle n_i n_j \rangle \delta V_i \delta V_j \\
-    &=& \langle [\bar{n}(1+\delta_i)] [\bar{n}(1+\delta_j)] \rangle \delta V_i \delta V_j \\
-    &=& [1 + \langle \delta_i \delta_j \rangle] \bar{n}^2 \delta V_i \delta V_j
-\end{eqnarray}
-where $\delta V$ is the volume of the grid cell and $n$ is the continuous number density field, and we have assumed the overdensity field has zero mean.
-This gives us the expectation value of the continuous estimator compared to the discrete, 
-\begin{equation}
-    \langle \delta_i \delta_j \rangle = \frac{\langle \mathcal{N}_i \mathcal{N}_j \rangle}{\bar{n}^2  \delta V_i \delta V_j} - 1 ~.
-\end{equation}
-\KSF{is this next bit true? check!}
-For an unclustered random catalog, $\langle \delta_i \delta_j \rangle = 0$, giving $\langle \mathcal{N}_{\mathrm{R},i} \mathcal{N}_{\mathrm{R},j} \rangle = \bar{n}_R^2  \delta V_i \delta V_j$, so 
-\begin{equation}
-    \langle \delta_i \delta_j \rangle = \frac{\langle \mathcal{N}_i \mathcal{N}_j \rangle}{\langle \mathcal{N}_{\mathrm{R},i} \mathcal{N}_{\mathrm{R},j} \rangle} - 1 ~.
-\end{equation}
-This is the natural estimator for the correlation function, which we have seen before as $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$.
+where $\bld{y}$ is a vector of pair observations $x_i x_j$.
 
-We can now relate the \cite{Tessore2018} estimator for the continuous-field \cf to ours for the discrete tracer \cf.
-Looking at the form of the estimator, we see that \KSF{this is not legal, the units aren't right! still trying to figure out...}
+Recall that in our case, we have taken the weights to be 1 for now, so $W$ is the identity matrix, giving $\bld{\hat{\xi}}_\mathrm{lsq} = [\bld{A}\T \bld{A}]\inv \, [\bld{A}\T \bld{y}]$.
+This is precisely the form of the terms of our amplitudes, where our observable is the occupation number.
+We can see that the amplitudes are the combination of least-squares estimates for these occupation number correlations:
+\KSF{not sure about this notation, this isn't exactly an equality}
 \begin{equation}
-\hat{\bld{\xi}}_\mathrm{lsq} = \frac{\hat{\bld{\xi}}_\mathrm{DD} - \hat{\bld{\xi}}_\mathrm{RR}}{\hat{\bld{\xi}}_\mathrm{RR}}  ~.       
+    \bld{\hat{a}} = \frac{\NN{CC}}{\NN{DD}} \langle \mathcal{N}_{\mathrm{D},i} \, \mathcal{N}_{\mathrm{D},j} \rangle 
+    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\langle \mathcal{N}_{\mathrm{D},i} \, \mathcal{N}_{\mathrm{R},j} \rangle
+    + \frac{\NN{CC}}{\NN{RR}} \langle \mathcal{N}_{\mathrm{R},i} \, \mathcal{N}_{\mathrm{R},j} \rangle ~.
 \end{equation}
-Using the least-squares estimator, the numerator of this becomes $ \left( [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] \right) - \left( [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] \right)$.
-This is closely related to the amplitude $\bld{a}$ we have defined above. 
-Consider the amplitudes we have formulated for the natural estimator (as opposed to Landy-Szalay), 
+
+We can understand the quantity $\langle \mathcal{N}_{i} \, \mathcal{N}_{j} \rangle$ is the joint probability of finding galaxies in a pair of cells $i$ and $j$.
+For uncorrelated catalogs such as random-random with $\NN{RR}$ pairs, this is simply
 \begin{equation}
-    \bld{a} = [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD} - \bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}] ~.
+    \langle \mathcal{N}_{\mathrm{R},i} \, \mathcal{N}_{\mathrm{R},j} \rangle \equiv \frac{\NN{RR}}{\NN{CC}} ~.
 \end{equation}
-We can rewrite this as 
+This is also the case for the data-random catalogs.
+For correlated catalogs like data-data with $\NN{DD}$ pairs, this becomes
+\begin{equation}
+    \langle \mathcal{N}_{\mathrm{D},i} \, \mathcal{N}_{\mathrm{D},j} \rangle \equiv \frac{\NN{DD}}{\NN{CC}} \left( 1 + \xi_{ij} \right) ~.
+\end{equation}
+where $\xi_{ij}$ is the correlation function.
+Plugging these into the amplitude equation, we find
 \begin{eqnarray}
-    \bld{a} &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] - [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{RR}}\T\,\bld{y}_\mathrm{RR}]  ~. \\
-    &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] - \hat{\bld{\xi}}_\mathrm{RR} \\
-    &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}] [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}]\inv [\bld{A}_{\mathrm{DD}}\T\,\bld{y}_\mathrm{DD}] - \hat{\bld{\xi}}_\mathrm{RR} \\
-    &=& [\bld{A}_{\mathrm{RR}}\T \, \bld{A}_{\mathrm{RR}}]\inv [\bld{A}_{\mathrm{DD}}\T \, \bld{A}_{\mathrm{DD}}] \hat{\bld{\xi}}_\mathrm{DD} - \hat{\bld{\xi}}_\mathrm{RR} ~.\\
+    \bld{\hat{a}} &=& \frac{\NN{CC}}{\NN{DD}} \left( \frac{\NN{DD}}{\NN{CC}} \left( 1 + \xi_{ij} \right) \right)
+    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\left( \frac{\NN{DR}}{\NN{CC}} \right)
+    + \frac{\NN{CC}}{\NN{RR}} \left( \frac{\NN{RR}}{\NN{CC}} \right) ~. \\
+    &=& \left( 1 + \xi_{ij} \right) - 2 + 1 \\
+    &=& \xi_{ij} ~.
 \end{eqnarray}
-The factor preceding $\hat{\bld{\xi}}_\mathrm{DD}$ is essentially performing a rescaling of the data space into the random space. \KSF{???}
+We see that our amplitudes $\bld{a}$ are a least-squares estimate of the correlation function, where we have assumed that we are working in the limit of a large random catalog.
+The evaluation of the correlation function for \est, as in \eqt{eq:xi_proj}, is precisely the matrix equation in \eqt{eq:xi_eqn}.
+In this notation, it becomes $\bld{\hat{\xi}} = \bld{A}_L \bld{a}$ where $\bld{A}_L$ is a matrix of pair features (the result of the basis functions $\ff{}$) at which to evaluate $\bld{\xi}$.
+Note that our amplitude estimate $\bld{\hat{a}}$ is the parallel to the estimate $\bld{\hat{\xi}_\mathrm{lsq}}$ of \cite{Tessore2018}.
+
+We note that this estimator still inherits the biases of the Landy-Szalay estimator; it is only unbiased in the limit of infinitesimal bins.
+A detailed treatment of the bias and variance properties of pair-count estimators can be found in \cite{Hamilton1993}.
 
 \bibliography{LSS-est_paper}
 
