@@ -127,11 +127,12 @@ One of the difficulties in performing a two-point estimate is that nontrivial su
 To account for the boundaries as well as \new{corrupted regions (e.g. by bright foreground stars)}, typically a large set of random points are \new{Poisson-distributed} within the acceptable survey window.
 The pairwise correlations of these unclustered points are used to normalize out the survey window.
 The current standard estimator, proposed by \cite{LandySzalay1993} (hereafter \LS), takes this approach.
-It involves a summation of the data--data pairs $DD$ in each separation bin, normalized by random--random pairs $RR$ as well as the data--random pairs $DR$ to improve the bias properties of the estimator.
+It involves a summation of the data--data pairs $DD$ in each separation bin, \new{and uses the random--random pairs $RR$ to perform this edge-correcton;} the data--random pairs $DR$ are incorporated to improve the bias and variance properties of the estimator \new{(see e.g. \citealt{Hamilton1993})}.
 The \LS estimator of the correlation function $\hat{\xi}_k$ for the $k^\mathrm{th}$ bin in separation $r$ is defined as
 \begin{equation} \label{eq:lsintro}
-\hat{\xi}_k = \frac{DD_k - 2DR_k + RR_k}{RR_k} ~.
+\hat{\xi}_k = \frac{DD_k - 2DR_k + RR_k}{RR_k}
 \end{equation}
+\new{where we have assumed the binned pair counts are normalized by the total number of pairs for each set of catalogs}.
 Compared with other estimators based on simple combinations of $DD$, $DR$ and $RR$, \LS has been shown to have the lowest bias and variance \citep{Kerscher2000}.
 Estimators of the \cf must also take into account the imperfect nature of the survey, including systematic effects, the target completeness, and fiber collisions.
 To account for these, each galaxy pair is typically assigned a weight, and pair counts are replaced by the sum of pair weights.
@@ -179,14 +180,16 @@ We can then write the \LS estimator as
 \begin{equation} \label{eq:ls}
     \bld{\hat{\xi}} = \frac{\vv{DD} - 2\,\vv{DR} + \vv{RR}}{\vv{RR}} ~.
 \end{equation}
-The components of the pair-count vectors are defined explicitly as
+\KSF{i decided to define these because i keep using them. are they ok in-line here or should i make them an equation?}
+\new{We also make explicit the pair-count normalization factors, defining $\NN{DD} \equiv \frac{2}{\NN{D}\,(\NN{D}-1)}$, $\NN{DR} \equiv \frac{1}{\NN{D}\,\NN{R}}$, and $\NN{RR} \equiv \frac{2}{\NN{R}\,(\NN{R}-1)}$.}
+The components of the pair-count vectors can then be written as
 \begin{eqnarray}\displaystyle
     \label{eq:ls1}
     % \adjustlimits aligns the subscripts with and without primes, which are diff heights
-    \left[ \vv{DD} \right]_k &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n' < n} i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) \\ 
-    \left[ \vv{DR} \right]_k &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} i(g_k < |\bld{r}_n - \bld{r}_m| < h_k) \\
+    \left[ \vv{DD} \right]_k &\equiv& \frac{1}{\NN{DD}} \adjustlimits \sum_{n} \sum_{n' < n} i(g_k < |\bld{r}_n - \bld{r}_{n'}| < h_k) \\ 
+    \left[ \vv{DR} \right]_k &\equiv& \frac{1}{\NN{DR}}\sum_{n} \sum_{m} i(g_k < |\bld{r}_n - \bld{r}_m| < h_k) \\
     \label{eq:ls3}
-    \left[ \vv{RR} \right]_k &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits\sum_{m} \sum_{m'<m} i(g_k < |\bld{r}_m - \bld{r}_{m'}| < h_k) ~,
+    \left[ \vv{RR} \right]_k &\equiv& \frac{1}{\NN{RR}} \adjustlimits\sum_{m} \sum_{m'<m} i(g_k < |\bld{r}_m - \bld{r}_{m'}| < h_k) ~,
 \end{eqnarray}
 where $\left[ \vv{} \right]_k$ is the pair counts in bin $k$ (which has bin edges $g_k$ and $h_k$), $i$ is an indicator function that returns $1$ if the the condition is true and otherwise returns $0$, $\bld{r}$ is the tracer position, the $n$ and $n'$ indices index data positions, and the $m$ and $m'$ indices index random catalog positions.
 The sums are over unique pairs, and for auto-correlations they exclude self-pairs; the normalization prefactors then account for the total number of possible pairs, explaining the difference between the auto- and cross-correlation factors.
@@ -200,27 +203,11 @@ When applied to clustered data, \LS does show a bias on very large scales ($>$13
 \LS is also less sensitive to the number of random points than other estimators \citep{Kerscher2000}.
 While \LS has been sufficient for past analyses, its persisting bias and suboptimal variance under imperfect conditions mean that improvement is possible, and will be necessary for realistic large-scale structure measurements on modern datasets.
 
-\subsection{Least Squares Fitting}
-
-Clustering estimation is closely related to least-squares fitting.
-We are essentially trying to find the best representation of spatial data in the space of two-point radial separation.
-Recall that the linear least-squares fit to a set of data is
-\begin{equation}
-    \label{eq:leastsq}
-    \bld{x} = [\bld{A}\T\,\bld{C}\inv\,\bld{A}]\inv \, [\bld{A}\T\,\bld{C}\inv\,\bld{y}] ~,
-\end{equation}
-where $\bld{x}$ is the vector of best-fit parameters, $\bld{A}$ is a design matrix containing functions of fitting features, $\bld{C}$ is the covariance matrix, and $\bld{y}$ is a column vector of $\bld{y}$ data to be fit.
-The second bracketed factor $[\bld{A}\T\,\bld{C}\inv\,\bld{y}]$ projects the data onto the features (as in a matched filter). 
-The first bracketed factor $[\bld{A}\T\,\bld{C}\inv\,\bld{A}]\inv$ rescales the projected features into the space of the parameters.
-
-Standard two-point correlation function estimators are effectively performing such a projection: each bin is the projection of the data pair counts onto the radial separation annulus, and the random-random term rescales this feature.
-The analogy is clear in the so-called natural estimator of the \cf, $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$ (e.g., \citealt{Kerscher2000}), with $\vv{DD}$ aligning with the second bracketed factor and $\vv{RR}$ aligning with the first (the division can be written as an inverse factor).
-\Est was inspired by this connection with least-squares fitting; we detail its formulation in the following section.
-
 
 \subsection{\Est}
 \label{sec:est}
 
+\KSF{what do you think about the placement of this intuitive description here (the bolded next 2 paragraphs)? makes this section quite long, and a bit of an odd way to introduce it, but not sure where else to put it. and it might make the technical part more understandable, which is what the referee asked for.}
 \new{We present an estimator, \est, that generalizes the \LS estimator in a manner inspired by least-squares fitting.
 We provide an intuitive description here; the mathematical formulation follows.
 \Est replaces the binned pair counts of \LS with a \textit{projection} of the pairs onto any set of basis functions; the linear superposition of these projections is our estimate of the \cf.
@@ -247,22 +234,24 @@ This process is shown schematically in Figure~\ref{fig:schematic}, with a choice
     \label{fig:schematic}
 \end{figure}
 
-\new{We arrive at the formulation of \est by combining the \LS estimator defined above in equations~(\ref{eq:ls1}--\ref{eq:ls3}) with a least-squares fitting approach.}
+\new{We arrive at the formulation of \est by combining the \LS estimator defined above in equations~(\ref{eq:ls1}--\ref{eq:ls3}) with a least-squares fitting approach, detailed in Section~\ref{sec:leastsq}.}
 We generalize the indicator function $i$ to any function $\ff$, which returns a vector of length $K$ where $K$ is the number of basis functions.
 We further generalize the arguments of the function to any properties of the galaxy pair, rather than just the separation between pairs; we call $\GG{ij}$ the data payload for the pair of galaxies $i$ and $j$.
 This gives us, instead of pair counts, a vector $\vv{}$ of \textit{projections} of the basis functions.
 These projection vectors are defined as
 \begin{eqnarray}\displaystyle
     \label{eq:vdd}
-    \vv{DD} &\equiv& \frac{2}{\NN{D}\,(\NN{D}-1)} \adjustlimits \sum_{n} \sum_{n'<n} \ff(\GG{n n'}) \\
-    \vv{DR} &\equiv& \frac{1}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n m}) \\
-    \vv{RR} &\equiv& \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) ~,
+    \vv{DD} &\equiv& \frac{1}{\NN{DD}} \adjustlimits \sum_{n} \sum_{n'<n} \ff(\GG{n n'}) \\
+    \label{eq:vdr}
+    \vv{DR} &\equiv& \frac{1}{\NN{DR}} \sum_{n} \sum_{m} \ff(\GG{n m}) \\
+    \label{eq:vrr}
+    \vv{RR} &\equiv& \frac{1}{\NN{RR}} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) ~.
 \end{eqnarray}
-where the prefactors are as explained for the standard \LS estimator.
 We also require an invertible matrix to perform the rescaling seen in \eqt{eq:leastsq} for least-squares fitting.
 In the case of the \cf, the rescaling of the data is performed by the autocorrelation of the random catalog, so we define a projection tensor $\TT{RR}$ as
 \begin{equation}
-    \TT{RR} \equiv \frac{2}{\NN{R}\,(\NN{R}-1)} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) \cdot \ff\T(\GG{m m'}) ~.
+    \label{eq:Trr}
+    \TT{RR} \equiv \frac{1}{\NN{RR}} \adjustlimits \sum_{m} \sum_{m'<m} \ff(\GG{m m'}) \cdot \ff\T(\GG{m m'}) ~.
 \end{equation}
 The formulation of this factor as the sum of outer products of the basis function vectors and their transposes is motivated by the desire that the estimator be invariant under affine transformations, such as a rescaling of the basis functions or a rotation in the basis space (see Appendix~\ref{sec:affine}).
 
@@ -296,7 +285,6 @@ In this case the $\vv{DD}$, $\vv{DR}$ and $\vv{RR}$ projection vectors simply be
 The $\TT{RR}$ tensor becomes diagonal, with its diagonal elements equal to the elements of the $\vv{RR}$ vector.
 Then the evaluation of the amplitudes $\bld{a}$ and the correlation function estimate $\bld{\hat{\xi}}$ results in the equivalent of the \LS estimator--just displayed in a continuous form.
 
-\KSF{could add: if you want to see a related derivation, see tessore paper. derives an estimator similar to ours.}
 \new{We arrived at the formulation of \est by heuristic reasoning; we show that this formulation is correct by the following argument. 
 Consider taking the \LS estimator to the limit of infinitesimal bins.
 One could then rotate these bins into the space of a chosen set of basis functions, and then re-sum the counts in the infinitesimal bins into the form of the basis functions.
@@ -326,6 +314,92 @@ The derivation and formulation of these terms are shown in Appendix~\ref{sec:ana
 
 We discuss the implementation of \est in Section~\ref{sec:comp}.
 
+
+\subsection{Connection to Least-Squares Fitting}
+\label{sec:leastsq}
+
+\KSF{TODO: wrap this section with new to bold}
+
+The formulation of \est is based on linear least-squares fitting; in this section we derive the connection between the two.
+This derivation is closely connected to that given by \cite{Tessore2018}.
+
+We can formulate the goal of clustering estimation as finding the best representation of spatial data in the space of two-point separation.
+Recall that the linear least-squares fit to a set of data is
+\begin{equation}
+    \label{eq:leastsq}
+    \bld{\theta} = [\bld{X}\T\,\bld{C}\inv\,\bld{X}]\inv \, [\bld{X}\T\,\bld{C}\inv\,\bld{y}] ~,
+\end{equation}
+where $\bld{\theta}$ is the vector of best-fit parameters, $\bld{X}$ is a design matrix containing functions of fitting features, $\bld{C}$ is the covariance matrix, and $\bld{y}$ is a column vector of data to be fit.
+The second bracketed factor $[\bld{X}\T\,\bld{C}\inv\,\bld{y}]$ projects the data onto the features (as in a matched filter). 
+The first bracketed factor $[\bld{X}\T\,\bld{C}\inv\,\bld{X}]\inv$ rescales the projected features into the space of the parameters.
+Standard two-point correlation function estimators are effectively performing such a projection: each bin is the projection of the data pair counts onto the radial separation annulus, and the random-random term rescales this feature.
+The analogy is clear in the so-called natural estimator of the \cf, $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$ (e.g., \citealt{Kerscher2000}), with $\vv{DD}$ paralleling with the second bracketed factor and $\vv{RR}$ the first (the division can be written as an inverse factor).
+
+We can make this parallel explicit by dividing our survey window into a fine grid of cells (or ``voxels'') such that each cell contains exactly 0 or 1 galaxies. 
+Then we can consider the occupation number $\mathcal{N}$ of each cell, where $\mathcal{N}$ is 0 or 1.
+We construct a design matrix $\bld{X}$ which contains the the features for each of the $\NN{CC}$ cell pairs, which has dimensions  $\NN{CC} \times K$, where $K$ is the number of features.
+\KSF{don't love indexing cell pairs by a single value c, but if do something like cc' then indexing X in the following equation gets weird; thoughts?}
+These features can be described as the values of basis functions $\ff$ given the properties $\GG{c}$ of the cell pair indexed by $c$ (properties that include, say, the separation $r$ between the cells):
+\begin{equation}
+    X_{ck} = f_k(\GG{c}) ~.
+\end{equation}
+For a given galaxy catalog in this survey window, we can define a vector of observables $\bld{y}$ of length $\NN{CC}$.
+Where the cell pair hosts a data pair, $y_c = 1$; elsewhere, $y_c = 0$.
+
+With this notation, we can rewrite our projection vectors of equations (\ref{eq:vdd})--(\ref{eq:vrr}) as
+\begin{eqnarray}
+    \vv{DD} &\equiv& \frac{1}{\NN{DD}} \bld{X}\T\,\bld{y}_\mathrm{DD} \\
+    \vv{DR} &\equiv& \frac{1}{\NN{DR}} \bld{X}\T\,\bld{y}_\mathrm{DR} \\
+    \vv{RR} &\equiv& \frac{1}{\NN{RR}} \bld{X}\T\,\bld{y}_\mathrm{RR} ~.
+\end{eqnarray}
+We can define the projection tensor of \eqt{eq:Trr} as
+\begin{equation}
+    \TT{RR} \approx \frac{1}{\NN{CC}} \bld{X}\T\,\bld{X} ~.
+\end{equation}
+where the $\approx$ symbol indicates that we have taken the limit $\NN{RR}\to\NN{CC}$ in which the random catalog objects fill all cells in the grid.
+We can now write our amplitudes of \eqt{eq:amplitude} as
+\begin{equation}
+    \label{eq:amps_lsq}
+    \bld{\hat{a}} \approx \left[ \frac{1}{\NN{CC}} \, \bld{X}\T \, \bld{X} \right]\inv \left[ \frac{1}{\NN{DD}}\,\bld{X}\T\,\bld{y}_\mathrm{DD} 
+    - 2\,\frac{1}{\NN{DR}}\,\bld{X}\T\,\bld{y}_\mathrm{DR} 
+    + \frac{1}{\NN{RR}}\,\bld{X}\T\,\bld{y}_\mathrm{RR} \right] ~.
+\end{equation}
+
+The terms of \eqt{eq:amps_lsq} parallel the definition of generalized least-squares in \eqt{eq:leastsq}.
+(Recall that we have taken the weights to be 1 for now, so our covariance matrix $\bld{C}$ here is just the identity matrix; non-uniform weights could straightforwardly be included with this formulation.)
+Each term is the least-squares estimate for the two-point correlation function of the occupation number of the catalog pair, $\langle \mathcal{N}_{l} \, \mathcal{N}_{l'} \rangle$, where $ll'$ indexes a cell pair.
+We then see that we can predict the occupation number at any cell pair, by defining $X_{ll'}$ as the feature vector of length $K$ of a cell pair $ll'$, by taking the product of this with the amplitudes:
+\begin{equation}
+    \bld{X}_{ll'} \, \bld{\hat{a}} \, \approx \, \frac{\NN{CC}}{\NN{DD}} \langle \mathcal{N}_{\mathrm{D},l} \, \mathcal{N}_{\mathrm{D},l'} \rangle 
+    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\langle \mathcal{N}_{\mathrm{D},l} \, \mathcal{N}_{\mathrm{R},l'} \rangle
+    + \frac{\NN{CC}}{\NN{RR}} \langle \mathcal{N}_{\mathrm{R},l} \, \mathcal{N}_{\mathrm{R},l'} \rangle ~.
+\end{equation}
+Here we have used the $\approx$ symbol to show that $\bld{X}_{ll'} \, \bld{\hat{a}}$ is an estimator for the quantity on the right-hand side. \KSF{overloading $\approx$ here! used for limit and estimate. is there an alternative for one of them?}
+
+We can understand the quantity $\langle \mathcal{N}_{l} \, \mathcal{N}_{l'} \rangle$ as the joint probability of finding galaxies in a pair of cells $l$ and $l'$.
+For the random-random cross-correlation which has a vanishing correlation function, this is simply
+\begin{equation}
+    \langle \mathcal{N}_{\mathrm{R},l} \, \mathcal{N}_{\mathrm{R},l'} \rangle = \frac{\NN{RR}}{\NN{CC}} ~.
+\end{equation}
+We can make a similar statement for the data-random catalog which has a vanishing correlation function.
+For the data-data cross-correlation which has a non-vanishing correlation function $\xi_{ll'}$, this becomes
+\begin{equation}
+    \langle \mathcal{N}_{\mathrm{D},l} \, \mathcal{N}_{\mathrm{D},l'} \rangle = \frac{\NN{DD}}{\NN{CC}} \left( 1 + \xi_{ll'} \right) ~.
+\end{equation}
+Plugging these into the amplitude equation, we find
+\begin{eqnarray}
+    \bld{X}_{ll'} \, \bld{\hat{a}} \, &\approx& \, \frac{\NN{CC}}{\NN{DD}} \left( \frac{\NN{DD}}{\NN{CC}} \left( 1 + \xi_{ll'} \right) \right)
+    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\left( \frac{\NN{DR}}{\NN{CC}} \right)
+    + \frac{\NN{CC}}{\NN{RR}} \left( \frac{\NN{RR}}{\NN{CC}} \right) ~. \\
+    \label{eq:xi_lsq}
+    \bld{X}_{ll'} \, \bld{\hat{a}} \, &\approx& \, \xi_{ll'} ~.
+\end{eqnarray}
+We see that our amplitudes $\bld{\hat{a}}$ are a least-squares estimate of the correlation function, where we have assumed that we are working in the limit of a very large random catalog.
+Equation (\ref{eq:xi_lsq}) shows that these best-fit amplitudes give the prediction of the correlation function at a new cell pair; this is precisely what we define in \eqt{eq:xi_proj} as the evaluation of the \cf.
+
+\KSF{should i keep this next bit? i included because Tessore goes out of his way to say that his estimator is unbiased, and ive been asked this in talks, so thought it might be important to clarify here.}
+We note that this estimator still inherits the biases of the Landy-Szalay estimator; it is only unbiased in the limit of infinitesimal bins.
+A detailed treatment of the bias and variance properties of pair-count estimators can be found in \cite{Hamilton1993}.
 
 \section{Experiments and Results}
 \label{sec:experiments}
@@ -463,11 +537,11 @@ As we know the cosmology used for our mock catalogs, we can compute the true val
 (Here our choice of fiducial model happened to be close to the true model, so our $\alpha_{\text{true}}$ is very close to 1; this is typical, as our cosmological model is fairly well-constrained.)
 With this fiducial model, we can construct the basis functions for our estimator; these are shown (with $\alpha=1$ and arbitrary scaling) in Figure~\ref{fig:bao_bases}.
 
-\label{fig:bao}
 \begin{figure}[t]
 \centering
     \includegraphics[width=0.8\textwidth]{xicomparison_2e-4_tophat8_baoiter}
     \caption{Estimation of the correlation function using \est with basis functions based on the BAO fitting function (thick green; same as in Figure~\ref{fig:bao_bases}, with arbitrary scaling). \new{We compare this to the standard binned Landy--Szalay estimator (grey squares), and to} \est with a tophat function (thin blue). \new{The panels are the same as in Figure~\ref{fig:spline}.}}
+    \label{fig:bao}
 \end{figure}
 
 We apply our iterative estimation procedure to each of the 1000 mocks; the mean of the resulting estimates for the correlation function is shown in Figure~\ref{fig:bao}.
@@ -572,7 +646,7 @@ We elaborate on the use cases for incorporating further tracer information into 
 \label{sec:beyondls}
 
 While we have formulated our estimator as a generalization of \LS, as this is the standard used in \cf analyses and has optimal properties under certain conditions, we can also reformulate it for other estimators.
-Our formulation currently requires a normalization term (i.e. denominator) based on the random--random counts; for \LS we replace this with our $\TT{RR}$ term (\eqt{eq:qq_proj}).
+Our formulation currently requires a normalization term (i.e. denominator) based on the random--random counts; for \LS we replace this with our $\TT{RR}$ term (\eqt{eq:Trr}).
 This is also the case for the \cite{PeeblesHauser1974} (natural) estimator and the \cite{Hewett1982} estimator:
 \begin{eqnarray}
     %using text so hyphens show up properly
@@ -585,7 +659,7 @@ We can also straightforwardly generalize estimators which have a data--random cr
 \end{equation}
 where we define
 \begin{equation}
-    \TT{DR} = \frac{2}{\NN{D}\,\NN{R}} \sum_{n} \sum_{m} \ff(\GG{n m}) \cdot \ff\T(\GG{n m}) ~.
+    \TT{DR} = \frac{1}{\NN{DR}} \sum_{n} \sum_{m} \ff(\GG{n m}) \cdot \ff\T(\GG{n m}) ~.
 \end{equation}
 
 The continuous form of these estimators can be extended to cross-correlations in the straightforward way expected.
@@ -823,23 +897,24 @@ We can represent this more generally as an integral,
 V_k = \int_{g_k}^{h_k} dV = 4\pi \int_{g_k}^{h_k} r^2 \, dr ~,
 \end{equation}
 where we assume spherical symmetry.
-We can generalize this to any basis function $\ff_k(r)$ that is only a function of $r$,
+\KSF{i'm pretty sure these f's should not be bolded because i'm evaluating them at r in a bin k; but i had it bolded before so wanted to double check}
+We can generalize this to any basis function $f_k(r)$ that is only a function of $r$,
 \begin{equation}
-V_k = 4\pi  \int_{g_k}^{h_k} \ff_k(r) \, r^2 \, dr ~,
+V_k = 4\pi  \int_{g_k}^{h_k} f_k(r) \, r^2 \, dr ~,
 \end{equation}
 where $k$ is now the index of the basis functions.
-This reduces to \eqt{eq:vol_tophat} when $\ff(r)$ is the tophat function (returning 1 or 0 depending on whether or not $r$ falls between $g_k$ and $h_k$).
+This reduces to \eqt{eq:vol_tophat} when $f_k(r)$ is the tophat function (returning 1 or 0 depending on whether or not $r$ falls between $g_k$ and $h_k$).
 
 Combining the above equations gives us our full generalized analytic random--random projection vector $\vv{RR}^\mathrm{ana}$, which has elements
 \begin{equation}
-\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{L^3} \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} \ff_k(r) \, r^2 \, dr ~,
+\left[ \vv{RR}^\mathrm{ana} \right]_k = \frac{1}{L^3} \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} f_k(r) \, r^2 \, dr ~,
 \end{equation}
 where we are now integrating over all values of $r$ we are interested in from some $r_\mathrm{min}$ to $r_\mathrm{max}$.
 (For non-localized basis functions, the fully correct thing would be to integrate from $-\infty$ to $\infty$, though some bounds must be chosen in practice.)
 
-Based on the definition of $\TT{RR}$ in \eqt{eq:qq_proj} as the sum of outer products of the basis function vectors and their transposes, the elements of the analytic random--random tensor $\TT{RR}^\mathrm{ana}$ can be written as
+Based on the definition of $\TT{RR}$ in \eqt{eq:Trr} as the sum of outer products of the basis function vectors and their transposes, the elements of the analytic random--random tensor $\TT{RR}^\mathrm{ana}$ can be written as
 \begin{equation}
-\left[ \TT{RR}^\mathrm{ana} \right]_{kk'} = \frac{1}{L^3} \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} \ff_k(r) \, \ff_{k'}(r) \, r^2 \, dr ~.
+\left[ \TT{RR}^\mathrm{ana} \right]_{kk'} = \frac{1}{L^3} \, 4\pi \, \int_{r_\mathrm{min}}^{r_\mathrm{max}} f_k(r) \, f_{k'}(r) \, r^2 \, dr ~.
 \end{equation}
 This could be further generalized to account for basis functions that take properties other than pair separation as input.
 
@@ -859,7 +934,7 @@ In this case, one would have to integrate over these axes as well, but the idea 
 
 \subsection{Iterative Procedure}
 
-\Est can be used to measure the baryon acoustic oscillation (BAO) scale by choosing the basis functions to terms of a BAO fitting function, as described in Section~\ref{sec:bao} and shown in Figures~\ref{fig:bao} and~\ref{fig:bao_bases}.
+\Est can be used to measure the baryon acoustic oscillation (BAO) scale by choosing the basis functions to terms of a BAO fitting function, as described in Section~\ref{sec:bao} and shown in Figures~\ref{fig:bao_bases} and~\ref{fig:bao}.
 For this application, we need to choose a fiducial cosmology for our bases, which will be offset from the true cosmology.
 This offset can be encoded by a scale dilation parameter $\alpha$, which contains the information about the BAO scale; see \eqt{eq:alpha}. 
 As our fitting function requires a fiducial model and an initial guess of this parameter, $\alpha_\mathrm{guess}$, and then determines the change needed, an iterative procedure is needed to converge to the best-fit value.
@@ -899,134 +974,6 @@ In our implementation we take $\Delta \alpha = 0.001$; we have checked that our 
 
 We choose the magnitudes of the basis functions $k$ to set them at similar scales, providing improved stability.
 We use the values $k_0=0.1$, $k_1=10.0$, $k_2=0.1$, and $k_3=0.001$, though we check that the results are insensitive to choices near these values.
-
-\section{Least-Squares Fitting and The Continuous-Function Estimator}
-
-We can formalize the connection between \est and least-squares fitting.
-Let's return to the definition of the correlation function for LSS. 
-For the case of continuous large-scale structure, we care about the correlation function of the overdensity field, $\langle \delta_i \delta_j \rangle$.
-This can be defined in terms of a the continuous galaxy number density field $n$, 
-\begin{equation}
-    \delta = \frac{n - \bar{n}}{\bar{n}}
-\end{equation}
-Now for the case of the discrete correlation function, we can imagine defining a fine grid of cells of volume $\Delta V$ throughout our survey volume such that each cell contains exactly 0 or 1 galaxies. 
-Then we can consider the occupation number $\mathcal{N}$ of each cell, where $\mathcal{N}$ is 0 or 1.
-We can relate the continuous and discrete cases with
-\begin{eqnarray}
-    \langle \mathcal{N}_i \mathcal{N}_j \rangle &=& \langle n_i n_j \rangle \Delta V_i \Delta V_j \\
-    &=& \langle [\bar{n}(1+\Delta_i)] [\bar{n}(1+\delta_j)] \rangle \Delta V_i \Delta V_j \\
-    &=& [1 + \langle \delta_i \delta_j \rangle] \bar{n}^2 \Delta V_i \Delta V_j
-\end{eqnarray}
-where we have assumed that the overdensity field has zero mean.
-This gives us the expectation value of the continuous estimator compared to the discrete, 
-\begin{equation}
-    \langle \delta_i \delta_j \rangle = \frac{\langle \mathcal{N}_i \mathcal{N}_j \rangle}{\bar{n}^2  \Delta V_i \Delta V_j} - 1 ~.
-\end{equation}
-This is the origin of the natural estimator for the correlation function that we have seen before, $\bld{\hat{\xi}} = \vv{DD}/\vv{RR} - 1$, where we use the random-random pair counts to normalize out the volume correlations in the denominator. 
-
-Now we are prepared to return to our formulation of \est.
-We first construct a vector of the occupation numbers of data pairs $\bld{\tilde{y}}_\mathrm{DD}$.
-As we are only considering pairs that exist, this is simply a vector of ones.
-The data-random vector $\bld{\tilde{y}}_\mathrm{DR}$ and random-random vector $\bld{\tilde{y}}_\mathrm{RR}$ are similarly defined.
-
-We also construct a design matrix $\bld{\tilde{A}}_\mathrm{DD}$ of the features for each of the $\NN{DD}$ data pairs, which has dimensions $\NN{DD} \times K$, where $K$ is the number of features.
-In the language of \est, the features are the values of the basis functions $\ff$ given the properties of the pair, and $K$ is the number of basis functions.
-We define the data-random design matrix $\bld{\tilde{A}}_\mathrm{DR}$ and random-random design matrix $\bld{\tilde{A}}_\mathrm{RR}$ in the same manner.
-
-Then can write data projection vector $\vv{DD}$ of \eqt{eq:vdd} as
-\begin{equation}
-    \vv{DD}  \equiv \frac{1}{\NN{DD}} \bld{\tilde{A}}_{\mathrm{DD}}\T\,\bld{\tilde{y}}_\mathrm{DD} ~,
-\end{equation}
-Similarly, 
-\begin{eqnarray}
-    \vv{DR} &\equiv& \frac{1}{\NN{DR}} \bld{\tilde{A}}_{\mathrm{DR}}\T\,\bld{\tilde{y}}_\mathrm{DR} ~, \\
-    \vv{RR} &\equiv& \frac{1}{\NN{RR}} \bld{\tilde{A}}_{\mathrm{RR}}\T\,\bld{\tilde{y}}_\mathrm{RR} ~, \\
-    \TT{RR} &\equiv& \frac{1}{\NN{RR}} \bld{\tilde{A}}_{\mathrm{RR}}\T\,\bld{\tilde{A}}_{\mathrm{RR}} ~.
-\end{eqnarray}
-Then our amplitude vector of \eqt{eq:amplitude} looks like
-\begin{equation}
-    \bld{\hat{a}} = \left[ \frac{1}{\NN{RR}}\,\bld{\tilde{A}}_{\mathrm{RR}}\T \, \bld{\tilde{A}}_{\mathrm{RR}} \right]\inv 
-    \left[ \frac{1}{\NN{DD}}\,\bld{\tilde{A}}_{\mathrm{DD}}\T\,\bld{\tilde{y}}_\mathrm{DD} 
-    - 2\,\frac{1}{\NN{DR}}\,\bld{\tilde{A}}_{\mathrm{DR}}\T\,\bld{\tilde{y}}_\mathrm{DR} 
-    + \frac{1}{\NN{RR}}\,\bld{\tilde{A}}_{\mathrm{RR}}\T\,\bld{\tilde{y}}_\mathrm{RR} \right] ~.
-\end{equation}
-
-Recall that the cross-correlation of the random catalog is intended to approximate the cross-correlation of the survey window function.
-With this in mind, let's start with a survey window divided up into cells such that each contains 0 or 1 galaxies from the data catalog.
-Then we construct the design matrix $\bld{A}$ of all of the $\NN{CC}$ \textit{cell pairs}, which has dimensions  $\NN{CC} \times K$.
-This contains features which are the values of the basis functions $\ff$ given the properties of the cell pair, such as the separation $r$ between the cells).
-We can imagine the limit of the random catalog in which the points fill all of the cells:
-\begin{equation}
-    \lim_{\NN{RR}\to\NN{CC}} \bld{\tilde{A}}_{\mathrm{RR}} = \bld{A}
-\end{equation}
-so the term $\frac{1}{\NN{RR}} \, \bld{\tilde{A}}_{\mathrm{RR}}\T \, \bld{\tilde{A}}_{\mathrm{RR}} \rightarrow \frac{1}{\NN{CC}} \bld{A}\T \, \bld{A}$.
-This is now a proper design matrix that contains the features of the independent variables (cell pairs) and no information about the data.
-We can now write our full occupation number vectors $\bld{y}$ considering all possible cell pairs.
-The full data-data vector $\bld{y}_\mathrm{DD}$ now has length $\NN{CC}$ with elements 1 (in the case that the cell pair hosts a data pair) or 0 (otherwise).
-The full data-random vector $\bld{y}_\mathrm{DR}$ and full random-random vector $\bld{y}_\mathrm{RR}$ are similarly defined.
-When we take the product of such a vectors with the full design matrix, we recover the same result as when we had just considered existing pairs,
-\begin{equation}
-    \vv{DD} \equiv \frac{1}{\NN{DD}} \bld{A}\T\,\bld{y}_\mathrm{DD} = \frac{1}{\NN{DD}} \bld{\tilde{A}}_{\mathrm{DD}}\T\,\bld{\tilde{y}}_\mathrm{DD}
-\end{equation}
-and similarly with the other projection vectors.
-We can then rewrite our amplitudes as
-\begin{align}
-    \bld{\hat{a}} &= \left[ \frac{1}{\NN{CC}} \, \bld{A}\T \, \bld{A} \right]\inv \left[ \frac{1}{\NN{DD}}\,\bld{A}\T\,\bld{y}_\mathrm{DD} 
-    - 2\,\frac{1}{\NN{DR}}\,\bld{A}\T\,\bld{y}_\mathrm{DR} 
-    + \frac{1}{\NN{RR}}\,\bld{A}\T\,\bld{y}_\mathrm{RR} \right] \\
-    &=  \frac{\NN{CC}}{\NN{DD}}\,\left[\bld{A}\T \, \bld{A} \right]\inv \,\bld{A}\T\,\bld{y}_\mathrm{DD} 
-    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\left[ \bld{A}\T \, \bld{A} \right]\inv\,\bld{A}\T\,\bld{y}_\mathrm{DR} \notag\\
-    & \hspace{18em} + \frac{\NN{CC}}{\NN{RR}}\,\left[\bld{A}\T \, \bld{A} \right]\inv\,\bld{A}\T\,\bld{y}_\mathrm{RR} ~.
-\end{align}
-
-Now let's look at the quantity that \cite{Tessore2018} identified as the least-squares estimator for the two-point correlation function,
-\begin{equation}
-    \bld{\hat{\xi}}_\mathrm{lsq} = [\bld{A}\T \bld{W} \bld{A}]\inv \, [\bld{A}\T \bld{W} \bld{y}] ~,
-\end{equation}
-where $\bld{W}$ is the weight matrix.
-This is the solution to the matrix equation
-\begin{equation}
-    \label{eq:xi_eqn}
-    \langle \bld{y} \rangle = \bld{A} \bld{\xi} ~.
-\end{equation}
-where $\bld{y}$ is a vector of pair observations $x_i x_j$.
-
-Recall that in our case, we have taken the weights to be 1 for now, so $W$ is the identity matrix, giving $\bld{\hat{\xi}}_\mathrm{lsq} = [\bld{A}\T \bld{A}]\inv \, [\bld{A}\T \bld{y}]$.
-This is precisely the form of the terms of our amplitudes, where our observable is the occupation number.
-We can see that the amplitudes are the combination of least-squares estimates for these occupation number correlations:
-\KSF{not sure about this notation, this isn't exactly an equality}
-\begin{equation}
-    \bld{\hat{a}} = \frac{\NN{CC}}{\NN{DD}} \langle \mathcal{N}_{\mathrm{D},i} \, \mathcal{N}_{\mathrm{D},j} \rangle 
-    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\langle \mathcal{N}_{\mathrm{D},i} \, \mathcal{N}_{\mathrm{R},j} \rangle
-    + \frac{\NN{CC}}{\NN{RR}} \langle \mathcal{N}_{\mathrm{R},i} \, \mathcal{N}_{\mathrm{R},j} \rangle ~.
-\end{equation}
-
-We can understand the quantity $\langle \mathcal{N}_{i} \, \mathcal{N}_{j} \rangle$ is the joint probability of finding galaxies in a pair of cells $i$ and $j$.
-For uncorrelated catalogs such as random-random with $\NN{RR}$ pairs, this is simply
-\begin{equation}
-    \langle \mathcal{N}_{\mathrm{R},i} \, \mathcal{N}_{\mathrm{R},j} \rangle \equiv \frac{\NN{RR}}{\NN{CC}} ~.
-\end{equation}
-This is also the case for the data-random catalogs.
-For correlated catalogs like data-data with $\NN{DD}$ pairs, this becomes
-\begin{equation}
-    \langle \mathcal{N}_{\mathrm{D},i} \, \mathcal{N}_{\mathrm{D},j} \rangle \equiv \frac{\NN{DD}}{\NN{CC}} \left( 1 + \xi_{ij} \right) ~.
-\end{equation}
-where $\xi_{ij}$ is the correlation function.
-Plugging these into the amplitude equation, we find
-\begin{eqnarray}
-    \bld{\hat{a}} &=& \frac{\NN{CC}}{\NN{DD}} \left( \frac{\NN{DD}}{\NN{CC}} \left( 1 + \xi_{ij} \right) \right)
-    - 2\,\frac{\NN{CC}}{\NN{DR}}\,\left( \frac{\NN{DR}}{\NN{CC}} \right)
-    + \frac{\NN{CC}}{\NN{RR}} \left( \frac{\NN{RR}}{\NN{CC}} \right) ~. \\
-    &=& \left( 1 + \xi_{ij} \right) - 2 + 1 \\
-    &=& \xi_{ij} ~.
-\end{eqnarray}
-We see that our amplitudes $\bld{a}$ are a least-squares estimate of the correlation function, where we have assumed that we are working in the limit of a large random catalog.
-The evaluation of the correlation function for \est, as in \eqt{eq:xi_proj}, is precisely the matrix equation in \eqt{eq:xi_eqn}.
-In this notation, it becomes $\bld{\hat{\xi}} = \bld{A}_L \bld{a}$ where $\bld{A}_L$ is a matrix of pair features (the result of the basis functions $\ff{}$) at which to evaluate $\bld{\xi}$.
-Note that our amplitude estimate $\bld{\hat{a}}$ is the parallel to the estimate $\bld{\hat{\xi}_\mathrm{lsq}}$ of \cite{Tessore2018}.
-
-We note that this estimator still inherits the biases of the Landy-Szalay estimator; it is only unbiased in the limit of infinitesimal bins.
-A detailed treatment of the bias and variance properties of pair-count estimators can be found in \cite{Hamilton1993}.
 
 \bibliography{LSS-est_paper}
 
