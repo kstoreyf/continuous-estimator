@@ -26,18 +26,24 @@ def main():
     print("Corrfunc version:", Corrfunc.__version__, Corrfunc.__file__)
 
     L = 750
-    #cat_tag = f'_L{L}_n2e-4_z057'
-    #cat_tag = f'_L{L}_n1e-4_z057'
-    cat_tag = f'_L{L}_n5e-5_z057'
+    nbar_str = '5e-5'
+    #cat_tag = f'_L{L}_n2e-4_z057_patchy'
+    #cat_tag = f'_L{L}_n1e-4_z057_patchy'
+    cat_tag = f'_L{L}_n{nbar_str}_z057_patchy'
+    #cat_tag = f'_L{L}_n1e-4'
     kwargs = {}
     
     #proj = 'theory'
     #binwidth = 6
     #cf_tag = f"_{proj}_bw{binwidth}"
 
-    proj = 'tophat'
-    binwidth = 6
-    cf_tag = f"_{proj}_bw{binwidth}"
+    #proj = 'tophat'
+    #binwidth = 6
+    #cf_tag = f"_{proj}_bw{binwidth}_evalxitest"
+
+    proj = 'gradient'
+    binwidth = 8
+    cf_tag = f"_{proj}_top_bw{binwidth}"
 
     # proj = 'piecewise'
     # binwidth = 10
@@ -47,11 +53,11 @@ def main():
     #kwargs = {'order': 3}
     #binwidth = 12
     #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}"
-    compute_xis(L, cat_tag, proj, cf_tag, binwidth=binwidth, kwargs=kwargs)
+    compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=binwidth, kwargs=kwargs, Nrealizations=1, nthreads=1, qq_analytic=False)
 
 
-def compute_xis(L, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None, Nrealizations=1000, overwrite=False, qq_analytic=True, nthreads=12, rmin=36.0, rmax=156.0):
- 
+def compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None, Nrealizations=1000, overwrite=False, qq_analytic=True, nthreads=12, rmin=36.0, rmax=156.0):
+
     result_dir = '../results/results_lognormal{}'.format(cat_tag)
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
@@ -64,21 +70,24 @@ def compute_xis(L, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None
     r_edges = np.arange(rmin, rmax+binwidth, binwidth)
     r_avg = 0.5*(r_edges[1:]+r_edges[:-1])
 
-    proj_type, nprojbins, projfn = get_proj_parameters(proj, r_edges=r_edges, cf_tag=cf_tag, **kwargs)
+    proj_type, nprojbins, projfn, weight_type = get_proj_parameters(proj, r_edges=r_edges, cf_tag=cf_tag, **kwargs)
+    assert not (proj_type=='gradient' and qq_analytic), "Can't use qq_analytic yet for gradient!"
 
     if not qq_analytic:
         # Load in randoms, will need for DR at least
-        nx = 10
+        nx = 1
         rand_dir = '../catalogs/randoms'
-        rand_fn = '{}/rand{}_{}x.dat'.format(rand_dir, cat_tag, nx)
+        rand_fn = '{}/rand_L{}_n{}_{}x.dat'.format(rand_dir, L, nbar_str, nx)
         random = np.loadtxt(rand_fn)
+        rx, ry, rz = random.T
+        weights_r = np.array([np.ones(len(rx)), rx, ry, rz])
         # check if already have RR, compute if not
         rr_qq_fn = f'{result_dir}/rr_qq{cf_tag}{cat_tag}.npy'
         if os.path.exists(rr_qq_fn):
             print(f"RR & QQ already computed, loading in from {rr_qq_fn}")
             rr_proj, qq_proj, _ = np.load(rr_qq_fn, allow_pickle=True)
         else:
-            rr_proj, qq_proj = compute_rr_qq_numeric(rr_qq_fn,random, L, r_edges, nprojbins, proj, proj_type, projfn=projfn)
+            rr_proj, qq_proj = compute_rr_qq_numeric(rr_qq_fn,random, L, r_edges, nprojbins, proj, proj_type, projfn=projfn, weights_r=weights_r, weight_type=weight_type)
 
     cat_dir = '../catalogs/lognormal'
     for Nr in range(Nrealizations):
@@ -95,6 +104,10 @@ def compute_xis(L, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None
         assert L==Lx and L==Ly and L==Lz, f"Box sizes don't align! L: {L}, Lx: {Lx}, Ly: {Ly}, Lz: {Lz}"
         x, y, z, vx, vy, vz = data.T
         print("N =",N)
+        if proj_type=='gradient':
+            weights = np.array([np.ones(len(x)), x, y, z])
+        else:
+            weights = None
         
         extra_dict = {'r_edges': r_edges, 'nprojbins': nprojbins, 'proj_type': proj_type, 'projfn': projfn, 'qq_analytic': qq_analytic}
         start = time.time()
@@ -107,10 +120,10 @@ def compute_xis(L, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None
                 r, xi, amps = xi_proj_periodic_analytic(x, y, z, L, r_edges,
                  nprojbins, proj_type, projfn=projfn)
             else:
-                rx, ry, rz = random.T
                 r, xi, amps = xi_proj_periodic_numeric(x, y, z, 
-                rx, ry, rz, rr_proj, qq_proj, L, r_edges,
-                 nprojbins, proj_type, projfn=projfn)
+                                rx, ry, rz, rr_proj, qq_proj, L, r_edges,
+                                nprojbins, proj_type, projfn=projfn, 
+                                weights=weights, weights_r=weights_r, weight_type=weight_type)
         end = time.time()
 
         #print("Done but not saved", save_fn)
@@ -154,7 +167,8 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     numerator = dd_proj - rr_ana
     amps_periodic_ana = np.linalg.solve(qq_ana, numerator)
     #xi_periodic_ana = evaluate_xi(nrbins, amps_periodic_ana, len(rcont), rcont, nrbins, r_edges, proj_type, projfn=projfn)
-    xi_periodic_ana = evaluate_xi(amps_periodic_ana, rcont, proj_type, rbins=r_edges, projfn=projfn)
+    #xi_periodic_ana = evaluate_xi(amps_periodic_ana, rcont, proj_type, rbins=r_edges, projfn=projfn)
+    xi_periodic_ana = evaluate_xi(amps_periodic_ana, r_cont, proj_type, rbins=r_edges, projfn=projfn)
 
     print("DD proj:", dd_proj)
     print(numerator)
@@ -163,7 +177,7 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     return rcont, xi_periodic_ana, amps_periodic_ana
 
 
-def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, nprojbins, proj_type, projfn=None, nthreads=24):
+def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, nprojbins, proj_type, projfn=None, weights=None, weights_r=None, weight_type=None, nthreads=24):
     mumax = 1.0
     nmubins = 1
     verbose = False # MAKE SURE THIS IS FALSE otherwise breaks
@@ -172,14 +186,17 @@ def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, 
     print("computing dd...")
     _, dd_proj, _ = DDsmu(1, nthreads, r_edges, mumax, nmubins, x, y, z,
                 proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
-                boxsize=L, periodic=periodic)
+                boxsize=L, periodic=periodic,
+                weights1=weights, weight_type=weight_type)
     print("DD proj:", dd_proj)
 
 
     print("computing dr...")
-    _, dr_proj, _ = DDsmu(0, nthreads, r_edges, mumax,               nmubins, x, y, z, X2=rx, Y2=ry, Z2=rz,
-            proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
-            boxsize=L, periodic=periodic)
+    _, dr_proj, _ = DDsmu(0, nthreads, r_edges, mumax, nmubins, x, y, z, 
+                    X2=rx, Y2=ry, Z2=rz,
+                    proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
+                    boxsize=L, periodic=periodic,
+                    weights1=weights, weights2=weights_r, weight_type=weight_type)
     print("DR proj:", dr_proj)
 
     nd = len(x)
@@ -188,13 +205,15 @@ def xi_proj_periodic_numeric(x, y, z, rx, ry, rz, rr_proj, qq_proj, L, r_edges, 
     rmax = max(r_edges)
     r_cont = np.linspace(rmin, rmax, 1000)
     amps = compute_amps(nprojbins, nd, nd, nr, nr, dd_proj, dr_proj, dr_proj, rr_proj, qq_proj)
-    xi_proj = evaluate_xi(nprojbins, amps, len(r_cont), r_cont, len(r_edges)-1, r_edges, proj_type, projfn=projfn)
+    
+    # for gradient, this will just return the tophat for now; we'll do the evaluation separately
+    xi_proj = evaluate_xi(amps, r_cont, proj_type, rbins=r_edges, projfn=projfn)
 
-    return r_cont, xi_proj
+    return r_cont, xi_proj, amps
 
 
 
-def compute_rr_qq_numeric(rr_qq_fn, random, L, r_edges, nprojbins, proj, proj_type, projfn=None, nthreads=24):
+def compute_rr_qq_numeric(rr_qq_fn, random, L, r_edges, nprojbins, proj, proj_type, projfn=None, weights_r=None, weight_type=None, nthreads=24):
     print("computing rr...")
 
     rx, ry, rz = random.T
@@ -203,9 +222,9 @@ def compute_rr_qq_numeric(rr_qq_fn, random, L, r_edges, nprojbins, proj, proj_ty
     nmubins = 1
     verbose = False # MAKE SURE THIS IS FALSE otherwise breaks
     periodic = True
-    _, rr_proj, qq_proj = DDsmu(1, nthreads, r_edges, mumax,             nmubins, rx, ry, rz,
+    _, rr_proj, qq_proj = DDsmu(1, nthreads, r_edges, mumax, nmubins, rx, ry, rz,
             proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
-            boxsize=L, periodic=periodic)
+            boxsize=L, periodic=periodic, weights1=weights_r, weight_type=weight_type)
 
     print("RR proj:", rr_proj)
     print("QQ proj:", qq_proj)   
@@ -218,6 +237,7 @@ def compute_rr_qq_numeric(rr_qq_fn, random, L, r_edges, nprojbins, proj, proj_ty
 def get_proj_parameters(proj, r_edges=None, cf_tag=None, **kwargs):
     proj_type = proj
     projfn = None
+    weight_type = None
     if proj=="tophat" or proj_type=="piecewise":
         nprojbins = len(r_edges)-1
     elif proj=='spline':
@@ -226,12 +246,15 @@ def get_proj_parameters(proj, r_edges=None, cf_tag=None, **kwargs):
         # cf_tag includes binwidth and order
         projfn = f"../tables/bases{cf_tag}_r{r_edges[0]}-{r_edges[-1]}_npb{nprojbins}.dat"
         spline.write_bases(r_edges[0], r_edges[-1], nprojbins, projfn, **kwargs)
+    elif proj=='gradient':
+        nprojbins = 4*(len(r_edges)-1)
+        weight_type = 'pair_product_gradient'
     elif proj=='theory':
         proj_type = None
         nprojbins = None
     else:
       raise ValueError("Proj type {} not recognized".format(proj_type))
-    return proj_type, nprojbins, projfn
+    return proj_type, nprojbins, projfn, weight_type
 
 
 if __name__=='__main__':
