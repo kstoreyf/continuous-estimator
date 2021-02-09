@@ -158,7 +158,6 @@ def compute_radius_sound_horizon(om, ob, h0):
 
 
 def get_alphas(cat_tag, cf_tag, realizations=range(100)):
-    cat_dir = '../catalogs'
     result_dir = '../results/results_lognormal{}'.format(cat_tag)
     
     n_converged = 0
@@ -188,6 +187,39 @@ def get_alphas(cat_tag, cf_tag, realizations=range(100)):
     print("alpha_median:", np.nanmedian(alphas))
     print("alpha_std:", np.nanstd(alphas))
     return alphas
+
+
+def get_coverged_bao_fn(cat_tag, cf_tag, Nr):
+    result_dir = '../results/results_lognormal{}'.format(cat_tag)
+    fn_pattern = f"cf{cf_tag}_converged_*{cat_tag}_rlz{Nr}.npy"
+    cf_fns = glob.glob(f'{result_dir}/{fn_pattern}')
+    if len(cf_fns)==0:
+        raise ValueError(f"File matching {fn_pattern} not found!")
+    if len(cf_fns)>1:
+        raise ValueError(f"Multiple files found matching {fn_pattern}, should only be one!")
+    # unpack with: r_avg, xi, amps, proj, extra_dict = np.load(cf_fn, allow_pickle=True)
+    return cf_fns[0]
+
+
+def get_gradient_bao_params(cat_tag, cf_tag, cf_tag_bao=None, Nr=None, rmin=36.0, rmax=200.0, 
+                            redshift=0.57, bias=2.0):
+    
+    assert (cat_tag is not None) and (cf_tag_bao is not None) and (Nr is not None), "Must pass cat_tag, cf_tag, and Nr!"
+
+    bao_fn = get_coverged_bao_fn(cat_tag, cf_tag_bao, Nr)
+    _, _, amps_bao, _, _ = np.load(bao_fn, allow_pickle=True) #params: r_avg, xi, amps, proj, extra_dict
+
+    projfn_bao = f"../tables/bases{cat_tag}{cf_tag_bao}_r{rmin}-{rmax}_z{redshift}_bias{bias}_rlz{Nr}.dat"
+    bases_bao = np.loadtxt(projfn_bao)
+
+    r = bases_bao[:,0]
+    bases_combined = bases_bao[:,1:] @ amps_bao
+    
+    projfn_grad = f"../tables/bases{cat_tag}{cf_tag}{cf_tag_bao}_rlz{Nr}.dat"
+    np.savetxt(projfn_grad, np.array([r, bases_combined]).T)
+    nprojbins = 4
+
+    return projfn_grad, nprojbins, projfn_bao, amps_bao
 
 
 def make_bao_fit(cf_func):

@@ -9,13 +9,13 @@ from nbodykit.lab import *
 def main():
 
     boxsize = 750
-    nbar_str = '3e-5'
-    nx = 10
+    nbar_str = '1e-4'
+    nx = 3
     tag = '_L{}_n{}'.format(boxsize, nbar_str)
 
     print("Making random catalogs for {}".format(tag))
 
-    cat_dir = '../catalogs/randoms/'
+    cat_dir = '../catalogs/randoms'
     if not os.path.isdir(cat_dir):
         os.makedirs(cat_dir)
 
@@ -25,6 +25,9 @@ def main():
 
     if not os.path.isfile(rand_fn):
         random = generate_random(nbar, boxsize, nx, savepos=rand_fn)
+    else:
+        print("File already exists! Exiting.", rand_fn)
+
 
 def generate_random(nbar, boxsize, nx, seed=41, savepos=None):
     print("Making random catalog")

@@ -1,8 +1,9 @@
 #!/bin/bash
 ##PBS -N baoiter_adaptive2
-#PBS -N cf_morefun
+##PBS -N cf_morefun
 ##PBS -N cf_loop_tophat_bw3
 ##PBS -N cf_tophat_bw8_1e-4_2e-4
+#PBS -N cf_gradient_bao_2e-4
 #PBS -l walltime=40:00:00
 #PBS -l nodes=1:ppn=24
 ##PBS -l mem=32GB
@@ -16,7 +17,8 @@ echo $PBS_O_WORKDIR
 echo 'starting'
 echo -n 'Job is running on node '; cat $PBS_NODEFILE
 #python cf.py
-python cf_loop.py
+python cf_gradient.py
+#python cf_loop.py
 #python bao_iterative.py
 echo 'done'
 

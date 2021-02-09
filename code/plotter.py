@@ -12,10 +12,12 @@ from colors_labels import *
 
 def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, lws=None, alphas=None, saveto=None,
             log=False, err=False, error_regions=None, xlim=None, errlim=None, conts=None, 
-            label_rmse=True, show_legend=True, bases=None, ylim=None):
+            label_rmse=True, show_legend=True, bases=None, ylim=None, show_error=None):
 
     n_estimates = len(cfs)
-
+    if show_error is None:
+        show_error = [True]*n_estimates
+    
     if alphas is None:
         alphas = np.ones(n_estimates)
 
@@ -96,13 +98,13 @@ def plot_cf_cont(rs, cfs, r_true, cf_true, labels, colors, lws=None, alphas=None
                 ax[ax_main].errorbar(r+offset, cf, yerr=[cf-lower, upper-cf], color=colors[j], 
                                      ls='None', alpha=1, lw=1.5, capsize=4)
 
-        if err:
+        if err and show_error[j]:
             #ax[1].plot(r, (cf-cf_t)/cf_t, color=colors[j], alpha=alphas[j])
             if not rs_are_same:
                 cf_t_func = interp1d(r_true, cf_true, kind='cubic')
                 cf_t = cf_t_func(r)
 
-            # no error in resids!!!             
+            # no error in resids!!!
             ax[ax_err].plot(r, cf-cf_t, color=colors[j], alpha=alphas[j], marker=markers[j], ls=lss[j], lw=lws[j])
             #if conts[j]:
             #    ax[ax_err].plot(r, cf-cf_t, color=colors[j], alpha=alphas[j], marker=markers[j], ls=lss[j], lw=lws[j])
@@ -260,7 +262,9 @@ def plot_sim(data, random, boxsize, zrange=None, saveto=None):
         plt.savefig(saveto)
 
 
-def plot_cf_err(rs, cf_arrs, r_true, cf_true, labels, colors, lws=None, err=False, xlim=None, errlim=None, ylim=None, conts=None, bases=None):
+def plot_cf_err(rs, cf_arrs, r_true, cf_true, labels, colors, lws=None, 
+                err=False, xlim=None, errlim=None, ylim=None, conts=None, 
+                bases=None, show_error=None):
     #if len(rs) == 1:
     #    rs = [rs]
     # not sure why i need this next bit
@@ -276,12 +280,14 @@ def plot_cf_err(rs, cf_arrs, r_true, cf_true, labels, colors, lws=None, err=Fals
         error_regions.append([mean-std, mean+std])
     
     ax = plot_cf_cont(rs, cfs_mean, r_true, cf_true, labels, colors, lws=lws, error_regions=error_regions, 
-                         err=err, xlim=xlim, errlim=errlim, conts=conts, bases=bases, ylim=ylim)
+                         err=err, xlim=xlim, errlim=errlim, conts=conts, bases=bases, ylim=ylim, show_error=show_error)
     return ax
 
 
-def plot_continuous(cat_tag, cf_tags, Nrealizations=100, colors=None, lws=None, labels=None, err=True, errlim=None, ylim=None, 
-                    conts=None, show_bases=True, xlim=None, peak_fit=False, bws=[], r_widths=[], r_max_true=None, b1=2.0):
+def plot_continuous(cat_tag, cf_tags, Nrealizations=100, colors=None, 
+                    lws=None, labels=None, err=True, errlim=None, ylim=None, 
+                    conts=None, show_bases=True, xlim=None, show_error=None, 
+                    peak_fit=False, bws=[], r_widths=[], r_max_true=None, b1=2.0):
     
     if colors is None:
         colors = ['lime','blue', 'cyan', 'magenta', 'purple']
@@ -355,7 +361,7 @@ def plot_continuous(cat_tag, cf_tags, Nrealizations=100, colors=None, lws=None, 
     xi_true *= b1**2
 
     ax, ax_main = plot_cf_err(rs, cf_arrs, r_true, xi_true, labels, colors, lws=lws, err=err, xlim=xlim, ylim=ylim,
-                errlim=errlim, conts=conts, bases=bases)
+                errlim=errlim, conts=conts, bases=bases, show_error=show_error)
     
     if peak_fit:
         r_peak_guess = 100.0
