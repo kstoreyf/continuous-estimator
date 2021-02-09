@@ -14,8 +14,8 @@ from Corrfunc.theory.DDsmu import DDsmu
 from Corrfunc.mocks.DDsmu_mocks import DDsmu_mocks
 from Corrfunc.utils import evaluate_xi
 from Corrfunc.utils import qq_analytic
-from Corrfunc.bases import spline
-from Corrfunc.bases import bao
+from Corrfunc.bases import spline_bases
+from Corrfunc.bases import bao_bases
 from Corrfunc.utils import compute_amps
 
 import read_lognormal as reader
@@ -23,6 +23,8 @@ import read_lognormal as reader
 
 def main():
     print("Go!")
+    print(Corrfunc.__version__)
+    print(Corrfunc.__file__)
     nrealizations = 1
     #L = 750
     L = 450.0
@@ -36,7 +38,7 @@ def main():
     proj = 'tophat'
     kwargs = {}
     binwidth = 5
-    cf_tag = f"_{proj}_bw{binwidth}_anatest"
+    cf_tag = f"_{proj}_bw{binwidth}_basetest"
 
     #proj = None
     #kwargs = {}

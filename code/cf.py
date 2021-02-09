@@ -8,8 +8,8 @@ from Corrfunc.theory.DDsmu import DDsmu
 from Corrfunc.utils import compute_amps
 from Corrfunc.utils import evaluate_xi
 from Corrfunc.utils import qq_analytic
-from Corrfunc.bases import spline
-from Corrfunc.bases import bao
+from Corrfunc.bases import spline_bases
+from Corrfunc.bases import bao_bases
 
 import read_lognormal as reader
 
@@ -41,19 +41,19 @@ def main():
     #binwidth = 6
     #cf_tag = f"_{proj}_bw{binwidth}_evalxitest"
 
-    proj = 'gradient'
-    binwidth = 8
-    cf_tag = f"_{proj}_top_bw{binwidth}"
+    #proj = 'gradient'
+    #binwidth = 8
+    #cf_tag = f"_{proj}_top_bw{binwidth}"
 
     # proj = 'piecewise'
     # binwidth = 10
     # cf_tag = f"_{proj}_bw{binwidth}_hangstill"
 
-    #proj = 'spline'
-    #kwargs = {'order': 3}
-    #binwidth = 12
-    #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}"
-    compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=binwidth, kwargs=kwargs, Nrealizations=1, nthreads=1, qq_analytic=False)
+    proj = 'spline'
+    kwargs = {'order': 3}
+    binwidth = 12
+    cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}_basetest"
+    compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=binwidth, kwargs=kwargs, Nrealizations=1, nthreads=1, qq_analytic=True)
 
 
 def compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None, Nrealizations=1000, overwrite=False, qq_analytic=True, nthreads=12, rmin=36.0, rmax=156.0):
@@ -144,6 +144,7 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     nmubins = 1
     verbose = False # MAKE SURE THIS IS FALSE otherwise breaks
     periodic = True
+    print("DDsmu")
     _, dd_proj, _ = DDsmu(1, nthreads, r_edges, mumax, nmubins, x, y, z,
               proj_type=proj_type, nprojbins=nprojbins, projfn=projfn,
               boxsize=L, periodic=periodic)
@@ -159,7 +160,7 @@ def xi_proj_periodic_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=
     # works up to 100 thru here
     # hangs up to 15 when through next line
     print(rmin, rmax, nd, volume, nprojbins, r_edges, proj_type, projfn)
-    #rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, nrbins, r_edges, proj_type, projfn=projfn)
+    print("qq_ana")
     rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, proj_type, rbins=r_edges, projfn=projfn)
     print(rr_ana)
 
@@ -245,7 +246,7 @@ def get_proj_parameters(proj, r_edges=None, cf_tag=None, **kwargs):
         proj_type = 'generalr'
         # cf_tag includes binwidth and order
         projfn = f"../tables/bases{cf_tag}_r{r_edges[0]}-{r_edges[-1]}_npb{nprojbins}.dat"
-        spline.write_bases(r_edges[0], r_edges[-1], nprojbins, projfn, **kwargs)
+        spline_bases(r_edges[0], r_edges[-1], nprojbins, projfn, **kwargs)
     elif proj=='gradient':
         nprojbins = 4*(len(r_edges)-1)
         weight_type = 'pair_product_gradient'
