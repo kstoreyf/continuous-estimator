@@ -43,21 +43,22 @@ def main():
     #binwidth = 6
     #cf_tag = f"_{proj}_bw{binwidth}_evalxitest"
 
-    proj = 'gradient'
-    binwidth = 10 #for bao, still need as dummy parameter
+    #proj = 'gradient'
+    #binwidth = 10 #for bao, still need as dummy parameter
     #cf_tag = f"_{proj}_top_bw{binwidth}_nonperiodic"
-    kwargs = {'cat_tag':cat_tag, 'cf_tag_bao':'_baoiter_cosmob17_adaptive2'}
-    cf_tag = f"_{proj}_bao"
+    #kwargs = {'cat_tag':cat_tag, 'cf_tag_bao':'_baoiter_cosmob17_adaptive2'}
+    #cf_tag = f"_{proj}_bao"
 
     # proj = 'piecewise'
     # binwidth = 10
     # cf_tag = f"_{proj}_bw{binwidth}_hangstill"
 
-    #proj = 'spline'
-    #kwargs = {'order': 3}
-    #binwidth = 12
-    #cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}"
-    compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=binwidth, kwargs=kwargs, Nrealizations=Nrealizations, qq_analytic=False, periodic=periodic)
+    proj = 'spline'
+    kwargs = {'order': 3}
+    binwidth = 12
+    cf_tag = f"_{proj}{kwargs['order']}_bw{binwidth}_basetest"
+
+    compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=binwidth, kwargs=kwargs, Nrealizations=Nrealizations, qq_analytic=True, periodic=periodic)
 
 
 def compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None, Nrealizations=1000, overwrite=False, qq_analytic=True, nthreads=24, rmin=36.0, rmax=156.0, periodic=True):
@@ -180,8 +181,7 @@ def xi_proj_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=None, nth
     numerator = dd_proj - rr_ana
     amps_periodic_ana = np.linalg.solve(qq_ana, numerator)
     #xi_periodic_ana = evaluate_xi(nrbins, amps_periodic_ana, len(rcont), rcont, nrbins, r_edges, proj_type, projfn=projfn)
-    #xi_periodic_ana = evaluate_xi(amps_periodic_ana, rcont, proj_type, rbins=r_edges, projfn=projfn)
-    xi_periodic_ana = evaluate_xi(amps_periodic_ana, r_cont, proj_type, rbins=r_edges, projfn=projfn)
+    xi_periodic_ana = evaluate_xi(amps_periodic_ana, rcont, proj_type, rbins=r_edges, projfn=projfn)
 
     print("DD proj:", dd_proj)
     print(numerator)
