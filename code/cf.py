@@ -32,7 +32,7 @@ def main():
     #nbar_str = '2e-4'
     cat_tag = f'_L{L}_n{nbar_str}_z057_patchy'
     #cat_tag = f'_L{L}_n1e-4'
-    periodic = False
+    periodic = True
     kwargs = {}
     
     #proj = 'theory'
@@ -63,6 +63,10 @@ def main():
 
 def compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=None, nbins=None, kwargs=None, Nrealizations=1000, overwrite=False, qq_analytic=True, nthreads=24, rmin=36.0, rmax=156.0, periodic=True):
 
+    if qq_analytic and not periodic:
+        print("Turning qq_analytic off, as periodic is False")
+        qq_analytic = False
+
     result_dir = '../results/results_lognormal{}'.format(cat_tag)
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
@@ -72,8 +76,11 @@ def compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=None, nbins=None, k
     assert bool(nbins) ^ bool(binwidth), "Set either nbins or binwidth (but not both)!"
     if nbins:   
         binwidth = (rmax-rmin)/float(nbins) 
-    r_edges = np.arange(rmin, rmax+binwidth, binwidth)
-    r_avg = 0.5*(r_edges[1:]+r_edges[:-1])
+
+    if proj in ['tophat', 'piecewise', 'spline']:
+        r_edges = np.arange(rmin, rmax+binwidth, binwidth)
+    else:
+        r_edges = None
 
     if not (('gradient' in proj) and ('bao' in cf_tag)):
         proj_type, nprojbins, projfn, weight_type = get_proj_parameters(proj, r_edges=r_edges, cf_tag=cf_tag, **kwargs)
@@ -121,12 +128,12 @@ def compute_xis(L, nbar_str, cat_tag, proj, cf_tag, binwidth=None, nbins=None, k
             weights = np.array([np.ones(len(x)), x, y, z])
         else:
             weights = None
-        
+        print("r_edges:", r_edges) 
         extra_dict = {'r_edges': r_edges, 'nprojbins': nprojbins, 'proj_type': proj_type, 'projfn': projfn, 'qq_analytic': qq_analytic}
         start = time.time()
         if "theory" in proj:
             xi = xi_theory(x, y, z, L, r_edges)
-            r = r_avg
+            r = 0.5*(r_edges[1:]+r_edges[:-1]) #use averages of r bins for theory xi
             amps = None
         else:
             if qq_analytic:
@@ -164,8 +171,6 @@ def xi_proj_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=None, nth
     #dd_proj = np.random.rand(nprojbins)
     rmin = min(r_edges)
     rmax = max(r_edges)
-    if proj_type not in ['tophat', 'piecewise']:
-        r_edges = None
     volume = float(L**3)
     #nrbins = len(r_edges)-1
     nd = len(x)
@@ -173,7 +178,6 @@ def xi_proj_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=None, nth
     # works up to 100 thru here
     # hangs up to 15 when through next line
     print(rmin, rmax, nd, volume, nprojbins, r_edges, proj_type, projfn)
-    print("qq_ana")
     rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, proj_type, rbins=r_edges, projfn=projfn)
     print(rr_ana)
 
