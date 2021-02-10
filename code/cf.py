@@ -8,8 +8,8 @@ from Corrfunc.theory.DDsmu import DDsmu
 from Corrfunc.utils import compute_amps
 from Corrfunc.utils import evaluate_xi
 from Corrfunc.utils import qq_analytic
-from Corrfunc.bases import spline
-from Corrfunc.bases import bao
+from Corrfunc.bases import spline_bases
+from Corrfunc.bases import bao_bases
 
 import read_lognormal as reader
 import bao_utils
@@ -172,7 +172,7 @@ def xi_proj_analytic(x, y, z, L, r_edges, nprojbins, proj_type, projfn=None, nth
     # works up to 100 thru here
     # hangs up to 15 when through next line
     print(rmin, rmax, nd, volume, nprojbins, r_edges, proj_type, projfn)
-    #rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, nrbins, r_edges, proj_type, projfn=projfn)
+    print("qq_ana")
     rr_ana, qq_ana = qq_analytic(rmin, rmax, nd, volume, nprojbins, proj_type, rbins=r_edges, projfn=projfn)
     print(rr_ana)
 
@@ -256,7 +256,7 @@ def get_proj_parameters(proj, r_edges=None, cf_tag=None, **kwargs):
         proj_type = 'generalr'
         # cf_tag includes binwidth and order
         projfn = f"../tables/bases{cf_tag}_r{r_edges[0]}-{r_edges[-1]}_npb{nprojbins}.dat"
-        spline.write_bases(r_edges[0], r_edges[-1], nprojbins, projfn, **kwargs)
+        spline_bases(r_edges[0], r_edges[-1], nprojbins, projfn, **kwargs)
     elif proj=='gradient':
         if 'top' in cf_tag:
             nprojbins = 4*(len(r_edges)-1)

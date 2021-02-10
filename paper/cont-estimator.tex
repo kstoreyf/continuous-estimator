@@ -1,5 +1,5 @@
 % This project is part of the Continuous-Function Estimator project
-% Copyright 2020 the authors.
+% Copyright 2021 the authors.
 
 \documentclass[modern]{aastex62}
 
@@ -46,7 +46,11 @@
 % comments
 \newcommand{\KSF}[1]{\textcolor{teal}{KSF says: #1}}
 \newcommand{\hogg}[1]{\textcolor{red}{Hogg says: #1}}
-\newcommand{\new}[1]{\textbf{#1}}
+%\newcommand{\new}[1]{\textbf{#1}}
+\newcommand{\new}[1]{#1}
+
+% style
+\urlstyle{tt}
 
 % affiliations
 \newcommand{\ccpp}{\affiliation{%
@@ -325,7 +329,7 @@ This derivation is closely connected to the derivation of a similar estimator gi
 Recall that the linear least-squares fit to a set of data is
 \begin{equation}
     \label{eq:leastsq}
-    \bld{\hat{\theta}} = [\bld{X}\T\,\bld{C}\inv\,\bld{X}]\inv \, [\bld{X}\T\,\bld{C}\inv\,\bld{y}] ~,
+    \bld{\hat{\theta}} = [\bld{X}^\mathsf{T}\,\bld{C}^{-1}\,\bld{X}]^{-1}\, [\mathbf{X}^\mathsf{T}\,\bld{C}^{-1}\,\bld{y}] ~,
 \end{equation}
 where $\bld{\hat{\theta}}$ is the vector of best-fit parameters, $\bld{X}$ is a design matrix containing functions of fitting features, $\bld{C}$ is the covariance matrix, and $\bld{y}$ is a column vector of data to be fit.
 The second bracketed factor $[\bld{X}\T\,\bld{C}\inv\,\bld{y}]$ projects the data onto the features (as in a matched filter). 
@@ -664,7 +668,7 @@ However, some estimator formulations use powers of these terms that are nontrivi
 \subsection{Implementation and Computational Performance}
 \label{sec:comp}
 
-We implement \est within the correlation function package \texttt{Corrfunc} \citep{Sinha2019}.
+We implement \est within the correlation function package \texttt{Corrfunc} (\citealt{Sinha2019}, \url{https://github.com/manodeep/Corrfunc}).
 \new{\texttt{Corrfunc} is the state-of-the-art package for computing correlation functions and other clustering statistics; it is written in C with python bindings and utilities.
 It is used in many published analyses, and it is modular, user-friendly, and open-source.}
 \texttt{Corrfunc} performs extremely fast pair identification, and can estimate correlation functions on both theoretical boxes and on-sky data.
@@ -672,7 +676,7 @@ Our implementation of \est capitalizes on the power of \texttt{Corrfunc}, adding
 We allow the user to define the basis functions for continuous-function estimation, and for every pair identified, we pass the separation and any additional required tracer information to the basis functions.
 We output the projection vector and the projection tensor, as well as the traditional pair counts.
 We include additional functions to compute the amplitudes from these projections, and then to evaluate the continuous correlation function for these amplitudes at the desired points in parameter space, giving the user a high level of control at every step.
-\new{Our implementation of \est is also open-source and available at \texttt{github.com/kstoreyf/Corrfunc}.}
+\new{Our implementation of \est is also open-source and available at \url{https://github.com/kstoreyf/suave}.}
 
 The computational scaling for our estimator is by definition the same as the traditional method, as pair-finding remains the limiting factor.
 However, because \est must evaluate the set of basis functions for each pair of galaxies, \new{it can decrease the computational performance (i.e. decrease the speed and increase the computational cost) compared to the traditional estimator}.
@@ -819,7 +823,7 @@ KSF was supported by the Future Investigators in NASA Earth and Space Science an
 KSF would like to acknowledge significant code feedback and support from Manodeep Sinha and Lehman Garrison.
 The authors thank Michael Blanton, Jeremy Tinker, Roman Scoccimarro, David Grier, Alex Barnett, \new{Ashley Ross,} Lucia Perez, James Rhoads, Sangeeta Malhotra, Drew Jamieson, \new{Martin White, Nicholas Tessore, Ben Wibking}, Chris Lovell, and the members of the Flatiron Astronomical Data Group for helpful discussions and feedback.
 \new{We also thank the anonymous referee for comments that improved the paper.}
-All of the code used in this \documentname is available open-source at \texttt{github.com/kstoreyf/Corrfunc} and \texttt{github.com/kstoreyf/continuous-estimator}. 
+All of the code used in this \documentname is available open-source at \url{https://github.com/kstoreyf/suave} and \url{https://github.com/kstoreyf/continuous-estimator}. 
 
 
 \appendix
