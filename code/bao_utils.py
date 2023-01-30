@@ -3,8 +3,8 @@ import math
 import glob
 
 from scipy.optimize import curve_fit
-import nbodykit
-from nbodykit.lab import *
+#import nbodykit
+#from nbodykit.lab import *
 
 
 

@@ -39,7 +39,7 @@ def main():
     niter_max = 160 # stop after this many iterations if not converged 
 
     skip_converged = True
-    trr_analytic = True
+    trr_analytic = False
     nthreads = 24
     dalpha = 0.001
     k0 = 0.1
@@ -270,7 +270,7 @@ class BAO_iterator:
         print("nd nr", self.nd, self.nr)
         amps = compute_amps(self.ncomponents, self.nd, self.nd, self.nr, self.nr, dd_proj, dr_proj, dr_proj, rr_proj, trr_proj)
         print("AMPS:", amps)
-        xi_proj = evaluate_xi(self.ncomponents, amps, len(self.rcont), self.rcont, len(self.rbins)-1, self.rbins, self.proj_type, projfn=self.projfn)
+        xi_proj = evaluate_xi(amps, self.rcont, self.proj_type, projfn=self.projfn, rbins=self.rbins)
 
         return xi_proj, amps
 
