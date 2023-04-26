@@ -27,15 +27,17 @@ nmubins = 1
 mumax = 1.0
 dd_res, dd_proj, _ = DDsmu(1, nthreads, r_edges, mumax, nmubins, x, y, z, 
                            boxsize=boxsize, periodic=periodic, proj_type=proj_type, ncomponents=ncomponents)
-print("Corrfunc result:", dd_res)
-print("Smoothcorrfunc result:", dd_proj)
+print("Corrfunc dd result:", dd_res)
+print("Suave dd result:", dd_proj)
 
 volume = boxsize**3
 rr_ana, trr_ana = trr_analytic(rmin, rmax, nd, volume, ncomponents, proj_type, rbins=r_edges)
-
+print(rr_ana)
+print(trr_ana)
 numerator = dd_proj - rr_ana
 amps_ana, *_ = np.linalg.lstsq(trr_ana, numerator, rcond=None) # Use linalg.lstsq instead of actually computing inverse!
 r_fine = np.linspace(rmin, rmax, 200)
 xi_ana = evaluate_xi(amps_ana, r_fine, proj_type, rbins=r_edges)
-print(xi_ana)
+print("amps:", amps_ana)
+print("xi:", xi_ana)
 print("Successfully ran suave on lognormal mock!")
